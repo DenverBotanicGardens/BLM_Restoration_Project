@@ -1,0 +1,108 @@
+---
+title: "Simulate water treatment"
+author: "Michelle DePrenger-Levin"
+date: "4/19/2022"
+output: html_document
+---
+
+```{r}
+library(rjags)
+library(R2jags)
+library(ggplot2)
+library(lme4)
+```
+
+20 populations, 30 individuals per population, 2 treatments   
+what's the impact of different numbers of treatment blocks?
+```{r}
+
+traits <- data.frame(Pop = rep(rep(1:20, each = 30), 2), 
+                     Treatment = c(rep("wet", 20*30), rep("dry", 20*30)))
+# Different means per population, increase for wet
+b_treat <- 3 # increase of 3cm for wet
+mu_pops <- seq(10,20, length.out = 20) 
+traits$treatIn <- ifelse(traits$Treatment == "wet", 1, 0)
+
+traits$height <- unlist(lapply(1:nrow(traits), function(i){ 
+  rnorm(1, mu_pops[traits$Pop[i]], 1) + traits$treatIn[i] * rnorm(1, b_treat, 0.1)
+  }))
+
+ggplot(traits, aes(as.factor(Pop), height, colour = Treatment))+
+  geom_boxplot()
+
+lm1 <- glm(height ~ as.factor(Pop) + Treatment, data = traits)
+summary(lm1) # matches the treatment effect of 3
+confint(lm1) # matches the offsets of mu_pops
+
+```
+
+
+Bayesian
+```{r}
+## desgin matrix
+traits$Pop <- as.factor(traits$Pop)
+M <- model.matrix(~Pop + Treatment, traits)
+str(M)
+## data list
+traits.data <- with(traits, list(y = traits$height, x = M, nbetas = ncol(M), N = nrow(traits)))
+
+traits_jags <- function(){
+  # likelihood
+  for(i in 1:N){
+    y[i] ~ dnorm(mu[i], tau) # tau is precision (1/variance)
+    mu[i] <- inprod(beta[], x[i,]) # the matrix algebra of each beta for each row of the design matrix
+  }
+  
+  # Priors
+  for(i in 1:nbetas){ beta[i] ~ dnorm(0,0.01) }
+  sigma ~ dunif(0,100)
+  tau <- 1/(sigma * sigma)
+}
+
+## starting locations for parameters
+# init_values_traits <- function(){
+#   list(beta0 = rnorm(1), betaPop = rnorm(1), betaTr = rnorm(1), sigma = runif(1))
+# }
+
+## List parameters to collect, population means and variance
+param_trait <- c("beta","sigma")
+
+## JAGS it up
+bayesTraits <- jags(data = traits.data, 
+                    #inits = init_values_traits, 
+                    parameters.to.save = param_trait,
+                  model.file = traits_jags, n.chains = 3, n.iter = 12000, n.burnin = 2000,
+                  n.thin = 10, DIC = FALSE)
+
+traceplot(bayesTraits, mfrow = c(4,4), ask = FALSE)
+plot(bayesTraits)
+Traitsmcmc <- as.mcmc(bayesTraits)
+denplot(bayesTraits)
+
+## Population 1 is beta[1], pop2 is beta[1]+beta[2], pop3 is beta[1]+beta[3], beta[21] is the offset of wet treatment
+
+ms1 <- as.matrix(bayesTraits$BUGSoutput$sims.matrix)
+par(mfrow=c(1,1))
+
+hist(ms1[,1], main = "Pop1", xlim = c(9.5,20))
+for(i in 2:21){
+  hist(ms1[,1] + ms1[,i], add = TRUE, col = i)
+}
+
+```
+
+
+Add blocking of treatments
+```{r}
+
+traits$block <- rep(sample(1:5, replace = FALSE), 600/5) 
+traits$block <- as.factor(traits$block)
+
+ggplot(traits, aes(Pop, height, colour = Treatment, shape = block) )+
+  geom_jitter(height = 0)
+
+mlm1 <- lmer(height ~ Pop + Treatment + (1|block), data = traits)
+
+```
+
+
