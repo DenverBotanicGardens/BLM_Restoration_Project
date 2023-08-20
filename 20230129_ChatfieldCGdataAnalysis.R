@@ -11,6 +11,7 @@ rm(list=ls())
 
 
 ## LOAD PACKAGES AND FUNCTIONS --------------------------------------------------------------------
+library(Hmisc)
 library(dplyr)
 library(stringr)
 library(tidyr)
@@ -24,14 +25,16 @@ library(reshape2)
 library(gplots)
 library(tidyverse)
 library(AICcmodavg)
+library(corrplot)
+library(PerformanceAnalytics)
 calcSE <- function(x){sd(x, na.rm=TRUE)/sqrt(length(x))}
 ## ------------------------------------------------------------------------------------------------
 
 
 
 ## SET WORKING DIRECTORY --------------------------------------------------------------------------
-setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - BLM-Grassland")
-setwd("C:/Users/april/Denver Botanic Gardens/Conservation - BLM-Grassland")
+setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland")
+#setwd("C:/Users/april/Denver Botanic Gardens/Conservation - BLM-Grassland")
 ## ------------------------------------------------------------------------------------------------
 
 
@@ -46,34 +49,12 @@ BOGR <- read.csv(file="Chatfield/20230301_ChatfieldData_BOGR.csv", sep=",", head
 ARFR.SdZn <- read.csv(file="AGoebl/Seeds/20220929_ARFR_LatLong.csv", sep=",", header=TRUE, dec=".")
 ARFR.ppt <- read.csv(file="AGoebl/Seeds/20230311_ARFR_pptAnnual.csv", sep=",", header=TRUE, dec=".")
 ARFR.tmin <- read.csv(file="AGoebl/Seeds/20230311_ARFR_tminWinter.csv", sep=",", header=TRUE, dec=".")
+ARFR.biovar <- readRDS("AGoebl/Seeds/20230814_ARFR_BiovarsAvg1980_2021")
 ## ------------------------------------------------------------------------------------------------
 
 
 
 ## DATA CLEAN-UP ---------------------------------------
-
-## BOGR ------------------------------------------------
-#BOGR <- BOGR[1:1135,]
-#If OrigPltSurv_20220531 = 0 and plt not replaced (N),
-#ignore subsequent data for this plant, i.e. future survival should be NA and not 0
-#Don't use OrigPltSurv_20220531 data in days to mort or other field analyses, 
-#this surv may not correspond to plt names in Code/Pop column (may correspond to orig planted or assigned)
-#Check that all numinf_coll_0927 are entered in numinf_0927
-#Check that once zero in surv on 6/27 or later, stays zero (cannot become 1 later)
-#Check that phenology only increases or stays the same
-#Check that if surv=0 for a given date, there are no phenology or height values for that date
-#Check that phenology and surv are only integers and length is only numeric
-#If numInf col has value greater than 0, phenol for corresponding date should be >2
-#Pheno cols should only be b/w 2-6 (check upper value)
-#NumInf cols should only be integers
-#Surv should only be 1, 0 and maybe NA
-#Make a combine num inf col that combines numinf_927 with numinfCol1014 and 1108 
-#if the latter 2 are from blocks 7-10
-
-#Trying to figure out for block 3 how measured heights from 5/31 correspond to plts names in Source col
-#given replacements made on 6/6. There was an error in data entry (one row off; a non-BOGR measured at the end of a row/ block) around 5/31-6/2
-#but correction to the datasheet was not done until around 6/28. 
-
 
 
 ## ARFR DATA CLEAN UP ---------------------------------------------
@@ -90,7 +71,7 @@ ARFR.cl <- ARFR[ARFR$OrigPltSurvival_20220527==1 | (ARFR$OrigPltSurvival_2022052
 ARFR.cl$Length_cm_20220527[!is.na(ARFR.cl$Length_cm_20220527) & ARFR.cl$Replaced_YorN_20220531=="Y"] <- NA
 
 #If not replaced, but died before planting, don't use subsequent surv data
-ARFR.cl[!is.na(ARFR.cl$DateMortalityObservedPreTransplant),] #All plts that died before planting were replaced
+#ARFR.cl[!is.na(ARFR.cl$DateMortalityObservedPreTransplant),] #All plts that died before planting were replaced
 
 ## *** Need to work on this more ****
 #Check that once zero in surv on 6/22 or later, stays zero (if becomes 1 later, could be data entry error)
@@ -108,10 +89,12 @@ ARFR.Surv %>% filter_all(any_vars(.==0))
 
 
 #Some plts were dead that were selected to be harvested, check? 
-
-#Excel formula for surv cols: =IF(C2="",1,0)
-
-#Find bag size for ARFR ID 864. And look at entire AGB col for any missing
+ARFR.Coll <- ARFR.cl[!is.na(ARFR.cl$Harvest_20221014) | !is.na(ARFR.cl$Harvest_20221110),]
+#Current data sheet only have "Harvest" marked for plts there were alive
+ARFR.Coll[is.na(ARFR.Coll$AGB_MinusBag),] #Two harvested plts do not have final AGB: 1107 and 1274
+ARFR.MissinfBM <- ARFR.Coll[is.na(ARFR.Coll$InfBM_Wbag),]
+ARFR.MissinfBM$ID[ARFR.MissinfBM$Phenology_20220922==3] #Looks for these plts and get inf weights
+## ----------------------------------------------------------------------------------------------
 
 
 
@@ -120,6 +103,7 @@ ARFR.Surv %>% filter_all(any_vars(.==0))
 ARFR.SdZn$Source <- str_replace(ARFR.SdZn$SOURCE_CODE, "4-SOS", "")
 ARFR.ppt$Source <- str_replace(ARFR.ppt$Source, "4-SOS", "")
 ARFR.tmin$Source <- str_replace(ARFR.tmin$Code, "4-SOS", "")
+ARFR.biovar$Source <- str_replace(ARFR.biovar$Pop, "4-SOS", "")
 
 ## Add Population name abbreviation column
 ARFR.SdZn$PopAbbrev[grepl("ARFR-AZ930-423-NAVAJO-18", ARFR.SdZn$Source)] = "A.AZ.1"   
@@ -132,13 +116,19 @@ ARFR.SdZn$PopAbbrev[grepl("ARFR-UT080-109-UINTAH-12", ARFR.SdZn$Source)] = "A.UT
 ARFR.SdZn$PopAbbrev[grepl("ARFR-CO932-294-11", ARFR.SdZn$Source)] = "A.CO.4"   
 ARFR.SdZn$PopAbbrev[grepl("ARFR-WY040-71-10", ARFR.SdZn$Source)] = "A.WY.1"       
 ARFR.SdZn$PopAbbrev[grepl("ARFR-WY050-151-FREMONT-16", ARFR.SdZn$Source)] = "A.WY.2" 
-ARFR.SdZn$PopAbbrev[grepl("ARFR-WY050-49-FREMONT-12", ARFR.SdZn$Source)] = "A.WY.3"        
+ARFR.SdZn$PopAbbrev[grepl("ARFR-WY050-49-FREMONT-12", ARFR.SdZn$Source)] = "A.WY.3"  
+
+## Edit column names for biovariables
+colnames(ARFR.biovar) <- c("Pop","bio1","bio2","bio3","bio4","bio5","bio6","bio7","bio8",
+                           "bio9","bio10","bio11","bio12","bio13","bio14","bio15","bio16",
+                           "bio17","bio18","bio19","Source")
 
 
 ## COMBINE DATA TYPES --------------------------------------------
 ARFR.cl <- left_join(ARFR.cl, ARFR.SdZn, by="Source")
 ARFR.cl <- left_join(ARFR.cl, ARFR.ppt, by="Source")
 ARFR.cl <- left_join(ARFR.cl, ARFR.tmin, by="Source")
+ARFR.cl <- left_join(ARFR.cl, ARFR.biovar, by="Source")
 
 
 ## Add a colour column that corresponds to seed zone
@@ -275,6 +265,21 @@ summary(ARFR.pair.bm)
 plot(ARFR.pair.rbm)
 
 
+## Use PCA
+ARFR.traits <- ARFR.cl %>% dplyr::select(c("Length_cm_20220726","Survival_20220922","Phenology_20220922",
+                                           "AGB_MinusBag","InfBM_Wbag"))
+covMat.traits <- cov(ARFR.traits, use="pairwise.complete.obs")
+pca.results <- prcomp(covMat.traits)
+cols <- viridis(5)
+plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, col=cols, cex=1.2)
+legend("topleft", colnames(ARFR.traits), col=cols, cex=0.75, pch=19)
+
+##Look at PCA by population
+
+## ---------------------------------------------------------------------------------------------------
+
+
+
 ## ESTIMATE VARIATION WITHIN POPULATIONS -------------------------------------------------------------
 ## ARFR -------------
 ## Order populations for plotting 
@@ -319,20 +324,31 @@ barplot(ARFR.bm.cv$Biomass_CV, xlab="Population", ylab="CV in above-ground bioma
 
 barplot(ARFR.rbm.cv$Rbiomass_CV, xlab="Population", ylab="CV in reproductive biomass", cex.lab=1.5, cex.axis=1.1, 
         names=ARFR.SdZn$PopAbbrev, main="Artemisia frigida", cex.main=1.5, col=ARFR.SdZn$SdZnCol)
-## ---------
+## ------------------------------------------------------------------------------
 
 
 
-## LOOK AT RELATIONSHIP BETWEEN TRAIT CV AND AVERAGE ---------------------------
-ARFR.ht.mn <- ARFR.cl %>% group_by(Source) %>% summarise(Height_MN=mean(Length_cm_20220726, na.rm=TRUE))
-ARFR.gr.mn <- ARFR.cl %>% group_by(Source) %>% summarise(Growth_MN=mean(log(Length_cm_20220726/Length_cm_20220622), na.rm=TRUE))
-ARFR.bm.mn <- ARFR.cl %>% group_by(Source) %>% summarise(Biomass_MN=mean(AGB_MinusBag, na.rm=TRUE))
-ARFR.rbm.mn <- ARFR.cl %>% group_by(Source) %>% summarise(Rbiomass_MN=mean(InfBM_Wbag, na.rm=TRUE))
+## LOOK AT RELATIONSHIP BETWEEN TRAIT VAR AND AVERAGE ---------------------------
+ARFR.ht.mn <- ARFR.cl %>% group_by(Source) %>% dplyr::summarise(Height_MN=mean(Length_cm_20220726, na.rm=TRUE))
+ARFR.gr.mn <- ARFR.cl %>% group_by(Source) %>% dplyr::summarise(Growth_MN=mean(log(Length_cm_20220726/Length_cm_20220622), na.rm=TRUE))
+ARFR.bm.mn <- ARFR.cl %>% group_by(Source) %>% dplyr::summarise(Biomass_MN=mean(AGB_MinusBag, na.rm=TRUE))
+ARFR.rbm.mn <- ARFR.cl %>% group_by(Source) %>% dplyr::summarise(Rbiomass_MN=mean(InfBM_Wbag, na.rm=TRUE))
+
+ARFR.ht.sd <- ARFR.cl %>% group_by(Source) %>% dplyr::summarise(Height_SD=sd(Length_cm_20220726, na.rm=TRUE))
+ARFR.gr.sd <- ARFR.cl %>% group_by(Source) %>% dplyr::summarise(Growth_SD=sd(log(Length_cm_20220726/Length_cm_20220622), na.rm=TRUE))
+ARFR.bm.sd <- ARFR.cl %>% group_by(Source) %>% dplyr::summarise(Biomass_SD=sd(AGB_MinusBag, na.rm=TRUE))
+ARFR.rbm.sd <- ARFR.cl %>% group_by(Source) %>% dplyr::summarise(Rbiomass_SD=sd(InfBM_Wbag, na.rm=TRUE))
 
 plot(ARFR.ht.cv$Height_CV, ARFR.ht.mn$Height_MN)
 plot(ARFR.gr.cv$Growth_CV, ARFR.gr.mn$Growth_MN)
 plot(ARFR.bm.cv$Biomass_CV, ARFR.bm.mn$Biomass_MN)
 plot(ARFR.rbm.cv$Rbiomass_CV, ARFR.rbm.mn$Rbiomass_MN)
+
+plot(ARFR.ht.sd$Height_SD, ARFR.ht.mn$Height_MN)
+plot(ARFR.gr.sd$Growth_SD, ARFR.gr.mn$Growth_MN)
+plot(ARFR.bm.sd$Biomass_SD, ARFR.bm.mn$Biomass_MN)
+plot(ARFR.rbm.sd$Rbiomass_SD, ARFR.rbm.mn$Rbiomass_MN)
+## ---------
 
 
 
@@ -340,8 +356,12 @@ plot(ARFR.rbm.cv$Rbiomass_CV, ARFR.rbm.mn$Rbiomass_MN)
 ## EVALUATE RELATIONSHIPS B/W TRAITS AND SOURCE CLIMATE -------------------------------------------
 ## ARFR -------------
 ## Visualize raw data
-ARFR.summ <- ARFR %>% group_by(Source) %>% 
-  summarise(AGB_MEAN=mean(AGB_MinusBag, na.rm=TRUE), AGB_SE=calcSE(AGB_MinusBag), 
+ARFR.summ <- ARFR.cl %>% group_by(Source) %>% 
+  dplyr::summarise(AGB_MEAN=mean(AGB_MinusBag, na.rm=TRUE), AGB_SE=calcSE(AGB_MinusBag),
+            LEN_MEAN=mean(Length_cm_20220726, na.rm=TRUE), LEN_SE=calcSE(Length_cm_20220726),
+            INFBM_MEAN=mean(InfBM_Wbag, na.rm=TRUE), INFBM_SE=calcSE(InfBM_Wbag), BIO1=mean(bio1, na.rm=TRUE), 
+            BIO2=mean(bio2, na.rm=TRUE), BIO4=mean(bio4, na.rm=TRUE), BIO7=mean(bio7, na.rm=TRUE), 
+            BIO9=mean(bio9, na.rm=TRUE), BIO14=mean(bio14, na.rm=TRUE), BIO15=mean(bio15, na.rm=TRUE),  
             PPT=mean(Mean_Annual_Ppt, na.rm=TRUE), TMIN=mean(Mean_MinWinter_Temp, na.rm=TRUE))
 
 ARFR.summ <- left_join(ARFR.summ, ARFR.SdZn, by="Source")
@@ -351,31 +371,135 @@ plot(ARFR.summ$TMIN, ARFR.summ$Lat, pch=19)
 summary(lm(ARFR.summ$TMIN ~ ARFR.summ$Lat))
 
 
-plot(ARFR.summ$PPT, ARFR.summ$AGB_MEAN, col=ARFR.SdZn$SdZnCol, pch=19, cex=1.25, main="Artemisia frigida", 
+plot(ARFR.summ$PPT, ARFR.summ$AGB_MEAN, col=ARFR.summ$SdZnCol, pch=19, cex=1.25, main="Artemisia frigida", 
      cex.main=1.5, xlab="Mean annual precipitation", ylab="Above-ground biomass (g)", cex.lab=1.5, cex.axis=1.1)
 arrows(ARFR.summ$PPT, ARFR.summ$AGB_MEAN-ARFR.summ$AGB_SE, ARFR.summ$PPT, ARFR.summ$AGB_MEAN+ARFR.summ$AGB_SE, 
-       angle=90, col=ARFR.SdZn$SdZnCol, code=3, length=0, lwd=1.6)
+       angle=90, col=ARFR.summ$SdZnCol, code=3, length=0, lwd=1.6)
 
-plot(ARFR.summ$TMIN, ARFR.summ$AGB_MEAN, col=ARFR.SdZn$SdZnCol, pch=19, cex=1.25, main="Artemisia frigida", 
+plot(ARFR.summ$TMIN, ARFR.summ$AGB_MEAN, col=ARFR.summ$SdZnCol, pch=19, cex=1.25, main="Artemisia frigida", 
      cex.main=1.5, xlab="Mean winter temperature", ylab="Above-ground biomass (g)", cex.lab=1.5, cex.axis=1.1)
 arrows(ARFR.summ$TMIN, ARFR.summ$AGB_MEAN-ARFR.summ$AGB_SE, ARFR.summ$TMIN, ARFR.summ$AGB_MEAN+ARFR.summ$AGB_SE, 
-       angle=90, col=ARFR.SdZn$SdZnCol, code=3, length=0, lwd=1.6)
+       angle=90, col=ARFR.summ$SdZnCol, code=3, length=0, lwd=1.6)
 
-plot(ARFR.summ$Lat, ARFR.summ$AGB_MEAN, col=ARFR.SdZn$SdZnCol, pch=19, cex=1.25, main="Artemisia frigida",
+plot(ARFR.summ$Lat, ARFR.summ$AGB_MEAN, col=ARFR.summ$SdZnCol, pch=19, cex=1.25, main="Artemisia frigida",
      cex.main=1.5, xlab="Latitude", ylab="Above-ground biomass (g)", cex.lab=1.5, cex.axis=1.1)
 arrows(ARFR.summ$Lat, ARFR.summ$AGB_MEAN-ARFR.summ$AGB_SE, ARFR.summ$Lat, ARFR.summ$AGB_MEAN+ARFR.summ$AGB_SE,
-       angle=90, col=ARFR.SdZn$SdZnCol, code=3, length=0, lwd=1.5)
+       angle=90, col=ARFR.summ$SdZnCol, code=3, length=0, lwd=1.5)
+
+plot(ARFR.summ$Lat, ARFR.summ$LEN_MEAN, col=ARFR.summ$SdZnCol, pch=19, cex=1.25, main="Artemisia frigida",
+     cex.main=1.5, xlab="Latitude", ylab="Plant Height (cm)", cex.lab=1.5, cex.axis=1.1)
+arrows(ARFR.summ$Lat, ARFR.summ$LEN_MEAN-ARFR.summ$LEN_SE, ARFR.summ$Lat, ARFR.summ$LEN_MEAN+ARFR.summ$LEN_SE,
+       angle=90, col=ARFR.summ$SdZnCol, code=3, length=0, lwd=1.5)
 
 
 ## Models
-ARFR$Ppt.sq <- (ARFR$Mean_Annual_Ppt)^2
-ARFR.bm.mod <- lmer(log(AGB_MinusBag) ~ Mean_Annual_Ppt + Ppt.sq + Mean_MinWinter_Temp + (1|Block), data=ARFR)
+ARFR.cl$Ppt.sq <- (ARFR.cl$Mean_Annual_Ppt)^2
+ARFR.bm.mod <- lmer(log(AGB_MinusBag) ~ Mean_Annual_Ppt + Ppt.sq + Mean_MinWinter_Temp + (1|Block), data=ARFR.cl)
 summary(ARFR.bm.mod)
 Anova(ARFR.bm.mod)
 
 plot(allEffects(ARFR.bm.mod))
 plot(predictorEffects(ARFR.bm.mod))
+#Min winter temp looks important 
+
+
+
+
+## 19 Bioclimate variables ------------------------------------------------------
+## Look at correlations b/w climate variables to decide which to include in models 
+cor.mat <- cor(biovar.means[,2:20], method="pearson")
+corrplot(cor.mat)
+chart.Correlation(cor.mat, histogram=TRUE, method="pearson")
+
+cor.p.mats <- rcorr(as.matrix(biovar.means[,2:20]), type="pearson")
+
+##Function to re-format the output (from http://www.sthda.com/english/wiki/...)
+flattenCorrMatrix <- function(cormat, pmat) {
+  ut <- upper.tri(cormat)
+  data.frame(row=rownames(cormat)[row(cormat)[ut]],
+             column=rownames(cormat)[col(cormat)[ut]],
+             cor=(cormat)[ut], p=pmat[ut]) }
+
+cor.p.tbl <- flattenCorrMatrix(cor.p.mats$r, cor.p.mats$P)
+cor.80 <- cor.p.tbl[cor.p.tbl$cor>0.8 | cor.p.tbl$cor<(-0.8),] #Filter by correlations > 80%
+cor.80 <- cor.80[order(cor.80$row, cor.80$column),]
+## List of variables to include in model if excluding vars that are > 80% correlated
+#bio1, bio2, bio4, bio7, bio9, bio12, bio14, bio15, bio16
+
+## Models
+ARFR.ht.bv.mod <- lmer(Length_cm_20220726 ~ bio1 + bio2 + bio4 + bio7 + bio9 + bio12 + bio14 + 
+                                               bio15 + bio16 + (1|Block), data=ARFR.cl)
+summary(ARFR.ht.bv.mod)
+Anova(ARFR.ht.bv.mod)
+
+plot(allEffects(ARFR.ht.bv.mod))
+plot(predictorEffects(ARFR.ht.bv.mod))
+
+
+
+## Look at PCA of 19 variables to reduce the number of predictors **
+# filter ARFR.biovar to keep only biovar columns
+# use cov an prcomp
+ARFR.justBios <- ARFR.biovar %>% dplyr::select(c(starts_with("bio")))
+covMat <- cov(ARFR.justBios)
+pca.results <- prcomp(covMat)
+cols <- viridis(19)
+plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, col=cols, cex=1.2)
+legend("topleft", colnames(ARFR.justBios), col=cols, cex=0.75, pch=19)
+plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, col="yellow", cex=1.2)
+text(pca.results$x[,1], pca.results$x[,2], colnames(ARFR.justBios), cex=0.7)
+plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, col="yellow", cex=1.2, xlim=c(-1350,-550), ylim=c(-0,300))
+text(pca.results$x[,1], pca.results$x[,2], colnames(ARFR.justBios), cex=0.7)
+
+plot(x=pca.results$x[,1], y=pca.results$x[,3],pch=19, col=cols, cex=1.2)
+text(pca.results$x[,1], pca.results$x[,3], colnames(ARFR.justBios), cex=0.7)
+legend("topleft", colnames(ARFR.justBios), col=cols, cex=0.75, pch=19)
+
+plot(x=pca.results$x[,2], y=pca.results$x[,3],pch=19, col=cols, cex=1.2)
+legend("topleft", colnames(ARFR.justBios), col=cols, cex=0.75, pch=19)
+plot(x=pca.results$x[,2], y=pca.results$x[,3],pch=19, col="yellow", cex=1.2)
+text(pca.results$x[,2], pca.results$x[,3], colnames(ARFR.justBios), cex=0.7)
+
+## Look at scree plot
+pca.results$sdev[1]**2/sum(pca.results$sdev**2)
+var.expl <- pca.results$sdev^2/sum(pca.results$sdev^2)
+barplot(pca.results$sdev[1:19]**2/sum(pca.results$sdev**2))
+
+## Add arrows and loadings on PCA plot? 
+
+
+##Look at pops
+ARFR.popsByBios <- t(ARFR.justBios)
+covMat.popsByBios <- cov(ARFR.popsByBios)
+pca.popsByBios <- prcomp(covMat.popsByBios)
+plot(x=pca.popsByBios$x[,1], y=pca.popsByBios$x[,2],pch=19, col=cols, cex=1.2)
+var.expl <- pca.popsByBios$sdev^2/sum(pca.popsByBios$sdev^2)
+## -----------
+
+
+
+## Visualize raw data relationships with bioclimate vars
+plot(ARFR.cl$Length_cm_20220726 ~ ARFR.cl$bio1)
+plot(ARFR.cl$InfBM_Wbag ~ ARFR.cl$bio1)
+plot(ARFR.cl$Length_cm_20220726 ~ ARFR.cl$bio9)
+plot(ARFR.cl$InfBM_Wbag ~ ARFR.cl$bio9)
+
+plot(ARFR.summ$BIO1, ARFR.summ$AGB_MEAN, col=ARFR.summ$SdZnCol, pch=19, cex=1.2, main="Artemisia frigida", 
+     cex.main=1.5, xlab="BIO1", ylab="Above-ground biomass (g)", cex.lab=1.5, cex.axis=1.1)
+arrows(ARFR.summ$BIO1, ARFR.summ$AGB_MEAN-ARFR.summ$AGB_SE, ARFR.summ$BIO1, ARFR.summ$AGB_MEAN+ARFR.summ$AGB_SE, 
+       angle=90, col=ARFR.summ$SdZnCol, code=3, length=0, lwd=1.6)
+
+plot(ARFR.summ$BIO2, ARFR.summ$INFBM_MEAN, col=ARFR.summ$SdZnCol, pch=19, cex=1.2, main="Artemisia frigida", 
+     cex.main=1.5, xlab="BIO2", ylab="Inf biomass (g)", cex.lab=1.5, cex.axis=1.1)
+arrows(ARFR.summ$BIO2, ARFR.summ$INFBM_MEAN-ARFR.summ$INFBM_SE, ARFR.summ$BIO2, ARFR.summ$INFBM_MEAN+ARFR.summ$INFBM_SE, 
+       angle=90, col=ARFR.summ$SdZnCol, code=3, length=0, lwd=1.6)
+
+plot(ARFR.summ$BIO9, ARFR.summ$LEN_MEAN, col=ARFR.summ$SdZnCol, pch=19, cex=1.2, main="Artemisia frigida", 
+     cex.main=1.5, xlab="BIO9", ylab="Inf biomass (g)", cex.lab=1.5, cex.axis=1.1)
+arrows(ARFR.summ$BIO9, ARFR.summ$LEN_MEAN-ARFR.summ$LEN_SE, ARFR.summ$BIO9, ARFR.summ$LEN_MEAN+ARFR.summ$LEN_SE, 
+       angle=90, col=ARFR.summ$SdZnCol, code=3, length=0, lwd=1.6)
 ## -------------------------------------------------------------------------------
+
 
 
 
@@ -401,6 +525,31 @@ heatmap.2(ARFR.ht.pw.pvals, dendrogram="none", cexRow=0.7, cexCol=0.7)
 
 
 
+
+
+
+
+## BOGR ------------------------------------------------
+#BOGR <- BOGR[1:1135,]
+#If OrigPltSurv_20220531 = 0 and plt not replaced (N),
+#ignore subsequent data for this plant, i.e. future survival should be NA and not 0
+#Don't use OrigPltSurv_20220531 data in days to mort or other field analyses, 
+#this surv may not correspond to plt names in Code/Pop column (may correspond to orig planted or assigned)
+#Check that all numinf_coll_0927 are entered in numinf_0927
+#Check that once zero in surv on 6/27 or later, stays zero (cannot become 1 later)
+#Check that phenology only increases or stays the same
+#Check that if surv=0 for a given date, there are no phenology or height values for that date
+#Check that phenology and surv are only integers and length is only numeric
+#If numInf col has value greater than 0, phenol for corresponding date should be >2
+#Pheno cols should only be b/w 2-6 (check upper value)
+#NumInf cols should only be integers
+#Surv should only be 1, 0 and maybe NA
+#Make a combine num inf col that combines numinf_927 with numinfCol1014 and 1108 
+#if the latter 2 are from blocks 7-10
+
+#Trying to figure out for block 3 how measured heights from 5/31 correspond to plts names in Source col
+#given replacements made on 6/6. There was an error in data entry (one row off; a non-BOGR measured at the end of a row/ block) around 5/31-6/2
+#but correction to the datasheet was not done until around 6/28. 
 
 
 
