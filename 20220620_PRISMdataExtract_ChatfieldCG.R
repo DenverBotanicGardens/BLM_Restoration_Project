@@ -30,8 +30,8 @@ library(dismo)
 ## FROM PRISM PACKAGE TUTORIAL 
 ## https://github.com/ropensci/prism
 
-## Set download directory
-#prism_set_dl_dir("Q:/Research/All_Projects_by_Species/Astragalus SPECIES/Astragalus_microcymbus/PRISM_asmiclimate")
+## Set directory where data is downloaded
+prism_set_dl_dir("Q:/Research/All_Projects_by_Species/Astragalus SPECIES/Astragalus_microcymbus/PRISM_asmiclimate")
 
 ## Download data
 #get_prism_monthlys(type=c("ppt"), year=2001:2020, mon=1:12, keepZip=FALSE)
@@ -40,8 +40,8 @@ library(dismo)
 
 
 ## LOAD LAT/ LONGS AND ASSIGN DESIRED TEMPORAL RANGE FOR CLIMATE DATA ---------------------------
-pops_LatLong <- read.table(file ='C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds/20220622_ERNA_LatLong.csv', sep=',', header = TRUE)  
-#pops_LatLong <- read.table(file ='C:/Users/april.goebl/Denver Botanic Gardens/Conservation - BLM-Grassland/AGoebl/Seeds/20221129_BOGR_LatLong.csv', sep=',', header = TRUE)  
+#pops_LatLong <- read.table(file ='C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds/20220622_ERNA_LatLong.csv', sep=',', header = TRUE)  
+pops_LatLong <- read.table(file ='C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds/20221129_BOGR_LatLong.csv', sep=',', header = TRUE)  
 #pops_LatLong <- read.table(file ='C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds/20220929_ARFR_LatLong.csv', sep=',', header = TRUE)  
 num.pops <- nrow(pops_LatLong)
 colnames(pops_LatLong)
@@ -206,7 +206,7 @@ write.csv(tmin.means.winter, file=paste(date,species,"tminWinter.csv",sep="_"), 
 
 
 ## MONTHLY MAX TEMP ----------------------------------------------------------
-setwd("Q:/Research/All_Projects_by_Species/Astragalus SPECIES/Astragalus_microcymbus/PRISM_asmiclimate") #Directory containing climate data 
+#setwd("Q:/Research/All_Projects_by_Species/Astragalus SPECIES/Astragalus_microcymbus/PRISM_asmiclimate") #Directory containing climate data 
 dirs.tmax <- prism_archive_subset("tmax", "monthly", year=1980:2021)
 bils.tmax <- pd_to_file(dirs.tmax)
 
@@ -239,10 +239,10 @@ for (pp in 1:num.pops) {
 }
 
 
-setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - BLM-Grassland/AGoebl/Seeds")
+setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds")
 date <- Sys.Date()  
 date <- gsub("-", "", date)
-species <- as.character("ARFR")
+species <- as.character("BOGR")
 saveRDS(tmax.means, file=paste(date,species,"tmaxMonthly",sep="_"))
 
 #tmax.means <- readRDS("20230312_ARFR_tmaxMonthly")
@@ -258,9 +258,12 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 #ppt.means <- readRDS("20230311_ARFR_pptMonthly")
 #tmin.means <- readRDS("20230311_ARFR_tminMonthly")
 #tmax.means <- readRDS("20230314_ARFR_tmaxMonthly")
-ppt.means <- readRDS("20230219_ERNA_pptMonthly")
+#ppt.means <- readRDS("20230219_ERNA_pptMonthly")
 #tmin.means <- readRDS("20221129_ERNA_tminMonthly")
 #tmax.means <- readRDS("20230314_ERNA_tmaxMonthly")
+ppt.means <- readRDS("20221129_BOGR_pptMonthly")
+tmin.means <- readRDS("20221129_BOGR_tminMonthly")
+#tmax.means <- readRDS("20230824_BOGR_tmaxMonthly")
 
 ppt.means.nopops <- ppt.means[,2:13]
 tmin.means.nopops <- tmin.means[,2:13]
@@ -284,7 +287,7 @@ for (pp in 1:11) {
 #setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds")
 date <- Sys.Date()  
 date <- gsub("-", "", date)
-species <- as.character("ARFR")
+species <- as.character("BOGR")
 saveRDS(biovar.means, file=paste(date,species,"BiovarsAvg1980_2021",sep="_"))
 #write.csv(biovar.means, file=paste(date,species,"BiovarsAvg1980_2021.csv",sep="_"), row.names=FALSE)
 
