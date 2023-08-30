@@ -211,7 +211,6 @@ dirs.tmax <- prism_archive_subset("tmax", "monthly", year=1980:2021)
 bils.tmax <- pd_to_file(dirs.tmax)
 
 
-
 ## Extract maximum temp data  
 tmax <- as.data.frame(matrix(NA, ncol(yyyymm), (nrow(yyyymm)+1)))
 colnames(tmax) <- c("Year", 1:12)
@@ -242,7 +241,7 @@ for (pp in 1:num.pops) {
 setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds")
 date <- Sys.Date()  
 date <- gsub("-", "", date)
-species <- as.character("BOGR")
+species <- as.character("ERNA")
 saveRDS(tmax.means, file=paste(date,species,"tmaxMonthly",sep="_"))
 
 #tmax.means <- readRDS("20230312_ARFR_tmaxMonthly")
@@ -260,10 +259,10 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 #tmax.means <- readRDS("20230314_ARFR_tmaxMonthly")
 #ppt.means <- readRDS("20230219_ERNA_pptMonthly")
 #tmin.means <- readRDS("20221129_ERNA_tminMonthly")
-#tmax.means <- readRDS("20230314_ERNA_tmaxMonthly")
+#tmax.means <- readRDS("20230825_ERNA_tmaxMonthly")
 ppt.means <- readRDS("20221129_BOGR_pptMonthly")
 tmin.means <- readRDS("20221129_BOGR_tminMonthly")
-#tmax.means <- readRDS("20230824_BOGR_tmaxMonthly")
+tmax.means <- readRDS("20230824_BOGR_tmaxMonthly")
 
 ppt.means.nopops <- ppt.means[,2:13]
 tmin.means.nopops <- tmin.means[,2:13]
@@ -276,11 +275,11 @@ biovar.means <- as.data.frame(matrix(NA, num.pops, 20))
 colnames(biovar.means) <- c("Pop", as.character(1:19))
 biovar.means$Pop <- pops_LatLong$Code
 
-for (pp in 1:11) {
-  bioVars.ARFR <- biovars(as.vector(ppt.means.t[,pp]), as.vector(tmin.means.t[,pp]),
+for (pp in 1:num.pops) {
+  bioVars.BOGR <- biovars(as.vector(ppt.means.t[,pp]), as.vector(tmin.means.t[,pp]),
                           as.vector(tmax.means.t[,pp]))
   
-  biovar.means[pp,2:20] <- bioVars.ARFR
+  biovar.means[pp,2:20] <- bioVars.BOGR
 }
 
 
