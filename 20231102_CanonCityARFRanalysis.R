@@ -29,7 +29,8 @@ calcSE <- function(x){sd(x, na.rm=TRUE)/sqrt(length(x))}
 
 ## SET WORKING DIRECTORY --------------------------------------------------------------------------
 #setwd("C:/Users/april.goebl/OneDrive - Denver Botanic Gardens/AGoebl_NonProject_WorkRelated/BLM_Restoration_Project")
-setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/CanyonCity")
+#setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/CanyonCity")
+setwd("C:/Users/april/Denver Botanic Gardens/Conservation - BLM-Grassland/CanyonCity")
 ## ------------------------------------------------------------------------------------------------
 
 
@@ -78,7 +79,7 @@ dats$SeedMix <- as.factor(dats$SeedMix)
 
 
 
-## PLOT RAW DATA ----------------------------------------------------------------------------------
+## PLOT RAW DATA AS BOX PLOTS ----------------------------------------------------------------------------------
 cols <- c(rep("darkseagreen4", 10), rep("red4",10), rep("steelblue4",12))
 par(las=2)
 boxplot(ARFR.Seedling.Count ~ Site + Contents, data=dats, col=cols, ylim=c(0,80),
@@ -138,6 +139,119 @@ EmrgAvgs_EP <- EP %>% group_by(Contents) %>%
                    Emrg_SE=calcSE(ARFR.Seedling.Count))
 
 plot(1:16, EmrgAvgs_EP$Emrg_MN, col=EmrgAvgs$PopCol, pch=19, cex=1.25)
+
+
+
+## PLOT RAW DATA AS MIX VS SINGLE ----------------------------------------------------------------------------------
+Emrg_rates <- dats %>% group_by(Site, Contents) %>% summarise(RATE=ARFR.Seedling.Count/NumSeeds)
+
+## Subset by mix/ single type, order lowest to highest emrg rate
+# Site PC only 
+Emrg_mixS1 <- subset(Emrg_rates, Contents=="mix_s1" & Site=="PC")
+Emrg_mixS1 <- Emrg_mixS1[order(Emrg_mixS1$RATE),]
+Emrg_mixS2 <- subset(Emrg_rates, Contents=="mix_s2" & Site=="PC")
+Emrg_mixS2 <- Emrg_mixS2[order(Emrg_mixS2$RATE),]
+Emrg_mixS3 <- subset(Emrg_rates, Contents=="mix_s3" & Site=="PC")
+Emrg_mixS3 <- Emrg_mixS3[order(Emrg_mixS3$RATE),]
+Emrg_mixS4 <- subset(Emrg_rates, Contents=="mix_s4" & Site=="PC")
+Emrg_mixS4 <- Emrg_mixS4[order(Emrg_mixS4$RATE),]
+Emrg_mixS5 <- subset(Emrg_rates, Contents=="mix_s5" & Site=="PC")
+Emrg_mixS5 <- Emrg_mixS5[order(Emrg_mixS5$RATE),]
+
+Emrg_UT <- subset(Emrg_rates, Contents=="single_UT" & Site=="PC")
+Emrg_UT <- Emrg_UT[order(Emrg_UT$RATE),]
+Emrg_294 <- subset(Emrg_rates, Contents=="single_294" & Site=="PC")
+Emrg_294 <- Emrg_294[order(Emrg_294$RATE),]
+Emrg_NM <- subset(Emrg_rates, Contents=="single_NM" & Site=="PC")
+Emrg_NM <- Emrg_NM[order(Emrg_NM$RATE),]
+Emrg_316Jeff <- subset(Emrg_rates, Contents=="single_316Jeff" & Site=="PC")
+Emrg_316Jeff <- Emrg_316Jeff[order(Emrg_316Jeff$RATE),]
+Emrg_314Jeff <- subset(Emrg_rates, Contents=="single_314Jeff" & Site=="PC")
+Emrg_314Jeff <- Emrg_314Jeff[order(Emrg_314Jeff$RATE),]
+Emrg_LasAn <- subset(Emrg_rates, Contents=="single_LasAn" & Site=="PC")
+Emrg_LasAn <- Emrg_LasAn[order(Emrg_LasAn$RATE),]
+
+## List what components are in each mix
+#mix_s1: LasAn, 314Jeff, 316Jeff
+#mix_s2: NM, 294, 316Jeff
+#mix_s3: UT, 294, 314Jeff
+#mix_s4: 294, 314Jeff, 316Jeff
+#mix_s5: LasAn, 294, 316Jeff
+
+
+## 
+
+## Plot
+par(pty="s")
+
+plot((subset(Emrg_rates, Contents=="mix_s1" & Site=="PC"))$RATE,
+     (subset(Emrg_rates, Contents=="single_316Jeff" & Site=="PC"))$RATE)
+
+mean(Emrg_316Jeff$RATE)
+mean(Emrg_314Jeff$RATE)
+mean(Emrg_LasAn$RATE)
+mean(Emrg_NM$RATE)
+mean(Emrg_UT$RATE)
+mean(Emrg_294$RATE)
+
+
+plot(Emrg_316Jeff$RATE, Emrg_mixS1$RATE, ylim=c(0,0.11), xlim=c(0,0.11))
+abline(0,1)
+
+#plot(Emrg_316Jeff$RATE, Emrg_mixS2$RATE, ylim=c(0,0.11), xlim=c(0,0.11))
+#abline(0,1)
+
+#plot(Emrg_UT$RATE, Emrg_mixS3$RATE, ylim=c(0,0.11), xlim=c(0,0.11))
+#abline(0,1)
+
+plot(Emrg_316Jeff$RATE, Emrg_mixS4$RATE, ylim=c(0,0.12), xlim=c(0,0.12))
+abline(0,1)
+
+plot(Emrg_316Jeff$RATE, Emrg_mixS5$RATE, ylim=c(0,0.12), xlim=c(0,0.12))
+abline(0,1)
+
+#How to deal with diff number of plots per mix/ single? For avgs of singles that make up mixes, add NAs.
+#or randomly drop plots so num remaining equals min number. Do the same when num plots per mix != num plots per single.
+#Even with this, I don't know if these comparisons are appropriate. And if ordering by ascending val is ok.
+
+
+## TRY PLOTTING DEVIATION FROM EXPECTED 
+## Calculate 'expected' num emerged for each mix based on additive of components
+e_s1 <- ((mean(Emrg_LasAn$RATE)*(400/3)) + (mean(Emrg_314Jeff$RATE)*(400/3)) 
+         + (mean(Emrg_316Jeff$RATE)*(400/3)))/400
+e_s2 <- ((mean(Emrg_NM$RATE)*(400/3)) + (mean(Emrg_294$RATE)*(400/3)) 
+         + (mean(Emrg_316Jeff$RATE)*(400/3)))/400
+e_s3 <- ((mean(Emrg_UT$RATE)*(400/3)) + (mean(Emrg_314Jeff$RATE)*(400/3)) 
+         + (mean(Emrg_294$RATE)*(400/3)))/400
+e_s4 <- ((mean(Emrg_294$RATE)*(400/3)) + (mean(Emrg_314Jeff$RATE)*(400/3)) 
+         + (mean(Emrg_316Jeff$RATE)*(400/3)))/400
+e_s5 <- ((mean(Emrg_LasAn$RATE)*(400/3)) + (mean(Emrg_294$RATE)*(400/3)) 
+         + (mean(Emrg_316Jeff$RATE)*(400/3)))/400
+
+## Calculate deviation from expected for each plot of each close mix
+e_s1Dev <- Emrg_mixS1$RATE - e_s1
+e_s2Dev <- Emrg_mixS2$RATE - e_s2
+e_s3Dev <- Emrg_mixS3$RATE - e_s3
+e_s4Dev <- Emrg_mixS4$RATE - e_s4
+e_s5Dev <- Emrg_mixS5$RATE - e_s5
+
+plot(rep(1,length(e_s5Dev)),e_s5Dev,)
+abline(h=0)
+
+## Combine diff mixes together and add values for x-axis for plotting
+e_Devs <- c(e_s1Dev, e_s2Dev, e_s3Dev, e_s4Dev, e_s5Dev)
+xAx <- c(rep(1,length(e_s1Dev)), rep(2,length(e_s2Dev)), rep(3,length(e_s3Dev)),
+       rep(4,length(e_s4Dev)), rep(5,length(e_s5Dev)))
+
+e_DevsForPlot <- as.data.frame(cbind(e_Devs, xAx))
+
+plot(e_DevsForPlot$xAx, e_DevsForPlot$e_Devs, pch=16, ylim=c(-0.06,0.06),
+     cex=0.9, ylab="Deviation from expected\nemergence rate", col="black",
+     xlab="Close Mix")
+abline(h=0)
+
+
+
 
 
 
