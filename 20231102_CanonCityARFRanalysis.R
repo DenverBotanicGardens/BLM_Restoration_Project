@@ -47,7 +47,7 @@ dats$Plot.Number <- as.factor(dats$Plot.Number)
 dats$PlotTagNum <- as.factor(dats$PlotTagNum)
 dats$Site <- as.factor(dats$Site)
 dats$Treatment <- as.factor(dats$Treatment)
-dats$Contents <- as.factor(dats$Contents)
+#dats$Contents <- as.factor(dats$Contents)
 ## ------------------------------------------------------------------------------------------------
 
 
@@ -87,7 +87,8 @@ boxplot(ARFR.Seedling.Count ~ Site + Contents, data=dats, col=cols, ylim=c(0,80)
 
 cols <- c(rep("darkseagreen4", 5), rep("red4",5), rep("steelblue4",6),
           rep("darkseagreen4", 5), rep("red4",5), rep("steelblue4",6))
-boxplot(ARFR.Seedling.Count ~ Contents + Site, data=dats, col=cols, ylim=c(0,75))
+boxplot((ARFR.Seedling.Count/NumSeeds) ~ Contents + Site, data=dats, col=cols, ylim=c(0,0.14),
+        xlab=NA, ylab="Emergence Rate", xaxt="n", cex.lab=1.5)
 
 
 boxplot(ARFR.Seedling.Count ~ SeedMix + Site, data=dats)
