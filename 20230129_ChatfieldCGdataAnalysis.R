@@ -830,8 +830,8 @@ BOGR.cl$NumInf <- c(BOGR.cl$NumInflorescence_20220927[BOGR.cl$Block<7], BOGR.cl$
 
 
 ## BOGR - ADD GROWTH RATE VARIABLES -------------------------------------
-BOGR.cl$GrwthRate_Specific <- log(BOGR.cl$Length_cm_20220801/BOGR.cl$Length_cm_20220627)
-BOGR.cl$GrwthRate_Absolute <- BOGR.cl$Length_cm_20220801-BOGR.cl$Length_cm_20220627
+#BOGR.cl$GrwthRate_Specific <- log(BOGR.cl$Length_cm_20220801/BOGR.cl$Length_cm_20220627)
+#BOGR.cl$GrwthRate_Absolute <- BOGR.cl$Length_cm_20220801-BOGR.cl$Length_cm_20220627
 BOGR.cl$GrwthRate_Relative <- (BOGR.cl$Length_cm_20220801-BOGR.cl$Length_cm_20220627)/BOGR.cl$Length_cm_20220627
 ## ---------------------------------------------------------------
 
@@ -891,10 +891,21 @@ BOGR.grrByMed <- with(BOGR.cl, reorder(Source, GrwthRate_Relative, median, na.rm
 #BOGR.grsByMed <- with(BOGR.cl, reorder(Source, GrwthRate_Specific, median, na.rm=TRUE))
 BOGR.dfByMed <- with(BOGR.cl, reorder(Source, DaysToFlwr, median, na.rm=TRUE))
 
+
+## Calculate median trait values for each source pop
 BOGR.meds <- BOGR.cl %>% group_by(Source) %>% 
-             dplyr::summarise(Height_MD=median(Length_cm_20220801,na.rm=TRUE),
-                              Inf_MD=median(NumInf,na.rm=TRUE),Growth_MD=median(GrwthRate_Relative,na.rm=TRUE),
-                              DaysToFlwr_MD=median(DaysToFlwr,na.rm=TRUE))
+  dplyr::summarise(Height_MD=median(Length_cm_20220801,na.rm=TRUE),
+                   Inf_MD=median(NumInf,na.rm=TRUE),Growth_MD=median(GrwthRate_Relative,na.rm=TRUE),
+                   DaysToFlwr_MD=median(DaysToFlwr,na.rm=TRUE))
+
+
+## OR --- Order by average size ---
+BOGR.meds <- BOGR.meds[order(BOGR.meds$Height_MD),]
+BOGR.cl$Source <- factor(BOGR.cl$Source, levels=BOGR.meds$Source)
+
+
+
+
 BOGR.meds <- left_join(BOGR.meds, BOGR.SdZn, by="Source") 
 
 ## Boxplots of raw data 
@@ -908,17 +919,22 @@ par(mfrow=c(1,1))
 
 BOGR.meds <- BOGR.meds[order(BOGR.meds$Height_MD),] #Order by median 
 boxplot(Length_cm_20220801 ~ BOGR.htByMed, data=BOGR.cl,
-        xlab="Population", ylab="Plant height (cm)", cex.lab=1.25,
-        cex.axis=0.7, names=BOGR.meds$PopAbbrev, las=2,
-        main="Bouteloua gracilis", cex.main=1.5, col=BOGR.meds$SdZnColful)
+        xlab=NA, ylab="Plant height (cm)", cex.lab=1.25,
+        cex.axis=0.9, names=BOGR.meds$PopAbbrev, las=2, col=BOGR.meds$SdZnColful)
+        #main="Bouteloua gracilis", cex.main=1.5, col=BOGR.meds$SdZnColful)
 legend("topleft", unique(BOGR.meds$SdZnAbbrev[order(BOGR.meds$SdZnOrder)]), 
        col=unique(BOGR.meds$SdZnColful[order(BOGR.meds$SdZnOrder)]), cex=1.95, pch=19)
 
+
 ## Growth rate(s) ** Add time interval to growth rate calcs? **
-BOGR.meds <- BOGR.meds[order(BOGR.meds$Growth_MD),]
-boxplot(GrwthRate_Relative ~ BOGR.grrByMed, data=BOGR.cl, las=2,
-        xlab="Population", ylab="Plant relative growth", cex.lab=1.25, names=BOGR.meds$PopAbbrev,
-        cex.axis=0.7, main="Bouteloua gracilis", cex.main=1.5, col=BOGR.meds$SdZnColful)
+boxplot(GrwthRate_Relative ~ Source, data=BOGR.cl, las=2,
+        xlab=NA, ylab="Plant relative growth", cex.lab=1.25, names=BOGR.meds$PopAbbrev,
+        cex.axis=0.9, main=NA, col=BOGR.meds$SdZnColful)
+
+#BOGR.meds <- BOGR.meds[order(BOGR.meds$Growth_MD),]
+#boxplot(GrwthRate_Relative ~ BOGR.grrByMed, data=BOGR.cl, las=2,
+#        xlab="Population", ylab="Plant relative growth", cex.lab=1.25, names=BOGR.meds$PopAbbrev,
+#        cex.axis=0.7, main="Bouteloua gracilis", cex.main=1.5, col=BOGR.meds$SdZnColful)
 
 #BOGR.SdZn <- BOGR.SdZn[order(BOGR.SdZn$GR_AB),]
 #boxplot(GrwthRate_Absolute ~ BOGR.graByMed, data=BOGR.cl, las=2,
@@ -931,16 +947,24 @@ boxplot(GrwthRate_Relative ~ BOGR.grrByMed, data=BOGR.cl, las=2,
 #        cex.axis=0.7, main="Bouteloua gracilis", cex.main=1.5, col=BOGR.SdZn$PopCol)
 
 ## Repro
-BOGR.meds <- BOGR.meds[order(BOGR.meds$Inf_MD),]
-boxplot(NumInf ~ BOGR.infByMed, data=BOGR.cl, las=2,
-        xlab="Population", ylab="Number of inflorescences", cex.lab=1.25, names=BOGR.meds$PopAbbrev,
-        cex.axis=0.7, main="Bouteloua gracilis", cex.main=1.5, col=BOGR.meds$SdZnColful)
+boxplot(NumInf ~ Source, data=BOGR.cl, las=2,
+        xlab=NA, ylab="Number of inflorescences", cex.lab=1.25, names=BOGR.meds$PopAbbrev,
+        cex.axis=0.9, main=NA, col=BOGR.meds$SdZnColful)
+
+#BOGR.meds <- BOGR.meds[order(BOGR.meds$Inf_MD),]
+#boxplot(NumInf ~ BOGR.infByMed, data=BOGR.cl, las=2,
+#        xlab="Population", ylab="Number of inflorescences", cex.lab=1.25, names=BOGR.meds$PopAbbrev,
+#        cex.axis=0.7, main="Bouteloua gracilis", cex.main=1.5, col=BOGR.meds$SdZnColful)
 
 ## Phenology
-BOGR.meds <- BOGR.meds[order(BOGR.meds$DaysToFlwr_MD),]
-boxplot(DaysToFlwr ~ BOGR.dfByMed, data=BOGR.cl, las=2,
-        xlab="Population", ylab="Days to flower", cex.lab=1.25, names=BOGR.meds$PopAbbrev,
-        cex.axis=0.7, main="Bouteloua gracilis", cex.main=1.5, col=BOGR.meds$SdZnColful)
+boxplot(DaysToFlwr ~ Source, data=BOGR.cl, las=2,
+        xlab=NA, ylab="Days to flower", cex.lab=1.25, names=BOGR.meds$PopAbbrev,
+        cex.axis=0.9, main=NA, col=BOGR.meds$SdZnColful)
+
+#BOGR.meds <- BOGR.meds[order(BOGR.meds$DaysToFlwr_MD),]
+#boxplot(DaysToFlwr ~ BOGR.dfByMed, data=BOGR.cl, las=2,
+#        xlab="Population", ylab="Days to flower", cex.lab=1.25, names=BOGR.meds$PopAbbrev,
+#        cex.axis=0.7, main="Bouteloua gracilis", cex.main=1.5, col=BOGR.meds$SdZnColful)
 ## ---------------------------------------------------
 
 
