@@ -123,7 +123,7 @@ colnames(BOGR.biovar) <- c("Pop","bio1","bio2","bio3","bio4","bio5","bio6","bio7
 
 ## Add colour columns that corresponds to seed zone and pop
 unique(BOGR.SdZn$seed_zone)
-BOGR.SdZn$SdZnColful[grepl("10 - 15 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = "darkseagreen2"    #semi-humid, cool
+BOGR.SdZn$SdZnColful[grepl("10 - 15 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = "darkseagreen2"    #semi-humid, cool #hex#B4EEB4
 BOGR.SdZn$SdZnColful[grepl("15 - 20 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = "darkseagreen"     #semi-humid, warm
 BOGR.SdZn$SdZnColful[grepl("20 - 25 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = "darkseagreen4"    #semi-humid, v.warm
 BOGR.SdZn$SdZnColful[grepl("10 - 15 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = "lightgoldenrod1" #semi-arid, cool
