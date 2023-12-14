@@ -89,7 +89,7 @@ BOGR.cl[BOGR.cl$NumInflorescence_20220927 - floor(BOGR.cl$NumInflorescence_20220
 
 ## BOGR - DATA MODS ------------------------------------
 ## Add Source column where source name format matches Source in main data frame
-BOGR.SdZn$Source <- str_replace(BOGR.SdZn$ï..Code, "2-SOS", "")
+BOGR.SdZn$Source <- str_replace(BOGR.SdZn$?..Code, "2-SOS", "")
 BOGR.biovar$Source <- str_replace(BOGR.biovar$Pop, "2-SOS", "")
 BOGR.biovar$Source[16] <- str_replace(BOGR.biovar$Source[16], "BOGRNM-930", "BOGR-NM930")
 
@@ -133,42 +133,42 @@ BOGR.SdZn$SdZnColful[grepl("25 - 30 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = "
 BOGR.SdZn$SdZnColful[grepl("30 - 35 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = "orangered3"      #semi-arid, v.hot
 BOGR.SdZn$SdZnColful[grepl("5 - 10 Deg. F. / 12 - 30", BOGR.SdZn$seed_zone)] = "pink2"           #arid, cold
 
-colfunc <- colorRampPalette(c("grey15","grey90"))
-BOGR.SdZnCols <- colfunc(length(unique(BOGR.SdZn$seed_zone)))
-BOGR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[1]    #semi-humid, cool
-BOGR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[2]    #semi-humid, warm
-BOGR.SdZn$SdZnCol[grepl("20 - 25 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[3]    #semi-humid, v.warm
-BOGR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[4]   #semi-arid, cool
-BOGR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[5]   #semi-arid, warm
-BOGR.SdZn$SdZnCol[grepl("20 - 25 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[6]   #semi-arid, v.warm
-BOGR.SdZn$SdZnCol[grepl("25 - 30 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[7]   #semi-arid, hot
-BOGR.SdZn$SdZnCol[grepl("30 - 35 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[8]   #semi-arid, v.hot
-BOGR.SdZn$SdZnCol[grepl("5 - 10 Deg. F. / 12 - 30", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[9]   #arid, cold
+#colfunc <- colorRampPalette(c("grey15","grey90"))
+#BOGR.SdZnCols <- colfunc(length(unique(BOGR.SdZn$seed_zone)))
+#BOGR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[1]    #semi-humid, cool
+#BOGR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[2]    #semi-humid, warm
+#BOGR.SdZn$SdZnCol[grepl("20 - 25 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[3]    #semi-humid, v.warm
+#BOGR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[4]   #semi-arid, cool
+#BOGR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[5]   #semi-arid, warm
+#BOGR.SdZn$SdZnCol[grepl("20 - 25 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[6]   #semi-arid, v.warm
+#BOGR.SdZn$SdZnCol[grepl("25 - 30 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[7]   #semi-arid, hot
+#BOGR.SdZn$SdZnCol[grepl("30 - 35 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[8]   #semi-arid, v.hot
+#BOGR.SdZn$SdZnCol[grepl("5 - 10 Deg. F. / 12 - 30", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[9]   #arid, cold
 
 ## 'Order' by latitude 
-unique(BOGR.SdZn$Source)
-BOGR.popCols <- colfunc(length(unique(BOGR.SdZn$Source)))
-BOGR.SdZn$PopCol[grepl("BOGR-AZ040-302-SANTACRUZ-17", BOGR.SdZn$Source)] = BOGR.popCols[1]   
-BOGR.SdZn$PopCol[grepl("BOGR-AZ040-284-SANTACRUZ-17", BOGR.SdZn$Source)] = BOGR.popCols[2] 
-BOGR.SdZn$PopCol[grepl("BOGR-AZ040-278-SANTACRUZ-17", BOGR.SdZn$Source)] = BOGR.popCols[3]   
-BOGR.SdZn$PopCol[grepl("BOGR-AZ930-302-10", BOGR.SdZn$Source)] = BOGR.popCols[8] 
-BOGR.SdZn$PopCol[grepl("BOGR-AZ930-303-10", BOGR.SdZn$Source)] = BOGR.popCols[9]   
-BOGR.SdZn$PopCol[grepl("BOGR-CO932-360-FREMONT-17", BOGR.SdZn$Source)] = BOGR.popCols[12]   
-BOGR.SdZn$PopCol[grepl("BOGR-CO932-362-CHAFFEE-17", BOGR.SdZn$Source)] = BOGR.popCols[13]   
-BOGR.SdZn$PopCol[grepl("BOGR-CO932-307-JEFFERSON-12", BOGR.SdZn$Source)] = BOGR.popCols[14]   
-BOGR.SdZn$PopCol[grepl("BOGR-CO932-274-11", BOGR.SdZn$Source)] = BOGR.popCols[15]   
-BOGR.SdZn$PopCol[grepl("BOGR-CO932-363-CLEARCREEK-17", BOGR.SdZn$Source)] = BOGR.popCols[16]   
-BOGR.SdZn$PopCol[grepl("BOGR-CO932-276-11", BOGR.SdZn$Source)] = BOGR.popCols[18] 
-BOGR.SdZn$PopCol[grepl("BOGR-NM-930-071-08", BOGR.SdZn$Source)] = BOGR.popCols[4]   
-BOGR.SdZn$PopCol[grepl("BOGR-NM930-145-10", BOGR.SdZn$Source)] = BOGR.popCols[5]   
-BOGR.SdZn$PopCol[grepl("BOGR-NM080-67-CHAVES-16", BOGR.SdZn$Source)] = BOGR.popCols[6]   
-BOGR.SdZn$PopCol[grepl("BOGR-NM930-140-10", BOGR.SdZn$Source)] = BOGR.popCols[7]   
-BOGR.SdZn$PopCol[grepl("BOGR-NM930N-95-SANDOVAL-12", BOGR.SdZn$Source)] = BOGR.popCols[10]   
-BOGR.SdZn$PopCol[grepl("BOGR-UT030-215-GARFIELD-13", BOGR.SdZn$Source)] = BOGR.popCols[11]    
-BOGR.SdZn$PopCol[grepl("BOGR-UT080-163-CARBON-14", BOGR.SdZn$Source)] = BOGR.popCols[17]    
-BOGR.SdZn$PopCol[grepl("BOGR-WY050-133-FREMONT-16", BOGR.SdZn$Source)] = BOGR.popCols[19]       
-BOGR.SdZn$PopCol[grepl("BOGR-WY050-113-FREMONT-15", BOGR.SdZn$Source)] = BOGR.popCols[20] 
-BOGR.SdZn$PopCol[grepl("BOGR-WY070-71-JOHNSON-15", BOGR.SdZn$Source)] = BOGR.popCols[21]  
+#unique(BOGR.SdZn$Source)
+#BOGR.popCols <- colfunc(length(unique(BOGR.SdZn$Source)))
+#BOGR.SdZn$PopCol[grepl("BOGR-AZ040-302-SANTACRUZ-17", BOGR.SdZn$Source)] = BOGR.popCols[1]   
+#BOGR.SdZn$PopCol[grepl("BOGR-AZ040-284-SANTACRUZ-17", BOGR.SdZn$Source)] = BOGR.popCols[2] 
+#BOGR.SdZn$PopCol[grepl("BOGR-AZ040-278-SANTACRUZ-17", BOGR.SdZn$Source)] = BOGR.popCols[3]   
+#BOGR.SdZn$PopCol[grepl("BOGR-AZ930-302-10", BOGR.SdZn$Source)] = BOGR.popCols[8] 
+#BOGR.SdZn$PopCol[grepl("BOGR-AZ930-303-10", BOGR.SdZn$Source)] = BOGR.popCols[9]   
+#BOGR.SdZn$PopCol[grepl("BOGR-CO932-360-FREMONT-17", BOGR.SdZn$Source)] = BOGR.popCols[12]   
+#BOGR.SdZn$PopCol[grepl("BOGR-CO932-362-CHAFFEE-17", BOGR.SdZn$Source)] = BOGR.popCols[13]   
+#BOGR.SdZn$PopCol[grepl("BOGR-CO932-307-JEFFERSON-12", BOGR.SdZn$Source)] = BOGR.popCols[14]   
+#BOGR.SdZn$PopCol[grepl("BOGR-CO932-274-11", BOGR.SdZn$Source)] = BOGR.popCols[15]   
+#BOGR.SdZn$PopCol[grepl("BOGR-CO932-363-CLEARCREEK-17", BOGR.SdZn$Source)] = BOGR.popCols[16]   
+#BOGR.SdZn$PopCol[grepl("BOGR-CO932-276-11", BOGR.SdZn$Source)] = BOGR.popCols[18] 
+#BOGR.SdZn$PopCol[grepl("BOGR-NM-930-071-08", BOGR.SdZn$Source)] = BOGR.popCols[4]   
+#BOGR.SdZn$PopCol[grepl("BOGR-NM930-145-10", BOGR.SdZn$Source)] = BOGR.popCols[5]   
+#BOGR.SdZn$PopCol[grepl("BOGR-NM080-67-CHAVES-16", BOGR.SdZn$Source)] = BOGR.popCols[6]   
+#BOGR.SdZn$PopCol[grepl("BOGR-NM930-140-10", BOGR.SdZn$Source)] = BOGR.popCols[7]   
+#BOGR.SdZn$PopCol[grepl("BOGR-NM930N-95-SANDOVAL-12", BOGR.SdZn$Source)] = BOGR.popCols[10]   
+#BOGR.SdZn$PopCol[grepl("BOGR-UT030-215-GARFIELD-13", BOGR.SdZn$Source)] = BOGR.popCols[11]    
+#BOGR.SdZn$PopCol[grepl("BOGR-UT080-163-CARBON-14", BOGR.SdZn$Source)] = BOGR.popCols[17]    
+#BOGR.SdZn$PopCol[grepl("BOGR-WY050-133-FREMONT-16", BOGR.SdZn$Source)] = BOGR.popCols[19]       
+#BOGR.SdZn$PopCol[grepl("BOGR-WY050-113-FREMONT-15", BOGR.SdZn$Source)] = BOGR.popCols[20] 
+#BOGR.SdZn$PopCol[grepl("BOGR-WY070-71-JOHNSON-15", BOGR.SdZn$Source)] = BOGR.popCols[21]  
 
 
 ## Add seed zone name abbreviation column
@@ -274,8 +274,8 @@ BOGR.cl$NumInf <- c(BOGR.cl$NumInflorescence_20220927[BOGR.cl$Block<7], BOGR.cl$
 
 
 ## BOGR - ADD GROWTH RATE VARIABLES -------------------------------------
-BOGR.cl$GrwthRate_Specific <- log(BOGR.cl$Length_cm_20220801/BOGR.cl$Length_cm_20220627)
-BOGR.cl$GrwthRate_Absolute <- BOGR.cl$Length_cm_20220801-BOGR.cl$Length_cm_20220627
+#BOGR.cl$GrwthRate_Specific <- log(BOGR.cl$Length_cm_20220801/BOGR.cl$Length_cm_20220627)
+#BOGR.cl$GrwthRate_Absolute <- BOGR.cl$Length_cm_20220801-BOGR.cl$Length_cm_20220627
 BOGR.cl$GrwthRate_Relative <- (BOGR.cl$Length_cm_20220801-BOGR.cl$Length_cm_20220627)/BOGR.cl$Length_cm_20220627
 ## ---------------------------------------------------------------
 

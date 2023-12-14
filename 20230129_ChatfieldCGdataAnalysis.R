@@ -194,6 +194,8 @@ ARFR.cl$GrwthRate_Relative <- (ARFR.cl$Length_cm_20220726-ARFR.cl$Length_cm_2022
 
 
 
+
+
 ## ARFR - TEST FOR TREATMENT EFFECT -------------------------------------
 hist(log(ARFR$AGB_MinusBag))
 hist(ARFR$AGB_MinusBag)
