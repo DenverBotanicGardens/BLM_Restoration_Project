@@ -1,7 +1,7 @@
 ## April Goebl
-## Script started 2023-12-14 (modified from 20231122_ChatfieldCGdataAnalysis_BOGR)
+## Script started 2023-12-15 (modified from 20231122_ChatfieldCGdataAnalysis_BOGR)
 ## BLM Restoration project at Denver Botanic Gardens
-## Analyze ARFR data from Chatfield Common Garden  
+## Analyze ERNA data from Chatfield Common Garden  
 
 
 rm(list=ls())
@@ -39,50 +39,52 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 
 
 ## LOAD DATA --------------------------------------------------------------------------------------
-ARFR <- read.csv(file="Chatfield/20230616_ChatfieldData2022_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
-ARFR.SdZn <- read.csv(file="AGoebl/Seeds/20230823_ARFR_LatLong.csv", sep=",", header=TRUE, dec=".") #Change to file with hexCodes
-ARFR.biovar <- readRDS("AGoebl/Seeds/20230814_ARFR_BiovarsAvg1980_2021")
+ERNA <- read.csv(file="Chatfield/20230302_ChatfieldData_ERNA.csv", sep=",", header=TRUE, dec=".")
+ERNA.SdZn <- read.csv(file="AGoebl/Seeds/20231215_ERNA_LatLongSdZn_hexcodes.csv", sep=",", header=TRUE, dec=".")
+ERNA.biovar <- readRDS("AGoebl/Seeds/20230825_ERNA_BiovarsAvg1980_2021")
 ## ----------------------------------------------------------------------------------------------
 
 
 
 
-## ARFR - DATA CLEAN UP ---------------------------------------------
-str(ARFR)
-ARFR$Source <- as.factor(ARFR$Source)
+## ERNA - DATA CLEAN UP ---------------------------------------------
+str(ERNA)
+ERNA$Source <- as.factor(ERNA$Source)
 
-##If OrigPltSurv_20220527 = 0 & plt not replaced (N), ignore data for this plt, i.e. future surv should be NA, not 0
-ARFR.cl <- ARFR[ARFR$OrigPltSurvival_20220527==1 | (ARFR$OrigPltSurvival_20220527==0 & ARFR$Replaced_YorN_20220531=="Y"),]
+##If OrigPltSurv_20220518 = 0 & plt not replaced (N), ignore data for this plt, i.e. future surv should be NA, not 0
+ERNA.cl <- ERNA[ERNA$OrigPltSurvival_20220518==1 | (ERNA$OrigPltSurvival_20220518==0 & ERNA$Replaced_YorN=="Y"),]
 
-#Note: Don't use OrigPltSurv_20220527 data in days to mort or other field analyses,
+#Note: Don't use OrigPltSurv_20220518 data in days to mort or other field analyses,
 #this surv may not correspond to plt names in Source/Pop col (may correspond to orig planted or assigned)
 
-#Some plts that weren't dead & had sz measure on 5/27 were replaced. In this case, don't use length_0527.
+
+## *** CHECK AND EDIT FROM HERE ON DOWN !! ** ###
+#Some plts that weren't dead & had sz measure on 6/8 were replaced in 2nd round. In this case, don't use length_0608.
 #If length_0527 is not NA and Replaced = Y, then ignore length_527 as it doesn't correspond to plt names in source col
-ARFR.cl$Length_cm_20220527[!is.na(ARFR.cl$Length_cm_20220527) & ARFR.cl$Replaced_YorN_20220531=="Y"] <- NA
+ERNA.cl$Length_cm_20220608[!is.na(ERNA.cl$Length_cm_20220608) & ERNA.cl$Replaced_YorN=="Y"] <- NA
 
 #If not replaced, but died before planting, don't use subsequent surv data
-#ARFR.cl[!is.na(ARFR.cl$DateMortalityObservedPreTransplant),] #All plts that died before planting were replaced
+ERNA.cl[!is.na(ERNA.cl$DateMortalityObservedPreTransplant),] #All plts that died before planting were replaced
 
 
 
 ## Checks 
 #Some plts were dead that were selected to be harvested, check? 
-ARFR.Coll <- ARFR.cl[!is.na(ARFR.cl$Harvest_20221014) | !is.na(ARFR.cl$Harvest_20221110),]
+ERNA.Coll <- ERNA.cl[!is.na(ERNA.cl$Harvest_20221014) | !is.na(ERNA.cl$Harvest_20221110),]
 #Current data sheet only have "Harvest" marked for plts there were alive
-ARFR.Coll[is.na(ARFR.Coll$AGB_MinusBag),] #Two harvested plts do not have final AGB: 1107 and 1274. **Look in lab
-ARFR.MissinfBM <- ARFR.Coll[is.na(ARFR.Coll$InfBM_Wobag_g),]
-ARFR.MissinfBM$ID[ARFR.MissinfBM$Phenology_20220922==3] #Looks for these plts and get inf weights
+ERNA.Coll[is.na(ERNA.Coll$AGB_MinusBag),] #Two harvested plts do not have final AGB: 1107 and 1274. **Look in lab
+ERNA.MissinfBM <- ERNA.Coll[is.na(ERNA.Coll$InfBM_Wobag_g),]
+ERNA.MissinfBM$ID[ERNA.MissinfBM$Phenology_20220922==3] #Looks for these plts and get inf weights
 
 ## ** Add checks listed in BOGR ** 
 ## Check that surv is only 1, 0 and maybe NA
-ARFR.cl[ARFR.cl$Survival_20220622 < 0 | ARFR.cl$Survival_20220622 > 1,]
+ERNA.cl[ERNA.cl$Survival_20220622 < 0 | ERNA.cl$Survival_20220622 > 1,]
 
 #Check that pheno, surv, numInf are only integers
-ARFR.cl[ARFR.cl$Survival_20220622 - floor(ARFR.cl$Survival_20220622) != 0,]
-ARFR.cl[ARFR.cl$Survival_20220922 - floor(ARFR.cl$Survival_20220922) != 0,]
-ARFR.cl[ARFR.cl$Phenology_20220715 - floor(ARFR.cl$Phenology_20220715) != 0 & 
-          !is.na(ARFR.cl$Phenology_20220715),]
+ERNA.cl[ERNA.cl$Survival_20220622 - floor(ERNA.cl$Survival_20220622) != 0,]
+ERNA.cl[ERNA.cl$Survival_20220922 - floor(ERNA.cl$Survival_20220922) != 0,]
+ERNA.cl[ERNA.cl$Phenology_20220715 - floor(ERNA.cl$Phenology_20220715) != 0 & 
+          !is.na(ERNA.cl$Phenology_20220715),]
 
 # ** Check that length is only numeric
 # ** Check that if surv=0 for a given date, there are no phenology or height values for that date
@@ -90,16 +92,16 @@ ARFR.cl[ARFR.cl$Phenology_20220715 - floor(ARFR.cl$Phenology_20220715) != 0 &
 ## *** Need to work on this ****
 #Check that once zero in surv on 6/22 or later, stays zero (if becomes 1 later, could be data entry error)
 ## CONSOLIDATE SURVIVAL DATA
-ARFR.Surv <- ARFR.cl %>% dplyr::select(c(starts_with("Survival_")))
-#for (rr in 1:nrow(ARFR.Surv)) {
-#  for (cc in 1:(ncol(ARFR.Surv)-1)) {
-#    if(ARFR.Surv[rr,cc]==0 & ARFR.Surv[rr,cc+1]==1) {
-#     ARFR.Surv$Check[rr] <- "Y"
+ERNA.Surv <- ERNA.cl %>% dplyr::select(c(starts_with("Survival_")))
+#for (rr in 1:nrow(ERNA.Surv)) {
+#  for (cc in 1:(ncol(ERNA.Surv)-1)) {
+#    if(ERNA.Surv[rr,cc]==0 & ERNA.Surv[rr,cc+1]==1) {
+#     ERNA.Surv$Check[rr] <- "Y"
 #    }
 #  }
 #}
-ARFR.Surv %>% filter_all(any_vars(.==0))
-#ARFR.cl %>% filter_all(starts_with("Survival_")==0)
+ERNA.Surv %>% filter_all(any_vars(.==0))
+#ERNA.cl %>% filter_all(starts_with("Survival_")==0)
 ## ----------------------------------------------------------------------------------------------
 
 
@@ -258,9 +260,9 @@ str(ARFR.cl$InfBM_Wobag_g)
 ## Order by average size 
 ARFR.htByMed <- with(ARFR.cl, reorder(Source, Length_cm_20220726, median, na.rm=TRUE))
 ARFR.meds <- ARFR.cl %>% group_by(Source) %>% 
-             dplyr::summarise(Height_MD=median(Length_cm_20220726,na.rm=TRUE), AGB_MD=median(AGB_MinusBag,na.rm=TRUE),
-             ReproBM_MD=median(InfBM_Wobag_g,na.rm=TRUE), GrowthRe_MD=median(GrwthRate_Relative,na.rm=TRUE),
-             GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE), GrowthAb_MD=median(GrwthRate_Absolute,na.rm=TRUE))
+  dplyr::summarise(Height_MD=median(Length_cm_20220726,na.rm=TRUE), AGB_MD=median(AGB_MinusBag,na.rm=TRUE),
+                   ReproBM_MD=median(InfBM_Wobag_g,na.rm=TRUE), GrowthRe_MD=median(GrwthRate_Relative,na.rm=TRUE),
+                   GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE), GrowthAb_MD=median(GrwthRate_Absolute,na.rm=TRUE))
 ARFR.meds <- left_join(ARFR.meds, ARFR.SdZn, by="Source")
 
 

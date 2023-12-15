@@ -133,6 +133,17 @@ BOGR.SdZn$SdZnColful[grepl("25 - 30 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = "
 BOGR.SdZn$SdZnColful[grepl("30 - 35 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = "orangered3"      #semi-arid, v.hot
 BOGR.SdZn$SdZnColful[grepl("5 - 10 Deg. F. / 12 - 30", BOGR.SdZn$seed_zone)] = "pink2"           #arid, cold
 
+
+#ERNA -- MOVE TO -------------------
+#BOGR.SdZn$SdZnColful[grepl("0 - 5 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = "#7FFFD4"    #semi-humid, v.cold #aquamarine
+#BOGR.SdZn$SdZnColful[grepl("0 - 5 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = "#F0FFFF"    #semi-humid, v.cold #azure 
+BOGR.SdZn$SdZnColful[grepl("0 - 5 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = "#F0FFF0"    #semi-humid, v.cold #honeydew #ERNA
+BOGR.SdZn$SdZnColful[grepl("20 - 25 Deg. F. / 12 - 30", BOGR.SdZn$seed_zone)] = "#CD6090"           #arid, v.warm #hotpink3 #ERNA
+BOGR.SdZn$SdZnColful[grepl("5 - 10 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = "#C1FFC1"    #semi-humid, cold #darkseagreen1 #ERNA
+BOGR.SdZn$SdZnColful[grepl("15 - 20 Deg. F. / 2 - 3", BOGR.SdZn$seed_zone)] = "#87CEFF"    #humid, warm #skyblue1 #ERNA
+## ---------------------------
+
+
 #colfunc <- colorRampPalette(c("grey15","grey90"))
 #BOGR.SdZnCols <- colfunc(length(unique(BOGR.SdZn$seed_zone)))
 #BOGR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[1]    #semi-humid, cool
