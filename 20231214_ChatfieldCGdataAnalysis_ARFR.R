@@ -110,7 +110,7 @@ ARFR.Surv %>% filter_all(any_vars(.==0))
 ARFR.SdZn$Source <- str_replace(ARFR.SdZn$SOURCE_CODE, "4-SOS", "")
 ARFR.biovar$Source <- str_replace(ARFR.biovar$Pop, "4-SOS", "")
 
-## Add Population name abbreviation column
+## Add Population name abbreviation column. Within state should be ordered by increasing lat
 ARFR.SdZn$PopAbbrev[grepl("ARFR-AZ930-423-NAVAJO-18", ARFR.SdZn$Source)] = "A.AZ.1"   
 ARFR.SdZn$PopAbbrev[grepl("ARFR-AZ930-422-NAVAJO-18", ARFR.SdZn$Source)] = "A.AZ.2"    
 ARFR.SdZn$PopAbbrev[grepl("ARFR-NM930N-66-11", ARFR.SdZn$Source)] = "A.NM.1"   

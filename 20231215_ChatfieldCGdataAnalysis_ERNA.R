@@ -54,45 +54,42 @@ ERNA$Source <- as.factor(ERNA$Source)
 ##If OrigPltSurv_20220518 = 0 & plt not replaced (N), ignore data for this plt, i.e. future surv should be NA, not 0
 ERNA.cl <- ERNA[ERNA$OrigPltSurvival_20220518==1 | (ERNA$OrigPltSurvival_20220518==0 & ERNA$Replaced_YorN=="Y"),]
 
+
+## *** CHECK AND EDIT THIS FOR FUTURE ANALYSES !! ** ###
+## ** FOR NOW (20231217) DON'T USE EARLY SURV OR LEN IN ANALYSES ***
 #Note: Don't use OrigPltSurv_20220518 data in days to mort or other field analyses,
 #this surv may not correspond to plt names in Source/Pop col (may correspond to orig planted or assigned)
+#What about 6/8 surv?
 
+#Plts that were dead and missing on 5/18 were replaced. Surv & sz was taken on 6/8. 
+#If any that were dead on 5/18 were still dead 6/13, they were replaced as well.
+#Ignore surv=0 on 6/8 if replaced=Y? 
+#ERNA.cl[ERNA.cl$OrigPltSurvival_20220518==0 & (ERNA.cl$Survival_20220608==0 & ERNA.cl$Replaced_YorN=="Y"),]
 
-## *** CHECK AND EDIT FROM HERE ON DOWN !! ** ###
-#Some plts that weren't dead & had sz measure on 6/8 were replaced in 2nd round. In this case, don't use length_0608.
-#If length_0527 is not NA and Replaced = Y, then ignore length_527 as it doesn't correspond to plt names in source col
-ERNA.cl$Length_cm_20220608[!is.na(ERNA.cl$Length_cm_20220608) & ERNA.cl$Replaced_YorN=="Y"] <- NA
+#Length_0608 should be good to use foir early growth rate? 
 
-#If not replaced, but died before planting, don't use subsequent surv data
-ERNA.cl[!is.na(ERNA.cl$DateMortalityObservedPreTransplant),] #All plts that died before planting were replaced
-
+#If not replaced, but died before planting, don't use subsequent surv data?
+#ERNA.cl[!is.na(ERNA.cl$DateMortalityObservedPreTransplant),] #All plts that died before planting were replaced
+## ****************************************************** 
 
 
 ## Checks 
-#Some plts were dead that were selected to be harvested, check? 
-ERNA.Coll <- ERNA.cl[!is.na(ERNA.cl$Harvest_20221014) | !is.na(ERNA.cl$Harvest_20221110),]
-#Current data sheet only have "Harvest" marked for plts there were alive
-ERNA.Coll[is.na(ERNA.Coll$AGB_MinusBag),] #Two harvested plts do not have final AGB: 1107 and 1274. **Look in lab
-ERNA.MissinfBM <- ERNA.Coll[is.na(ERNA.Coll$InfBM_Wobag_g),]
-ERNA.MissinfBM$ID[ERNA.MissinfBM$Phenology_20220922==3] #Looks for these plts and get inf weights
-
-## ** Add checks listed in BOGR ** 
+## ** Add other checks listed in BOGR ** 
 ## Check that surv is only 1, 0 and maybe NA
-ERNA.cl[ERNA.cl$Survival_20220622 < 0 | ERNA.cl$Survival_20220622 > 1,]
+ERNA.cl[ERNA.cl$Survival_20220608 < 0 | ERNA.cl$Survival_20220608 > 1,]
+ERNA.cl[ERNA.cl$Survival_20221108 < 0 | ERNA.cl$Survival_20221108 > 1,]
 
-#Check that pheno, surv, numInf are only integers
-ERNA.cl[ERNA.cl$Survival_20220622 - floor(ERNA.cl$Survival_20220622) != 0,]
-ERNA.cl[ERNA.cl$Survival_20220922 - floor(ERNA.cl$Survival_20220922) != 0,]
-ERNA.cl[ERNA.cl$Phenology_20220715 - floor(ERNA.cl$Phenology_20220715) != 0 & 
-          !is.na(ERNA.cl$Phenology_20220715),]
+#Check that surv is only integers
+ERNA.cl[ERNA.cl$Survival_20220608 - floor(ERNA.cl$Survival_20220608) != 0,]
+ERNA.cl[ERNA.cl$Survival_20221108 - floor(ERNA.cl$Survival_20221108) != 0,]
 
 # ** Check that length is only numeric
 # ** Check that if surv=0 for a given date, there are no phenology or height values for that date
 
 ## *** Need to work on this ****
-#Check that once zero in surv on 6/22 or later, stays zero (if becomes 1 later, could be data entry error)
+#Check that once zero in surv on X/X or later, stays zero (if becomes 1 later, could be data entry error)
 ## CONSOLIDATE SURVIVAL DATA
-ERNA.Surv <- ERNA.cl %>% dplyr::select(c(starts_with("Survival_")))
+#ERNA.Surv <- ERNA.cl %>% dplyr::select(c(starts_with("Survival_")))
 #for (rr in 1:nrow(ERNA.Surv)) {
 #  for (cc in 1:(ncol(ERNA.Surv)-1)) {
 #    if(ERNA.Surv[rr,cc]==0 & ERNA.Surv[rr,cc+1]==1) {
@@ -100,8 +97,38 @@ ERNA.Surv <- ERNA.cl %>% dplyr::select(c(starts_with("Survival_")))
 #    }
 #  }
 #}
-ERNA.Surv %>% filter_all(any_vars(.==0))
+#ERNA.Surv %>% filter_all(any_vars(.==0))
 #ERNA.cl %>% filter_all(starts_with("Survival_")==0)
+
+
+#ERNA.test <- ERNA.cl[ERNA.cl$Replaced_YorN !="Y",]
+
+#OrigPltLength_cm_Greenhouse_20220323 may not correspond to plt names in Source col 
+#(may correspond to orig planted or assigned. This will be the case if the plant was replaced)'
+#so probably don't use OrigPltLen in growth rates or other field analyses (especially if Replaced = Y)
+
+#Seedlings planted 4/20-4/28
+#First surv 5/18
+#First replacements 5/18-5/19. Replaced if dead and missing and more of source available;
+#not replaced if appeared dead (no green tissue) but not missing.
+#Second surv/sz 6/8-6/10
+#Second replacements 6/13. Replaced if dead on both 5/18 and 6/8. Not replaced if only dead 6/8.
+#If 1 in both OrigPltSurv cols (Replaced=N or NA), then these and orig sizes correspond to plant named in Source.
+#If 1 in first OrigSurv and 0 in second OrigSurv (Replaced=N or NA), then no data other than first OrigLen and first OrigSurv,
+#and subsequent survs. The days to mort for these plants could be counted as the date of the second OrigSurv survey.
+#If 0 in first OrigSurv and 0 in second OrigSurv (Replaced=Y if Source available), 
+#then first OrigLen does not correspond to plant named and no data for second OrigLen. Subsequent data corresponds to plt named.
+#If 0 in first OrigSurv and 1 in second OrigSurv (Replaced=Y or N), if Replaced=Y then first OrigLen does not correspond to plt named;
+#and second OrigLen and subsequent data does correspond to plt named. If Replaced=N then first OrigSurv is wrong,
+#but all other data (including first and second OrigLen and second OrigSurv) corresponds to plt named.
+#Source should match Replacement (when value entered) minus unique plt id 
+
+#Due to how confusing this is, it is probably easiest to ignore all plants with Replaced=Y (even if subsequent data corresponds
+#to plt named, the data for these plts may vary do to being planted 1-2 months later).
+#Also don't use first OrigSurv in days to mort or other field analyses, these deaths are due to transplant shock.
+#Can use second OrigSurv in days to mort if first OrigSurv=1, ignore plt if first OrigSurv=0. If this plt wasn't replaced then it died from transplant.
+
+#ERNA <- left_join(ERNA, ERNA.SdZn, by="Source")
 ## ----------------------------------------------------------------------------------------------
 
 
@@ -109,205 +136,130 @@ ERNA.Surv %>% filter_all(any_vars(.==0))
 
 ## ARFR - DATA MODS ------------------------------------
 ## Add Source column where source name format matches Source in main data frame
-ARFR.SdZn$Source <- str_replace(ARFR.SdZn$SOURCE_CODE, "4-SOS", "")
-ARFR.biovar$Source <- str_replace(ARFR.biovar$Pop, "4-SOS", "")
+ERNA.SdZn$Source <- str_replace(ERNA.SdZn$Code, "10-SOS", "")
+ERNA.biovar$Source <- str_replace(ERNA.biovar$Pop, "10-SOS", "")
 
-## Add Population name abbreviation column
-ARFR.SdZn$PopAbbrev[grepl("ARFR-AZ930-423-NAVAJO-18", ARFR.SdZn$Source)] = "A.AZ.1"   
-ARFR.SdZn$PopAbbrev[grepl("ARFR-AZ930-422-NAVAJO-18", ARFR.SdZn$Source)] = "A.AZ.2"    
-ARFR.SdZn$PopAbbrev[grepl("ARFR-NM930N-66-11", ARFR.SdZn$Source)] = "A.NM.1"   
-ARFR.SdZn$PopAbbrev[grepl("ARFR-WY930-44-LASANIMAS-13", ARFR.SdZn$Source)] = "A.CO.1"       
-ARFR.SdZn$PopAbbrev[grepl("ARFR-CO932-314-JEFFERSON-12", ARFR.SdZn$Source)] = "A.CO.2"  
-ARFR.SdZn$PopAbbrev[grepl("ARFR-CO932-316-JEFFERSON-12", ARFR.SdZn$Source)] = "A.CO.3"   
-ARFR.SdZn$PopAbbrev[grepl("ARFR-UT080-109-UINTAH-12", ARFR.SdZn$Source)] = "A.UT.1"    
-ARFR.SdZn$PopAbbrev[grepl("ARFR-CO932-294-11", ARFR.SdZn$Source)] = "A.CO.4"   
-ARFR.SdZn$PopAbbrev[grepl("ARFR-WY040-71-10", ARFR.SdZn$Source)] = "A.WY.1"       
-ARFR.SdZn$PopAbbrev[grepl("ARFR-WY050-151-FREMONT-16", ARFR.SdZn$Source)] = "A.WY.2" 
-ARFR.SdZn$PopAbbrev[grepl("ARFR-WY050-49-FREMONT-12", ARFR.SdZn$Source)] = "A.WY.3"  
 
 ## Edit column names for biovariables
-colnames(ARFR.biovar) <- c("Pop","bio1","bio2","bio3","bio4","bio5","bio6","bio7","bio8",
+colnames(ERNA.biovar) <- c("Pop","bio1","bio2","bio3","bio4","bio5","bio6","bio7","bio8",
                            "bio9","bio10","bio11","bio12","bio13","bio14","bio15","bio16",
                            "bio17","bio18","bio19","Source")
 
-## Add colour columns that corresponds to pop or seed zone
-#SdZn.list <- unique(ARFR.SdZn$SdZone) #If coloring by seed zone, change to match BOGR
-#ARFR.SdZn$SdZnCol[grepl("5 - 10 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "powderblue"        #semi-humid, cold
-#ARFR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "darkseagreen"     #semi-humid, cool
-#ARFR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "darkseagreen4"    #semi-humid, warm
-#ARFR.SdZn$SdZnCol[grepl("5 - 10 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "darkgoldenrod1"   #semi-arid, cold
-#ARFR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "orange3"         #semi-arid, cool
-#ARFR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "tomato2"         #semi-arid, warm
 
-## Color by latitude (based on Alyson's map and SNP PCA colors)
-pop.list <- unique(ARFR.SdZn$Source)
-ARFR.SdZn$PopCol[grepl("ARFR-AZ930-423-NAVAJO-18", ARFR.SdZn$Source)] = "#9E0142"        
-ARFR.SdZn$PopCol[grepl("ARFR-AZ930-422-NAVAJO-18", ARFR.SdZn$Source)] = "#D53E4F"   
-ARFR.SdZn$PopCol[grepl("ARFR-NM930N-66-11", ARFR.SdZn$Source)] = "#F46D43"    
-ARFR.SdZn$PopCol[grepl("ARFR-WY930-44-LASANIMAS-13", ARFR.SdZn$Source)] = "#FDAE61"   
-ARFR.SdZn$PopCol[grepl("ARFR-CO932-314-JEFFERSON-12", ARFR.SdZn$Source)] = "#FEE08B"        
-ARFR.SdZn$PopCol[grepl("ARFR-CO932-316-JEFFERSON-12", ARFR.SdZn$Source)] = "#FFFF85"        
-ARFR.SdZn$PopCol[grepl("ARFR-UT080-109-UINTAH-12", ARFR.SdZn$Source)] = "#aabe7f"        
-ARFR.SdZn$PopCol[grepl("ARFR-CO932-294-11", ARFR.SdZn$Source)] = "#ABDDA4"     
-ARFR.SdZn$PopCol[grepl("ARFR-WY040-71-10", ARFR.SdZn$Source)] = "#66C2A5"    
-ARFR.SdZn$PopCol[grepl("ARFR-WY050-151-FREMONT-16", ARFR.SdZn$Source)] = "#3288BD"   
-ARFR.SdZn$PopCol[grepl("ARFR-WY050-49-FREMONT-12", ARFR.SdZn$Source)] = "#5E4FA2"
 
-## Add seed zone name abbreviation column (look at BOGR script)..?
+
+## Subset of ERNA seed zone colors (all listed in ERNA.SdZn file)
+#ERNA.SdZn$HexCode[grepl("0 - 5 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "#F0FFF0"     #semi-humid, v.cold #honeydew #
+#ERNA.SdZn$HexCode[grepl("20 - 25 Deg. F. / 12 - 30", ERNA.SdZn$seed_zone)] = "#CD6090" #arid, v.warm #hotpink3 
+#ERNA.SdZn$HexCode[grepl("5 - 10 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "#C1FFC1"    #semi-humid, cold #darkseagreen1 
+#ERNA.SdZn$HexCode[grepl("15 - 20 Deg. F. / 2 - 3", ERNA.SdZn$seed_zone)] = "#87CEFF"   #humid, warm #skyblue1 
+## ---------------------------
+
+
+## Add seed zone name abbreviation column (look at BOGR script).. (for legend)?
 
 ## Add column with seed zone or pop 'order' (look at BOGR script)..?
-ARFR.SdZn$PopOrder[grepl("ARFR-AZ930-423-NAVAJO-18", ARFR.SdZn$Source)] = "A"        
-ARFR.SdZn$PopOrder[grepl("ARFR-AZ930-422-NAVAJO-18", ARFR.SdZn$Source)] = "B"   
-ARFR.SdZn$PopOrder[grepl("ARFR-NM930N-66-11", ARFR.SdZn$Source)] = "C"    
-ARFR.SdZn$PopOrder[grepl("ARFR-WY930-44-LASANIMAS-13", ARFR.SdZn$Source)] = "D"   
-ARFR.SdZn$PopOrder[grepl("ARFR-CO932-314-JEFFERSON-12", ARFR.SdZn$Source)] = "E"        
-ARFR.SdZn$PopOrder[grepl("ARFR-CO932-316-JEFFERSON-12", ARFR.SdZn$Source)] = "F"        
-ARFR.SdZn$PopOrder[grepl("ARFR-UT080-109-UINTAH-12", ARFR.SdZn$Source)] = "G"        
-ARFR.SdZn$PopOrder[grepl("ARFR-CO932-294-11", ARFR.SdZn$Source)] = "H"     
-ARFR.SdZn$PopOrder[grepl("ARFR-WY040-71-10", ARFR.SdZn$Source)] = "I"    
-ARFR.SdZn$PopOrder[grepl("ARFR-WY050-151-FREMONT-16", ARFR.SdZn$Source)] = "J"   
-ARFR.SdZn$PopOrder[grepl("ARFR-WY050-49-FREMONT-12", ARFR.SdZn$Source)] = "K"
-#BOGR.SdZn$SdZnOrder[grepl("10 - 15 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = "A"    #semi-humid, cool
-#BOGR.SdZn$SdZnOrder[grepl("15 - 20 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = "B"    #semi-humid, warm
-#BOGR.SdZn$SdZnOrder[grepl("20 - 25 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = "C"    #semi-humid, v.warm
-#BOGR.SdZn$SdZnOrder[grepl("10 - 15 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = "D"   #semi-arid, cool
-#BOGR.SdZn$SdZnOrder[grepl("15 - 20 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = "E"   #semi-arid, warm
-#BOGR.SdZn$SdZnOrder[grepl("20 - 25 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = "F"   #semi-arid, v.warm
-#BOGR.SdZn$SdZnOrder[grepl("25 - 30 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = "G"   #semi-arid, hot
-#BOGR.SdZn$SdZnOrder[grepl("30 - 35 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = "H"   #semi-arid, v.hot
-#BOGR.SdZn$SdZnOrder[grepl("5 - 10 Deg. F. / 12 - 30", BOGR.SdZn$seed_zone)] = "I"   #arid, cold
+ERNA.SdZn$SdZnOrder[grepl("15 - 20 Deg. F. / 2 - 3", ERNA.SdZn$seed_zone)] = "A"    #humid, warm  
+ERNA.SdZn$SdZnOrder[grepl("0 - 5 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "B"      #semi-humid, v.cold 
+ERNA.SdZn$SdZnOrder[grepl("5 - 10 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "C"     #semi-humid, cold
+ERNA.SdZn$SdZnOrder[grepl("10 - 15 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "D"    #semi-humid, cool
+ERNA.SdZn$SdZnOrder[grepl("15 - 20 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "E"    #semi-humid, warm
+ERNA.SdZn$SdZnOrder[grepl("20 - 25 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "F"    #semi-humid, v.warm
+ERNA.SdZn$SdZnOrder[grepl("10 - 15 Deg. F. / 6 - 12", ERNA.SdZn$seed_zone)] = "G"   #semi-arid, cool
+ERNA.SdZn$SdZnOrder[grepl("15 - 20 Deg. F. / 6 - 12", ERNA.SdZn$seed_zone)] = "H"   #semi-arid, warm
+ERNA.SdZn$SdZnOrder[grepl("20 - 25 Deg. F. / 6 - 12", ERNA.SdZn$seed_zone)] = "I"   #semi-arid, v.warm
+ERNA.SdZn$SdZnOrder[grepl("20 - 25 Deg. F. / 12 - 30", ERNA.SdZn$seed_zone)] = "J"  #arid, v.warm
 ## ----------------------------------------------------------------------------------------------
 
 
 
 
 ## ARFR - COMBINE DATA TYPES --------------------------------------------
-ARFR.cl <- left_join(ARFR.cl, ARFR.SdZn, by="Source")
-ARFR.cl <- left_join(ARFR.cl, ARFR.biovar, by="Source")
+ERNA.cl <- left_join(ERNA.cl, ERNA.SdZn, by="Source")
+ERNA.cl <- left_join(ERNA.cl, ERNA.biovar, by="Source")
 ## ----------------------------------------------------------------------
 
 
 
-## ARFR - CONSOLIDATE PHENOLOGY DATA AND DO CHECKS ---------------------------------------------
+## ERNA - CONSOLIDATE PHENOLOGY DATA AND DO CHECKS ---------------------------------------------
 ## Add from 20230129_ChatfieldCGdataAnalysis and BOGR script if want to include.
-## Exclude for now due to lack of variation and questionable data (inability to distinguish buds etc.)
+## Exclude for now due to lack of data in 2022 
 ## ---------------------------------------------------------------
 
 
 
-## ARFR - ADD GROWTH RATE VARIABLES ------------------------------
-ARFR.cl$GrwthRate_Specific <- log(ARFR.cl$Length_cm_20220726/ARFR.cl$Length_cm_20220622)
-ARFR.cl$GrwthRate_Absolute <- ARFR.cl$Length_cm_20220726-ARFR.cl$Length_cm_20220622
-ARFR.cl$GrwthRate_Relative <- (ARFR.cl$Length_cm_20220726-ARFR.cl$Length_cm_20220622)/ARFR.cl$Length_cm_20220622
+## ERNA - ADD GROWTH RATE VARIABLES ------------------------------
+ERNA.cl$GrwthRate_Specific <- log(ERNA.cl$Length_cm_20220915/ERNA.cl$Length_cm_20220719)
+ERNA.cl$GrwthRate_Absolute <- ERNA.cl$Length_cm_20220915-ERNA.cl$Length_cm_20220719
+ERNA.cl$GrwthRate_Relative <- (ERNA.cl$Length_cm_20220915-ERNA.cl$Length_cm_20220719)/ERNA.cl$Length_cm_20220719
 
-## ** Look at early vs late growth if can use pre-replacement early height measurement 20220527 ** 
+## ** Look at early vs late growth if at least 3 height measurements are usable ** 
 ## ---------------------------------------------------------------
 
 
 
-## LOOK AT REPRO BM DATA 
-## Add any mods? 
-ARFR.cl$InfBM_Wobag_g
-ARFR.cl$InfBM_Wobag_g[!is.na(ARFR.cl$InfBM_Wobag_g)]
-length(ARFR.cl$InfBM_Wobag_g[!is.na(ARFR.cl$InfBM_Wobag_g)])
-length(ARFR.cl$InfBM_Wbag[!is.na(ARFR.cl$InfBM_Wbag)])
-hist(ARFR.cl$InfBM_Wobag_g)
-str(ARFR.cl$InfBM_Wobag_g)
+## LOOK AT REPRO BM DATA FOR 2023
 ## ---------------------------------------------------------------
 
 
 
-## COULD ADD AGB VARIABLES AS WELL? *
-## For now, I think height is better since more data and correlated to AGB
+## ADD AGB FOR 2023
+## ---------------------------------------------------------------
 
 
 
 
-## ARFR - TEST FOR TREATMENT EFFECT -------------------------------------------------------
+## ERNA - TEST FOR TREATMENT EFFECT -------------------------------------------------------
 ## Review and update models as needed **
-#hist(log(ARFR.cl$AGB_MinusBag))
-#hist(ARFR$AGB_MinusBag)
-#ARFR.tx.mod <- aov(ARFR$AGB_MinusBag ~ ARFR$Source + ARFR$Treatment)
-#ARFR.tx.mod <- lmer(log(AGB_MinusBag) ~ Source + Treatment + (1|Block), data=ARFR)
-#summary(ARFR.tx.mod)
-#ARFR.pop.mod <- lmer(log(AGB_MinusBag) ~ Source + (1|Block), data=ARFR)
-
-#models <- list(ARFR.tx.mod, ARFR.pop.mod)
-#mod.names <- c('IncldTx', 'JustPop')
-#aictab(cand.set = models, modnames = mod.names )
-# No support for treatment 
-
-#hist(log(ARFR$Length_cm_20220726))
-#hist(ARFR$Length_cm_20220726)
-#ARFR.tx.mod <- aov(log(ARFR$Length_cm_20220726) ~ ARFR$Source + ARFR$Treatment)
-#ARFR.tx.modlog <- lmer(log(ARFR$Length_cm_20220726) ~ Source + Treatment + (1|Block), data=ARFR)
-#ARFR.pop.modlog <- lmer(log(ARFR$Length_cm_20220726) ~ Source + (1|Block), data=ARFR)
-#ARFR.tx.mod <- lmer(ARFR$Length_cm_20220726 ~ Source + Treatment + (1|Block), data=ARFR)
-#ARFR.pop.mod <- lmer(ARFR$Length_cm_20220726 ~ Source + (1|Block), data=ARFR)
-
-#models <- list(ARFR.tx.mod, ARFR.pop.mod)
-#mod.names <- c('IncldTx', 'JustPop')
-#aictab(cand.set = models, modnames = mod.names )
-# No support for treatment? 
+## Copy code from BOGR and ARFR scripts 
 ## -----------------------------------------------------------------------------------------
 
 
 
 
-## ARFR - VISUALIZE RAW DATA ---------------------------------------------------------------
+## ERNA - VISUALIZE RAW DATA ---------------------------------------------------------------
 
 ## Order populations for plotting 
 ## Order by average size 
-ARFR.htByMed <- with(ARFR.cl, reorder(Source, Length_cm_20220726, median, na.rm=TRUE))
-ARFR.meds <- ARFR.cl %>% group_by(Source) %>% 
-  dplyr::summarise(Height_MD=median(Length_cm_20220726,na.rm=TRUE), AGB_MD=median(AGB_MinusBag,na.rm=TRUE),
-                   ReproBM_MD=median(InfBM_Wobag_g,na.rm=TRUE), GrowthRe_MD=median(GrwthRate_Relative,na.rm=TRUE),
-                   GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE), GrowthAb_MD=median(GrwthRate_Absolute,na.rm=TRUE))
-ARFR.meds <- left_join(ARFR.meds, ARFR.SdZn, by="Source")
+ERNA.htByMed <- with(ERNA.cl, reorder(Source, Length_cm_20220915, median, na.rm=TRUE))
+ERNA.meds <- ERNA.cl %>% group_by(Source) %>% 
+             dplyr::summarise(Height_MD=median(Length_cm_20220915,na.rm=TRUE), GrowthAb_MD=median(GrwthRate_Absolute,na.rm=TRUE),
+                   GrowthRe_MD=median(GrwthRate_Relative,na.rm=TRUE), GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE))
+ERNA.meds <- left_join(ERNA.meds, ERNA.SdZn, by="Source")
 
 
 ## Boxplots of raw data 
 par(mfrow=c(2,2))
 
 ## Size
-ARFR.meds <- ARFR.meds[order(ARFR.meds$Height_MD),] #Order by median 
-boxplot(Length_cm_20220726 ~ ARFR.htByMed, data=ARFR.cl,
+ERNA.meds <- ERNA.meds[order(ERNA.meds$Height_MD),] #Order by median 
+boxplot(Length_cm_20220915 ~ ERNA.htByMed, data=ERNA.cl,
         xlab=NA, ylab="Height (cm)", cex.lab=1.25,
-        cex.axis=0.99, names=ARFR.meds$PopAbbrev, las=2,
-        main="FINAL SIZE", cex.main=1.5, col=ARFR.meds$PopCol)
+        cex.axis=0.99, names=ERNA.meds$PopAbbrev, las=2,
+        main="FINAL SIZE", cex.main=1.5, col=ERNA.meds$HexCode)
 
 ## Growth rate(s) ** Add time interval to growth rate calcs? **
-#ARFR.meds <- ARFR.meds[order(ARFR.meds$Growth_MD),]
-boxplot(GrwthRate_Relative ~ ARFR.htByMed, data=ARFR.cl, las=2,
-        xlab=NA, ylab="Plant relative growth", cex.lab=1.25, cex.axis=0.99, names=ARFR.meds$PopAbbrev,
-        cex.main=1.5, col=ARFR.meds$PopCol, ylim=c(-0.4,7), main="GROWTH RATE")
+#ERNA.meds <- ERNA.meds[order(ERNA.meds$Growth_MD),]
+boxplot(GrwthRate_Relative ~ ERNA.htByMed, data=ERNA.cl, las=2,
+        xlab=NA, ylab="Plant relative growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
+        cex.main=1.5, col=ERNA.meds$HexCode, main="GROWTH RATE", ylim=c(-0.35,3))
 
-#boxplot(GrwthRate_Absolute ~ ARFR.htByMed, data=ARFR.cl, las=2,
-#        xlab=NA, ylab="Plant absolute growth", cex.lab=1, cex.axis=0.9, names=ARFR.meds$PopAbbrev,
-#        cex.main=1.5, col=ARFR.meds$PopCol)
+#boxplot(GrwthRate_Absolute ~ ERNA.htByMed, data=ERNA.cl, las=2,
+#        xlab=NA, ylab="Plant absolute growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
+#        cex.main=1.5, col=ERNA.meds$HexCode, main="GROWTH RATE")
 
-#boxplot(GrwthRate_Specific ~ ARFR.htByMed, data=ARFR.cl, las=2,
-#        xlab=NA, ylab="Plant specific growth", cex.lab=1, cex.axis=0.9, names=ARFR.meds$PopAbbrev,
-#        cex.main=1.5, col=ARFR.meds$PopCol)
-#ARFR.SdZn <- ARFR.SdZn[order(ARFR.SdZn$GR_SP),]
-#boxplot(GrwthRate_Specific ~ ARFR.grsByMed, data=ARFR.cl,
-#        xlab="Population", ylab="Plant specific growth", cex.lab=1.5, names=ARFR.SdZn$PopAbbrev,
-#        cex.axis=0.7, main="Bouteloua gracilis", cex.main=1.5, col=ARFR.SdZn$PopCol)
+#boxplot(GrwthRate_Specific ~ ERNA.htByMed, data=ERNA.cl, las=2,
+#        xlab=NA, ylab="Plant specific growth", cex.lab=1, cex.axis=0.9, names=ERNA.meds$PopAbbrev,
+#        cex.main=1.5, col=ERNA.meds$HexCode)
+#ERNA.SdZn <- ERNA.SdZn[order(ERNA.SdZn$GR_SP),]
+#boxplot(GrwthRate_Specific ~ ERNA.grsByMed, data=ERNA.cl,
+#        xlab="Population", ylab="Plant specific growth", cex.lab=1.5, names=ERNA.SdZn$PopAbbrev,
+#        cex.axis=0.7, cex.main=1.5, col=ERNA.SdZn$HexCode)
 
 ## Blank plot
 plot.new()
-legend("center", unique(ARFR.meds$Source[order(ARFR.meds$PopOrder, decreasing=TRUE)]), 
-       col=unique(ARFR.meds$PopCol[order(ARFR.meds$PopOrder, decreasing=TRUE)]), cex=1.1, pch=19)
-
-
-## Repro
-boxplot(InfBM_Wobag_g ~ ARFR.htByMed, data=ARFR.cl, las=2,
-        xlab=NA, ylab="Reproductive biomass", cex.lab=1.25, cex.axis=0.99, names=ARFR.meds$PopAbbrev,
-        cex.main=1.5, col=ARFR.meds$PopCol, main="REPRODUCTIVE OUTPUT")
-#ARFR.meds <- ARFR.meds[order(ARFR.meds$Inf_MD),]
-#boxplot(NumInf ~ ARFR.infByMed, data=ARFR.cl, las=2,
-#        xlab="Population", ylab="Number of inflorescences", cex.lab=1.25, names=ARFR.meds$PopAbbrev,
-#        cex.axis=0.7, main="Artemisia frigida", cex.main=1.5, col=ARFR.meds$SdZnColful)
+legend("center", unique(ERNA.meds$seed_zone[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), col="black",
+       pt.bg=unique(ERNA.meds$HexCode[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), cex=1.5, pch=21)
 ## ---------------------------------------------------
 
 
