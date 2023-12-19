@@ -33,7 +33,8 @@ calcSE <- function(x){sd(x, na.rm=TRUE)/sqrt(length(x))}
 
 
 ## SET WORKING DIRECTORY --------------------------------------------------------------------------
-setwd("C:/Users/april/Denver Botanic Gardens/Conservation - BLM-Grassland")
+#setwd("C:/Users/april/Denver Botanic Gardens/Conservation - BLM-Grassland")
+setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland")
 ## ------------------------------------------------------------------------------------------------
 
 
@@ -89,7 +90,7 @@ BOGR.cl[BOGR.cl$NumInflorescence_20220927 - floor(BOGR.cl$NumInflorescence_20220
 
 ## BOGR - DATA MODS ------------------------------------
 ## Add Source column where source name format matches Source in main data frame
-BOGR.SdZn$Source <- str_replace(BOGR.SdZn$..Code, "2-SOS", "")
+BOGR.SdZn$Source <- str_replace(BOGR.SdZn$Code, "2-SOS", "")
 BOGR.biovar$Source <- str_replace(BOGR.biovar$Pop, "2-SOS", "")
 BOGR.biovar$Source[16] <- str_replace(BOGR.biovar$Source[16], "BOGRNM-930", "BOGR-NM930")
 
@@ -133,19 +134,6 @@ BOGR.SdZn$SdZnColful[grepl("25 - 30 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = "
 BOGR.SdZn$SdZnColful[grepl("30 - 35 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = "orangered3"      #semi-arid, v.hot
 BOGR.SdZn$SdZnColful[grepl("5 - 10 Deg. F. / 12 - 30", BOGR.SdZn$seed_zone)] = "pink2"           #arid, cold
 
-
-
-#colfunc <- colorRampPalette(c("grey15","grey90"))
-#BOGR.SdZnCols <- colfunc(length(unique(BOGR.SdZn$seed_zone)))
-#BOGR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[1]    #semi-humid, cool
-#BOGR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[2]    #semi-humid, warm
-#BOGR.SdZn$SdZnCol[grepl("20 - 25 Deg. F. / 3 - 6", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[3]    #semi-humid, v.warm
-#BOGR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[4]   #semi-arid, cool
-#BOGR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[5]   #semi-arid, warm
-#BOGR.SdZn$SdZnCol[grepl("20 - 25 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[6]   #semi-arid, v.warm
-#BOGR.SdZn$SdZnCol[grepl("25 - 30 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[7]   #semi-arid, hot
-#BOGR.SdZn$SdZnCol[grepl("30 - 35 Deg. F. / 6 - 12", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[8]   #semi-arid, v.hot
-#BOGR.SdZn$SdZnCol[grepl("5 - 10 Deg. F. / 12 - 30", BOGR.SdZn$seed_zone)] = BOGR.SdZnCols[9]   #arid, cold
 
 ## 'Order'/color by latitude 
 #unique(BOGR.SdZn$Source)
@@ -360,8 +348,8 @@ legend("topleft", unique(BOGR.meds$SdZnAbbrev[order(BOGR.meds$SdZnOrder)]),
        col=unique(BOGR.meds$SdZnColful[order(BOGR.meds$SdZnOrder)]), cex=1.95, pch=19)
 
 ## Growth rate(s) ** Add time interval to growth rate calcs? **
-BOGR.meds <- BOGR.meds[order(BOGR.meds$Growth_MD),]
-boxplot(GrwthRate_Relative ~ BOGR.grrByMed, data=BOGR.cl, las=2,
+#BOGR.meds <- BOGR.meds[order(BOGR.meds$Growth_MD),]
+boxplot(GrwthRate_Relative ~ BOGR.htByMed, data=BOGR.cl, las=2,
         xlab="Population", ylab="Plant relative growth", cex.lab=1.25, names=BOGR.meds$PopAbbrev,
         cex.axis=0.7, main="Bouteloua gracilis", cex.main=1.5, col=BOGR.meds$SdZnColful)
 
@@ -376,14 +364,14 @@ boxplot(GrwthRate_Relative ~ BOGR.grrByMed, data=BOGR.cl, las=2,
 #        cex.axis=0.7, main="Bouteloua gracilis", cex.main=1.5, col=BOGR.SdZn$PopCol)
 
 ## Repro
-BOGR.meds <- BOGR.meds[order(BOGR.meds$Inf_MD),]
-boxplot(NumInf ~ BOGR.infByMed, data=BOGR.cl, las=2,
+#BOGR.meds <- BOGR.meds[order(BOGR.meds$Inf_MD),]
+boxplot(NumInf ~ BOGR.htByMed, data=BOGR.cl, las=2,
         xlab="Population", ylab="Number of inflorescences", cex.lab=1.25, names=BOGR.meds$PopAbbrev,
         cex.axis=0.7, main="Bouteloua gracilis", cex.main=1.5, col=BOGR.meds$SdZnColful)
 
 ## Phenology
-BOGR.meds <- BOGR.meds[order(BOGR.meds$DaysToFlwr_MD),]
-boxplot(DaysToFlwr ~ BOGR.dfByMed, data=BOGR.cl, las=2,
+#BOGR.meds <- BOGR.meds[order(BOGR.meds$DaysToFlwr_MD),]
+boxplot(DaysToFlwr ~ BOGR.htByMed, data=BOGR.cl, las=2,
         xlab="Population", ylab="Days to flower", cex.lab=1.25, names=BOGR.meds$PopAbbrev,
         cex.axis=0.7, main="Bouteloua gracilis", cex.main=1.5, col=BOGR.meds$SdZnColful)
 ## ---------------------------------------------------
@@ -395,30 +383,30 @@ boxplot(DaysToFlwr ~ BOGR.dfByMed, data=BOGR.cl, las=2,
 ## BOGR - ESTIMATE VARIATION B/W POPULATIONS -------------------------------------------------------------
 ## Use Emmeans ----------------
 ## Final size (height)
-BOGR.htMod <- lmer(Length_cm_20220801 ~ Source + (1|Block), data=BOGR.cl)
-BOGR.pair.ht <- emmeans(BOGR.htMod, specs = pairwise ~ Source)
+#BOGR.htMod <- lmer(Length_cm_20220801 ~ Source + (1|Block), data=BOGR.cl)
+#BOGR.pair.ht <- emmeans(BOGR.htMod, specs = pairwise ~ Source)
 #summary(BOGR.pair.ht)
-plot(BOGR.pair.ht)
+#plot(BOGR.pair.ht)
 
-BOGR.ht.pw <- as.data.frame(BOGR.pair.ht$contrasts)
-BOGR.ht.pwDiffs <- BOGR.ht.pw$estimate
-max(BOGR.ht.pwDiffs) 
+#BOGR.ht.pw <- as.data.frame(BOGR.pair.ht$contrasts)
+#BOGR.ht.pwDiffs <- BOGR.ht.pw$estimate
+#max(BOGR.ht.pwDiffs) 
 
 
 ## Plant growth
-BOGR.grMod <- lmer(GrwthRate_Relative ~ Source + (1|Block), data=BOGR.cl)
-BOGR.pair.gr <- emmeans(BOGR.grMod, specs = pairwise ~ Source)
+#BOGR.grMod <- lmer(GrwthRate_Relative ~ Source + (1|Block), data=BOGR.cl)
+#BOGR.pair.gr <- emmeans(BOGR.grMod, specs = pairwise ~ Source)
 #summary(BOGR.gr.em)
-plot(BOGR.pair.gr)
+#plot(BOGR.pair.gr)
 
-BOGR.gr.means <- as.data.frame(BOGR.pair.gr$emmeans)
-BOGR.gr.meanEsts <- BOGR.gr.means$emmean
-max(BOGR.gr.meanEsts)
-min(BOGR.gr.meanEsts)
+#BOGR.gr.means <- as.data.frame(BOGR.pair.gr$emmeans)
+#BOGR.gr.meanEsts <- BOGR.gr.means$emmean
+#max(BOGR.gr.meanEsts)
+#min(BOGR.gr.meanEsts)
 
-BOGR.gr.pw <- as.data.frame(BOGR.pair.gr$contrasts)
-BOGR.gr.pwDiffs <- exp(BOGR.gr.pw$estimate)
-max(BOGR.gr.pwDiffs)
+#BOGR.gr.pw <- as.data.frame(BOGR.pair.gr$contrasts)
+#BOGR.gr.pwDiffs <- exp(BOGR.gr.pw$estimate)
+#max(BOGR.gr.pwDiffs)
 ## ----------------------
 
 
@@ -433,28 +421,6 @@ Anova(BOGR.survMod) #No support for Source in Surv model
 BOGR.infMod <- glmer(NumInf ~ Source + (1|Block), data= BOGR.cl, family=poisson (link="log"))
 Anova(BOGR.infMod) #Support for Source in Inf model
 ## ----------------------
-
-## Use PCA -----------------
-## Look at clustering of individuals & if there is grouping by pop
-BOGR.traits <- BOGR.cl %>% dplyr::select(c("SdZnColful","PopCol","Source","Length_cm_20220801","DaysToFlwr",
-                                           "GrwthRate_Relative","NumInf"))
-#BOGR.traitsCen <- scale(BOGR.traits[,4:ncol(BOGR.traits)], center=TRUE, scale=TRUE)
-#BOGR.traitsComb <- cbind(BOGR.traits[,1:2], BOGR.traitsCen)
-BOGR.traits.noNA <- na.omit(BOGR.traits)
-#BOGR.pcaPops <- prcomp(BOGR.traitsComb.noNA[,3:ncol(BOGR.traitsComb.noNA)]) #b/c of NAs there are fewer indivs w/ data for all traits. Figure out how to deal with NAs
-BOGR.pcaPops <- prcomp(BOGR.traits.noNA[4:ncol(BOGR.traits.noNA)], scale=TRUE) 
-biplot(BOGR.pcaPops, pch=19)
-plot(x=BOGR.pcaPops$x[,1], y=BOGR.pcaPops$x[,2],col=BOGR.traits.noNA$SdZnColful, pch=19, cex=0.8)
-plot(x=BOGR.pcaPops$x[,2], y=BOGR.pcaPops$x[,3],col=BOGR.traits.noNA$SdZnColful, pch=19, cex=0.8)
-plot(x=BOGR.pcaPops$x[,3], y=BOGR.pcaPops$x[,4],col=BOGR.traits.noNA$SdZnColful, pch=19, cex=0.8)
-
-## Look at scree plot
-BOGR.pcaPops$sdev[1]**2/sum(BOGR.pcaPops$sdev**2) #variation explained by PC1
-BOGR.pcaPops$sdev^2/sum(BOGR.pcaPops$sdev^2)
-barplot(BOGR.pcaPops$sdev[1:11]**2/sum(BOGR.pcaPops$sdev**2))
-
-## Look at loadings
-BOGR.pcaPops$rotation
 ## ---------------------------------------------------------------------------------------------------
 
 
@@ -541,58 +507,53 @@ BOGR.gr.sd <- BOGR.cl %>% group_by(Source) %>% dplyr::summarise(Growth_SD=sd(Grw
 BOGR.df.sd <- BOGR.cl %>% group_by(Source) %>% dplyr::summarise(DaysToFlwr_SD=sd(DaysToFlwr, na.rm=TRUE))
 BOGR.inf.sd <- BOGR.cl %>% group_by(Source) %>% dplyr::summarise(Inf_SD=sd(NumInf, na.rm=TRUE))
 
-plot(BOGR.ht.sd$Height_SD, BOGR.ht.mn$Height_MN, pch=19, col=BOGR.SdZn$PopCol, cex=1.3)
-plot(BOGR.gr.sd$Growth_SD, BOGR.gr.mn$Growth_MN, pch=19, col=BOGR.SdZn$PopCol, cex=1.2)
-plot(BOGR.df.sd$DaysToFlwr_SD, BOGR.df.mn$DaysToFlwr_MN, pch=19, col=BOGR.SdZn$PopCol, cex=1.2)
-plot(BOGR.inf.sd$Inf_SD, BOGR.inf.mn$Inf_MN, pch=19,col=BOGR.SdZn$PopCol, cex=1.1)
+plot(BOGR.ht.sd$Height_SD, BOGR.ht.mn$Height_MN, pch=19, col=BOGR.SdZn$SdZnColful, cex=1.3)
+plot(BOGR.gr.sd$Growth_SD, BOGR.gr.mn$Growth_MN, pch=19, col=BOGR.SdZn$SdZnColful, cex=1.2)
+plot(BOGR.df.sd$DaysToFlwr_SD, BOGR.df.mn$DaysToFlwr_MN, pch=19, col=BOGR.SdZn$SdZnColful, cex=1.2)
+plot(BOGR.inf.sd$Inf_SD, BOGR.inf.mn$Inf_MN, pch=19,col=BOGR.SdZn$SdZnColful, cex=1.1)
 ## ----------------------------------------------------------
 
+
+## BOGR - LOOK AT CORRELATION BETWEEN TRAITS ----------------------------------------------
+par(mfrow=c(3,2))
+plot(BOGR.ht.mn$Height_MN, BOGR.gr.mn$Growth_MN, pch=19, col="black", cex=1.3,
+     xlab="Mean plant height", ylab="Mean relative growth rate", cex.lab=1.2)
+plot(BOGR.ht.mn$Height_MN, BOGR.df.mn$DaysToFlwr_MN, pch=19, col="black", cex=1.3,
+     xlab="Mean plant height", ylab="Mean days to first flower", cex.lab=1.2)
+plot(BOGR.ht.mn$Height_MN, BOGR.inf.mn$Inf_MN, pch=19, col="black", cex=1.3,
+     xlab="Mean plant height", ylab="Mean number of inflorescences", cex.lab=1.2)
+plot(BOGR.df.mn$DaysToFlwr_MN, BOGR.gr.mn$Growth_MN, pch=19, col="black", cex=1.3,
+     xlab="Mean days to first flower", ylab="Mean relative growth rate", cex.lab=1.2)
+plot(BOGR.inf.mn$Inf_MN, BOGR.gr.mn$Growth_MN, pch=19, col="black", cex=1.3,
+     xlab="Mean number of inflorescences", ylab="Mean relative growth rate", cex.lab=1.2)
+plot(BOGR.inf.mn$Inf_MN, BOGR.df.mn$DaysToFlwr_MN, pch=19, col="black", cex=1.3,
+     xlab="Mean number of inflorescences", ylab="Mean days to first flower", cex.lab=1.2)
+## ----------------------------------------------------------------------------------------
 
 
 
 
 ## BOGR - EVALUATE RELATIONSHIPS B/W TRAITS AND SOURCE CLIMATE -------------------------------------------
 ## 19 Bio-climate variables 
-
-## Look at correlations b/w climate variables ------------------------------------------------------------
-cor.mat <- cor(BOGR.biovar[,2:20], method="pearson")
-corrplot(cor.mat)
-#chart.Correlation(cor.mat, histogram=TRUE, method="pearson")
-
-cor.p.mats <- rcorr(as.matrix(BOGR.biovar[,2:20]), type="pearson")
-##Function to re-format the output (from http://www.sthda.com/english/wiki/...)
-flattenCorrMatrix <- function(cormat, pmat) {
-  ut <- upper.tri(cormat)
-  data.frame(row=rownames(cormat)[row(cormat)[ut]],
-             column=rownames(cormat)[col(cormat)[ut]],
-             cor=(cormat)[ut], p=pmat[ut]) }
- 
-cor.p.tbl <- flattenCorrMatrix(cor.p.mats$r, cor.p.mats$P)
-cor.80 <- cor.p.tbl[cor.p.tbl$cor>0.8 | cor.p.tbl$cor<(-0.8),] #Filter by correlations > 80%
-cor.80 <- cor.80[order(cor.80$row, cor.80$column),] #Use to decide which vars include in models?
-## List of variables to include in model if excluding vars that are > 80% correlated
-#bio1,bio2,bio3,bio5,bio8,bio12,bio13,bio14,bio15,bio17
-#Exclude: bio4,bio6,bio7,bio9,bio10,bio11,bio16,bio18,bio19
-
 ## Models
 #BOGR.ht.mod <- lmer(Length_cm_20220801 ~ Latitude.x + Longitude.x + (1|Block), data=BOGR.cl)
 #Anova(BOGR.ht.mod)
 #plot(allEffects(BOGR.ht.mod))
 #plot(predictorEffects(BOGR.ht.mod))
 
-BOGR.ht.bv.mod <- lmer(Length_cm_20220801 ~ scale(bio1) + scale(bio2) + scale(bio3) + scale(bio5)
-                       + scale(bio8) + scale(bio12) + scale(bio13) + scale(bio14) + scale(bio15)
-                       + scale(bio17) + (1|Block), data=BOGR.cl)
-Anova(BOGR.ht.bv.mod)
-plot(allEffects(BOGR.ht.bv.mod))
-plot(predictorEffects(BOGR.ht.bv.mod))
+#BOGR.ht.bv.mod <- lmer(Length_cm_20220801 ~ scale(bio1) + scale(bio2) + scale(bio3) + scale(bio5)
+#                       + scale(bio8) + scale(bio12) + scale(bio13) + scale(bio14) + scale(bio15)
+#                       + scale(bio17) + (1|Block), data=BOGR.cl)
+#Anova(BOGR.ht.bv.mod)
+#plot(allEffects(BOGR.ht.bv.mod))
+#plot(predictorEffects(BOGR.ht.bv.mod))
 
-BOGR.inf.bv.mod <- glmer(NumInf ~ scale(bio1) + scale(bio2) + scale(bio3) + scale(bio5)
-                       + scale(bio8) + scale(bio12) + scale(bio13) + scale(bio14) + scale(bio15)
-                       + scale(bio17) + (1|Block), data=BOGR.cl, family=poisson(link="log"))
-Anova(BOGR.inf.bv.mod)
-plot(allEffects(BOGR.inf.bv.mod))
-plot(predictorEffects(BOGR.inf.bv.mod))
+#BOGR.inf.bv.mod <- glmer(NumInf ~ scale(bio1) + scale(bio2) + scale(bio3) + scale(bio5)
+#                       + scale(bio8) + scale(bio12) + scale(bio13) + scale(bio14) + scale(bio15)
+#                       + scale(bio17) + (1|Block), data=BOGR.cl, family=poisson(link="log"))
+#Anova(BOGR.inf.bv.mod)
+#plot(allEffects(BOGR.inf.bv.mod))
+#plot(predictorEffects(BOGR.inf.bv.mod))
 
 ## ** Pick different model form? **
 #BOGR.df.bv.mod <- lmer(log(DaysToFlwr) ~ scale(bio1) + scale(bio2) + scale(bio3) + scale(bio5)
@@ -604,18 +565,17 @@ plot(predictorEffects(BOGR.inf.bv.mod))
 ## --------------------------------------------------------------
 
 
-## ALTERNATIVELY - Look at PCA of 19 variables to reduce number of predictors -------------------
+## Look at PCA of 19 bioclim variables to reduce number of predictors -------------------
 BOGR.biovar <- left_join(BOGR.biovar, BOGR.SdZn, by="Source")
 
 #BOGR.biovarCen <- scale(BOGR.biovar[,2:20], center=TRUE, scale=TRUE)
 #BOGR.biovarComb <- as.data.frame(cbind(BOGR.biovar[,21],BOGR.biovarCen))
 BOGR.pcaBiovar <- prcomp(BOGR.biovar[,2:20], scale=TRUE)
 par(pty="s")
+par(mfrow=c(1,1))
 plot(x=BOGR.pcaBiovar$x[,1], y=BOGR.pcaBiovar$x[,2], pch=19, cex=1.4, col=BOGR.biovar$SdZnColful)
 plot(x=BOGR.pcaBiovar$x[,2], y=BOGR.pcaBiovar$x[,3], pch=19, cex=1.4, col=BOGR.biovar$SdZnColful)
 plot(x=BOGR.pcaBiovar$x[,3], y=BOGR.pcaBiovar$x[,4], pch=19, cex=1.4, col=BOGR.biovar$SdZnColful)
-plot(x=BOGR.pcaBiovar$x[,4], y=BOGR.pcaBiovar$x[,5], pch=19, cex=1.4, col=BOGR.biovar$SdZnColful)
-plot(x=BOGR.pcaBiovar$x[,5], y=BOGR.pcaBiovar$x[,6], pch=19, cex=1.4, col=BOGR.biovar$SdZnColful)
 
 ## Look at scree plot
 BOGR.pcaBiovar$sdev[1]**2/sum(BOGR.pcaBiovar$sdev**2)
@@ -625,42 +585,33 @@ sum(BOGR.pcaBV.varExpl[1:3]) #top 6 PC axes explain over 98% of variation
 
 ## Add arrows on PCA plot and look at loadings 
 biplot(BOGR.pcaBiovar)
-BOGR.pcaBiovar$rotation
+BOGR.pcaBiovar$rotation #loadings
 #BOGR.pc1 <- BOGR.pcaBiovar$rotation[,1][order(BOGR.pcaBiovar$rotation[,1])]
 #BOGR.pc2 <- BOGR.pcaBiovar$rotation[,2][order(BOGR.pcaBiovar$rotation[,2])]
-
-## Use a cumulative loading score to select biovars to include  
-BOGR.ldSum <- rowSums(abs(BOGR.pcaBiovar$rotation[,1:3]))
-BOGR.ldSum <- BOGR.ldSum[order(BOGR.ldSum)]
 ## ----------------------------------------
 
 
 ## Models
-## Using PC axis values
-#BOGR.pcs <-as.data.frame(cbind(BOGR.biovar$Source, BOGR.pcaBiovar$x))
-#colnames(BOGR.pcs) <- c("Source", colnames(BOGR.pcs[2:ncol(BOGR.pcs)]))
-#BOGR.cl <- left_join(BOGR.cl, BOGR.pcs[1:5], by="Source") #Add PC1-PC4
-#BOGR.cl$PC1 <- as.numeric(BOGR.cl$PC1)
-#BOGR.cl$PC2 <- as.numeric(BOGR.cl$PC2)
-#BOGR.cl$PC3 <- as.numeric(BOGR.cl$PC3)
-#BOGR.cl$PC4 <- as.numeric(BOGR.cl$PC4)
-
-#BOGR.ht.pc.mod <- lmer(Length_cm_20220801 ~ PC1 + PC2 + PC3 + PC4 + (1|Block), data=BOGR.cl)
-#Anova(BOGR.ht.pc.mod)
-#plot(allEffects(BOGR.ht.pc.mod))
-#plot(predictorEffects(BOGR.ht.pc.mod))
-
 ## Use 'top' biovars as determined by PCA
+## The following bioclim vars selected due to high loadings in orthogonal directions along PC1 and PC2 
+##BIO4, BIO5, BIO11, BIO12, BIO17
+
+BOGR.ht.bv.mod <- lmer(Length_cm_20220801 ~ scale(bio4) + scale(bio5) + scale(bio11) + scale(bio12) + scale(bio17)
+                         + (1|Block), data=BOGR.cl)
+Anova(BOGR.ht.bv.mod)
+plot(allEffects(BOGR.ht.bv.mod))
+plot(predictorEffects(BOGR.ht.bv.mod))
  
-BOGR.inf.bv.mod <- glmer(NumInf ~ scale(bio2) + scale(bio8) + scale(bio14) + scale(bio19)
+
+BOGR.inf.bv.mod <- glmer(NumInf ~ scale(bio4) + scale(bio5) + scale(bio11) + scale(bio12) + scale(bio17)
                          + (1|Block), data=BOGR.cl, family=poisson(link="log"))
 Anova(BOGR.inf.bv.mod)
 plot(allEffects(BOGR.inf.bv.mod))
 plot(predictorEffects(BOGR.inf.bv.mod))
 
-## ** Pick different model form? Negative binomial? **
-hist(BOGR.cl$DaysToFlwr)
-BOGR.df.bv.mod <- lmer(log(DaysToFlwr) ~ scale(bio2) + scale(bio8) + scale(bio14) + scale(bio19)
+## Is negative binomial an appropriate model form?
+hist(log(BOGR.cl$DaysToFlwr))
+BOGR.df.bv.mod <- glmer.nb(DaysToFlwr ~ scale(bio4) + scale(bio5) + scale(bio11) + scale(bio12) + scale(bio17)
                        + (1|Block), data=BOGR.cl)
 Anova(BOGR.df.bv.mod)
 plot(allEffects(BOGR.df.bv.mod))
@@ -669,12 +620,12 @@ plot(predictorEffects(BOGR.df.bv.mod))
 
 
 ## Visualize raw data relationships with bioclimate vars
-plot(BOGR.cl$Length_cm_20220801 ~ BOGR.cl$bio2)
-plot(BOGR.cl$NumInf ~ BOGR.cl$bio2)
-plot(BOGR.cl$DaysToFlwr ~ BOGR.cl$bio8)
-plot(BOGR.cl$NumInf ~ BOGR.cl$bio14)
-plot(BOGR.cl$DaysToFlwr ~ BOGR.cl$bio19)
-plot(BOGR.cl$NumInf ~ BOGR.cl$bio8)
+plot(BOGR.cl$Length_cm_20220801 ~ BOGR.cl$bio17)
+plot(BOGR.cl$Length_cm_20220801 ~ BOGR.cl$bio5)
+plot(BOGR.cl$NumInf ~ BOGR.cl$bio5)
+plot(BOGR.cl$NumInf ~ BOGR.cl$bio11)
+plot(BOGR.cl$NumInf ~ BOGR.cl$bio4)
+plot(BOGR.cl$DaysToFlwr ~ BOGR.cl$bio11)
 
 
 ## Calculate trait means
@@ -683,30 +634,34 @@ BOGR.summ <- BOGR.cl %>% group_by(Source) %>%
                    Height_MN=mean(Length_cm_20220801, na.rm=TRUE), Height_SE=calcSE(Length_cm_20220801),
                    Inf_MN=mean(NumInf, na.rm=TRUE), Inf_SE=calcSE(NumInf), 
                    Growth_MN=mean(GrwthRate_Relative, na.rm=TRUE), Growth_SE=calcSE(GrwthRate_Relative), 
-                   BIO1=mean(bio1, na.rm=TRUE),BIO2=mean(bio2, na.rm=TRUE),BIO3=mean(bio3, na.rm=TRUE),BIO4=mean(bio4, na.rm=TRUE), 
-                   BIO5=mean(bio5, na.rm=TRUE),BIO6=mean(bio6, na.rm=TRUE),BIO7=mean(bio7, na.rm=TRUE),BIO8=mean(bio8, na.rm=TRUE), 
-                   BIO9=mean(bio9, na.rm=TRUE),BIO10=mean(bio10, na.rm=TRUE),BIO11=mean(bio11, na.rm=TRUE),BIO12=mean(bio12, na.rm=TRUE),
-                   BIO13=mean(bio13, na.rm=TRUE),BIO14=mean(bio14, na.rm=TRUE),BIO15=mean(bio15, na.rm=TRUE),BIO16=mean(bio16, na.rm=TRUE),
-                   BIO17=mean(bio17, na.rm=TRUE),BIO18=mean(bio18, na.rm=TRUE),BIO19=mean(bio19, na.rm=TRUE))
+                   BIO4=mean(bio4, na.rm=TRUE), BIO5=mean(bio5, na.rm=TRUE),BIO11=mean(bio11, na.rm=TRUE),
+                   BIO12=mean(bio12, na.rm=TRUE), BIO17=mean(bio17, na.rm=TRUE))
 BOGR.summ <- left_join(BOGR.summ, BOGR.SdZn, by="Source")
 
-#par(mfrow=c(2,2))
 #Loop over columns with biovars
-for (bb in 10:28) { 
-  plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Height_MN, col=BOGR.summ$PopCol, pch=19, cex=1.2, main="B. gracilis", 
+colnames(BOGR.summ)
+par(mfrow=c(3,2))
+par(mar=c(1,1,1,1))
+for (bb in 10:14) { 
+  plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Height_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.2, main="B. gracilis", 
      cex.main=1.5, xlab=colnames(BOGR.summ[bb]), ylab="Height (cm)", cex.lab=1.5, cex.axis=1.1)
   arrows(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Height_MN-BOGR.summ$Height_SE, as.vector(t(BOGR.summ[,bb])), 
          BOGR.summ$Height_MN+BOGR.summ$Height_SE, 
-         angle=90, col=BOGR.summ$PopCol, code=3, length=0, lwd=1.6) }
+         angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) }
+plot.new()
+legend("center", unique(BOGR.meds$SdZnAbbrev[order(BOGR.meds$SdZnOrder)]), 
+       col=unique(BOGR.meds$SdZnColful[order(BOGR.meds$SdZnOrder)]), cex=0.95, pch=19)
 
-for (bb in 10:28) { 
-  plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Growth_MN, col=BOGR.summ$PopCol, pch=19, cex=1.2, main="B. gracilis", 
-       cex.main=1.5, xlab=colnames(BOGR.summ[bb]), ylab="Relative plant growth", cex.lab=1.5, cex.axis=1.1)
-  arrows(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Growth_MN-BOGR.summ$Growth_SE, as.vector(t(BOGR.summ[,bb])), 
-         BOGR.summ$Growth_MN+BOGR.summ$Growth_SE, 
-         angle=90, col=BOGR.summ$PopCol, code=3, length=0, lwd=1.6) }
 
-for (bb in 10:28) { 
+#for (bb in 10:14) { 
+#  plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Growth_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.2, main="B. gracilis", 
+#       cex.main=1.5, xlab=colnames(BOGR.summ[bb]), ylab="Relative plant growth", cex.lab=1.5, cex.axis=1.1)
+#  arrows(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Growth_MN-BOGR.summ$Growth_SE, as.vector(t(BOGR.summ[,bb])), 
+#         BOGR.summ$Growth_MN+BOGR.summ$Growth_SE, 
+#         angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) }
+
+
+for (bb in 10:14) { 
   plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Inf_MN, col=BOGR.summ$PopCol, pch=19, cex=1.2, main="B. gracilis", 
        cex.main=1.5, xlab=colnames(BOGR.summ[bb]), ylab="Number of inflorescences", cex.lab=1.5, cex.axis=1.1)
   arrows(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Inf_MN-BOGR.summ$Inf_SE, as.vector(t(BOGR.summ[,bb])), 
@@ -726,100 +681,6 @@ for (bb in 10:28) {
 #       angle=90, col=BOGR.summ$SdZnCol, code=3, length=0, lwd=1.5)
 ## ---------------------------------------------------------------------------------------------------
 ## ---------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-## ESTIMATE VARIATION WITHIN POPULATIONS -------------------------------------------------------------
-## BOGR ----------------
-## Final size (height)
-## Look at mean and var of CV across blocks for each source
-BOGR.ht.cv <- NULL
-
-for (vv in 1:10) {
-  dat.b <- subset(BOGR, BOGR$Block==vv)
-  BOGR.ht.cv <- rbind(BOGR.ht.cv, dat.b %>% group_by(Source) %>%
-                        summarise(Height_CV=cv(Length_cm_20220801, na.rm=TRUE)))
-}
-
-## Test for significance in CV differences
-BOGR.ht.CV.aov <- aov(Height_CV ~ Source, data=BOGR.ht.cv)
-summary(BOGR.ht.CV.aov)
-
-## Boxplot
-boxplot(Height_CV ~ Source, data=BOGR.ht.cv,
-        xlab="Population", ylab="CV in plant height", cex.lab=1.5,
-        names=c("B.AZ1","B.AZ2","B.AZ3","B.AZ4","B.AZ5","B.CO1","B.CO2","B.CO3", "B.CO4","B.CO5",
-                "B.CO6","B.NM1", "B.NM2", "B.NM3", "B.NM4", "B.NM5", "B.UT1", "B.UT2","B.WY1",
-                "B.WY2", "B.WY3"), cex.axis=0.7,
-        main="Bouteloua gracilis", cex.main=1.5, col="lightcyan")
-
-## Barplot
-BOGR.ht.mn.se <- BOGR.ht.cv %>% group_by(Source) %>%
-                 summarise(MN=mean(Height_CV, na.rm=TRUE), SE=calcSE(Height_CV))
-
-plotCI(barplot(BOGR.ht.mn.se$MN, col="lightcyan", ylab="CV in plant height", xlab="Population",
-               names=c("B.AZ1","B.AZ2","B.AZ3","B.AZ4","B.AZ5","B.CO1","B.CO2","B.CO3", "B.CO4","B.CO5",
-                       "B.CO6","B.NM1", "B.NM2", "B.NM3", "B.NM4", "B.NM5", "B.UT1", "B.UT2","B.WY1", "B.WY2", "B.WY3"), 
-               cex.names=0.7, ylim=c(0,0.7), cex.lab=1.4, main="Bouteloua gracilis", cex.main=1.5),
-               BOGR.ht.mn.se$MN, uiw=BOGR.ht.mn.se$SE, add=TRUE, pch=NA, sfrac=0)
-
-
-## Plant growth    
-## Look at mean and var of CV across blocks for each source
-BOGR.gr.cv <- NULL
-
-for (vv in 1:10) {
-  dat.b <- subset(BOGR, BOGR$Block==vv)
-  BOGR.gr.cv <- rbind(BOGR.gr.cv, dat.b %>% group_by(Source) %>%
-                        summarise(Growth_CV=cv(Length_cm_20220801/Length_cm_20220627, na.rm=TRUE)))
-}
-
-## Test for significance in CV differences
-BOGR.gr.CV.aov <- aov(Growth_CV ~ Source, data=BOGR.gr.cv)
-summary(BOGR.gr.CV.aov)
-
-## Boxplot
-boxplot(Growth_CV ~ Source, data=BOGR.gr.cv,
-        xlab="Population", ylab="CV in plant growth", cex.lab=1.5,
-        names=c("B.AZ1","B.AZ2","B.AZ3","B.AZ4","B.AZ5","B.CO1","B.CO2","B.CO3", "B.CO4","B.CO5",
-                "B.CO6","B.NM1", "B.NM2", "B.NM3", "B.NM4", "B.NM5", "B.UT1", "B.UT2","B.WY1",
-                "B.WY2", "B.WY3"), cex.axis=0.7,
-        main="Bouteloua gracilis", cex.main=1.5, col="lightcyan")
-
-## Barplot
-BOGR.gr.mn.se <- BOGR.gr.cv %>% group_by(Source) %>%
-            summarise(MN=mean(Growth_CV, na.rm=TRUE), SE=calcSE(Growth_CV))
-
-plotCI(barplot(BOGR.gr.mn.se$MN, col="lightcyan", ylab="CV in plant growth", xlab="Population",
-        names=c("B.AZ1","B.AZ2","B.AZ3","B.AZ4","B.AZ5","B.CO1","B.CO2","B.CO3", "B.CO4","B.CO5",
-                "B.CO6","B.NM1", "B.NM2", "B.NM3", "B.NM4", "B.NM5", "B.UT1", "B.UT2","B.WY1", "B.WY2", "B.WY3"), 
-        cex.names=0.7, ylim=c(0,0.56), cex.lab=1.4, main="Bouteloua gracilis", cex.main=1.5),
-       BOGR.gr.mn.se$MN, uiw=BOGR.gr.mn.se$SE, add=TRUE, pch=NA, sfrac=0)
-## -------------------------------------------------------------------------------
-
-
-
-
-## EMMEANS 
-BOGR.ht.em <- readRDS("20230318_BOGRhtPw.rds")
-BOGR.ht.pw <- as.data.frame(BOGR.ht.em$contrasts)
-BOGR.ht.pw$Pop1 <- gsub("\\ - .+?\\)", "", BOGR.ht.pw$contrast)
-BOGR.ht.pw$Pop2 <- gsub("\\(.+?\\ - ", "", BOGR.ht.pw$contrast)
-BOGR.ht.pw.pvals <- BOGR.ht.pw %>% dplyr::select(Pop1,Pop2, p.value)
-BOGR.ht.pw.pvals <- as.matrix(acast(BOGR.ht.pw.pvals, Pop1~Pop2))
-heatmap.2(BOGR.ht.pw.pvals, dendrogram="none", cexRow=0.7, cexCol=0.7)
-## -------------------------------------------------------------------------------
-
-
-
 
 
 

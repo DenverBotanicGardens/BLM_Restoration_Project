@@ -287,5 +287,5 @@ plot(ERNA.gr.sd$Growth_SD, ERNA.gr.mn$Growth_MN, pch=19, col="black", cex=1.3,
 ## ERNA - LOOK AT CORRELATION BETWEEN TRAITS ----------------------------------------------
 par(mfrow=c(1,1))
 plot(ERNA.ht.mn$Height_MN, ERNA.gr.mn$Growth_MN, pch=19, col="black", cex=1.3,
-     xlab="Mean plant height", ylab="Mean relative growth rate")
+     xlab="Mean plant height", ylab="Mean relative growth rate", cex.lab=1.2)
 ## ----------------------------------------------------------------------------------------
