@@ -737,19 +737,6 @@ for (bb in 10:28) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## ESTIMATE VARIATION WITHIN POPULATIONS -------------------------------------------------------------
 ## BOGR ----------------
 ## Final size (height)

@@ -263,3 +263,29 @@ legend("center", unique(ERNA.meds$seed_zone[order(ERNA.meds$SdZnOrder, decreasin
 ## ---------------------------------------------------
 
 
+
+
+## ERNA - LOOK AT RELATIONSHIP BETWEEN TRAIT VAR AND AVERAGE ---------------------------
+par(mfrow=c(1,2))
+
+ERNA.ht.mn <- ERNA.cl %>% group_by(Source) %>% dplyr::summarise(Height_MN=mean(Length_cm_20220915, na.rm=TRUE))
+ERNA.gr.mn <- ERNA.cl %>% group_by(Source) %>% dplyr::summarise(Growth_MN=mean(GrwthRate_Relative, na.rm=TRUE))
+
+ERNA.ht.sd <- ERNA.cl %>% group_by(Source) %>% dplyr::summarise(Height_SD=sd(Length_cm_20220915, na.rm=TRUE))
+ERNA.gr.sd <- ERNA.cl %>% group_by(Source) %>% dplyr::summarise(Growth_SD=sd(GrwthRate_Relative, na.rm=TRUE))
+
+plot(ERNA.ht.sd$Height_SD, ERNA.ht.mn$Height_MN, pch=19, col="black", cex=1.3, 
+     xlab="Standard deviation of plant height", ylab="Mean plant height")
+plot(ERNA.gr.sd$Growth_SD, ERNA.gr.mn$Growth_MN, pch=19, col="black", cex=1.3,
+     xlab="Standard deviation of relative growth rate", ylab="Mean relative growth rate")
+## ----------------------------------------------------------------------------------------
+
+
+
+
+
+## ERNA - LOOK AT CORRELATION BETWEEN TRAITS ----------------------------------------------
+par(mfrow=c(1,1))
+plot(ERNA.ht.mn$Height_MN, ERNA.gr.mn$Growth_MN, pch=19, col="black", cex=1.3,
+     xlab="Mean plant height", ylab="Mean relative growth rate")
+## ----------------------------------------------------------------------------------------
