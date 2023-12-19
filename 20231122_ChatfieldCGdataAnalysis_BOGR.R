@@ -640,17 +640,18 @@ BOGR.summ <- left_join(BOGR.summ, BOGR.SdZn, by="Source")
 
 #Loop over columns with biovars
 colnames(BOGR.summ)
+par(pty="m")
 par(mfrow=c(3,2))
-par(mar=c(1,1,1,1))
+par(mar=c(4,4.7,2.5,3))
 for (bb in 10:14) { 
-  plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Height_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.2, main="B. gracilis", 
+  plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Height_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
      cex.main=1.5, xlab=colnames(BOGR.summ[bb]), ylab="Height (cm)", cex.lab=1.5, cex.axis=1.1)
   arrows(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Height_MN-BOGR.summ$Height_SE, as.vector(t(BOGR.summ[,bb])), 
          BOGR.summ$Height_MN+BOGR.summ$Height_SE, 
          angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) }
 plot.new()
 legend("center", unique(BOGR.meds$SdZnAbbrev[order(BOGR.meds$SdZnOrder)]), 
-       col=unique(BOGR.meds$SdZnColful[order(BOGR.meds$SdZnOrder)]), cex=0.95, pch=19)
+       col=unique(BOGR.meds$SdZnColful[order(BOGR.meds$SdZnOrder)]), cex=1.35, pch=19)
 
 
 #for (bb in 10:14) { 
@@ -662,23 +663,23 @@ legend("center", unique(BOGR.meds$SdZnAbbrev[order(BOGR.meds$SdZnOrder)]),
 
 
 for (bb in 10:14) { 
-  plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Inf_MN, col=BOGR.summ$PopCol, pch=19, cex=1.2, main="B. gracilis", 
+  plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Inf_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.2, main="B. gracilis", 
        cex.main=1.5, xlab=colnames(BOGR.summ[bb]), ylab="Number of inflorescences", cex.lab=1.5, cex.axis=1.1)
   arrows(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Inf_MN-BOGR.summ$Inf_SE, as.vector(t(BOGR.summ[,bb])), 
          BOGR.summ$Inf_MN+BOGR.summ$Inf_SE, 
-         angle=90, col=BOGR.summ$PopCol, code=3, length=0, lwd=1.6) }
+         angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) }
 
-for (bb in 10:28) { 
-  plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$PopCol, pch=19, cex=1.2, main="B. gracilis", 
+for (bb in 10:14) { 
+  plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.2, main="B. gracilis", 
        cex.main=1.5, xlab=colnames(BOGR.summ[bb]), ylab="Days until first flower", cex.lab=1.5, cex.axis=1.1)
   arrows(as.vector(t(BOGR.summ[,bb])), BOGR.summ$DaysToFlwr_MN-BOGR.summ$DaysToFlwr_SE, as.vector(t(BOGR.summ[,bb])), 
          BOGR.summ$DaysToFlwr_MN+BOGR.summ$DaysToFlwr_SE, 
-         angle=90, col=BOGR.summ$PopCol, code=3, length=0, lwd=1.6) }
+         angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) }
 
-#plot(BOGR.summ$Latitude, BOGR.summ$Height_MN, col=BOGR.summ$SdZnCol, pch=19, cex=1.25, main="",
-#     cex.main=1.5, xlab="Latitude", ylab="Plant Height (cm)", cex.lab=1.5, cex.axis=1.1)
-#arrows(BOGR.summ$Latitude, BOGR.summ$Height_MN-BOGR.summ$Height_SE, BOGR.summ$Latitude, BOGRsumm$Height_MN+BOGR.summ$Height_SE,
-#       angle=90, col=BOGR.summ$SdZnCol, code=3, length=0, lwd=1.5)
+test <- as.data.frame(predictorEffects(BOGR.df.bv.mod)[2])
+line(test$bio5[,1],test$bio5[,2])
+test17 <- as.data.frame(predictorEffects(BOGR.df.bv.mod)[5])
+lines(test17$bio17[,1],test17$bio17[,2])
 ## ---------------------------------------------------------------------------------------------------
 ## ---------------------------------------------------------------------------------------------------
 
