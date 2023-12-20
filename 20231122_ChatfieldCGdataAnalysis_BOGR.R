@@ -596,6 +596,9 @@ BOGR.pcaBiovar$rotation #loadings
 ## The following bioclim vars selected due to high loadings in orthogonal directions along PC1 and PC2 
 ##BIO4, BIO5, BIO11, BIO12, BIO17
 
+bv.names <- c("Temperature seasonality","Max temp of warmest month","Mean temp of coldest quarter",
+              "Annual precipitation","Precipitation of direst quarter")
+
 BOGR.ht.bv.mod <- lmer(Length_cm_20220801 ~ scale(bio4) + scale(bio5) + scale(bio11) + scale(bio12) + scale(bio17)
                          + (1|Block), data=BOGR.cl)
 Anova(BOGR.ht.bv.mod)
@@ -603,11 +606,17 @@ plot(allEffects(BOGR.ht.bv.mod))
 plot(predictorEffects(BOGR.ht.bv.mod))
  
 
-BOGR.inf.bv.mod <- glmer(NumInf ~ scale(bio4) + scale(bio5) + scale(bio11) + scale(bio12) + scale(bio17)
-                         + (1|Block), data=BOGR.cl, family=poisson(link="log"))
+#Select model form for growth **
+
+
+#BOGR.inf.bv.mod <- glmer(NumInf ~ scale(bio4) + scale(bio5) + scale(bio11) + scale(bio12) + scale(bio17)
+#                         + (1|Block), data=BOGR.cl, family=poisson(link="log"))
+BOGR.inf.bv.mod <- glmer.nb(NumInf ~ scale(bio4) + scale(bio5) + scale(bio11) + scale(bio12) + scale(bio17)
+                         + (1|Block), data=BOGR.cl)
 Anova(BOGR.inf.bv.mod)
 plot(allEffects(BOGR.inf.bv.mod))
 plot(predictorEffects(BOGR.inf.bv.mod))
+
 
 ## Is negative binomial an appropriate model form?
 hist(log(BOGR.cl$DaysToFlwr))
@@ -638,11 +647,14 @@ BOGR.summ <- BOGR.cl %>% group_by(Source) %>%
                    BIO12=mean(bio12, na.rm=TRUE), BIO17=mean(bio17, na.rm=TRUE))
 BOGR.summ <- left_join(BOGR.summ, BOGR.SdZn, by="Source")
 
-#Loop over columns with biovars
+
+#Loop over columns with biovars and plot
 colnames(BOGR.summ)
 par(pty="m")
 par(mfrow=c(3,2))
 par(mar=c(4,4.7,2.5,3))
+
+## HEIGHT
 for (bb in 10:14) { 
   plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Height_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
      cex.main=1.5, xlab=colnames(BOGR.summ[bb]), ylab="Height (cm)", cex.lab=1.5, cex.axis=1.1)
@@ -654,6 +666,42 @@ legend("center", unique(BOGR.meds$SdZnAbbrev[order(BOGR.meds$SdZnOrder)]),
        col=unique(BOGR.meds$SdZnColful[order(BOGR.meds$SdZnOrder)]), cex=1.35, pch=19)
 
 
+## Plot without loop and add model lines to predictors with model support
+Anova(BOGR.ht.bv.mod)
+eff.bio5 <- as.data.frame(predictorEffects(BOGR.ht.bv.mod)[2]) #Extract values for plotting model lines
+eff.bio17 <- as.data.frame(predictorEffects(BOGR.ht.bv.mod)[5])
+
+plot(as.vector(t(BOGR.summ[,10])), BOGR.summ$Height_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[1], ylab="Height (cm)", cex.lab=1.5, cex.axis=1.1)
+arrows(as.vector(t(BOGR.summ[,10])), BOGR.summ$Height_MN-BOGR.summ$Height_SE, as.vector(t(BOGR.summ[,10])), 
+       BOGR.summ$Height_MN+BOGR.summ$Height_SE, 
+       angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+plot(as.vector(t(BOGR.summ[,11])), BOGR.summ$Height_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[2], ylab="Height (cm)", cex.lab=1.5, cex.axis=1.1)
+arrows(as.vector(t(BOGR.summ[,11])), BOGR.summ$Height_MN-BOGR.summ$Height_SE, as.vector(t(BOGR.summ[,11])), 
+       BOGR.summ$Height_MN+BOGR.summ$Height_SE, 
+       angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+lines(eff.bio5$bio5[,1], eff.bio5$bio5[,2],lwd=2,col="grey")
+plot(as.vector(t(BOGR.summ[,12])), BOGR.summ$Height_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[3], ylab="Height (cm)", cex.lab=1.5, cex.axis=1.1)
+arrows(as.vector(t(BOGR.summ[,12])), BOGR.summ$Height_MN-BOGR.summ$Height_SE, as.vector(t(BOGR.summ[,12])), 
+       BOGR.summ$Height_MN+BOGR.summ$Height_SE, 
+       angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+plot(as.vector(t(BOGR.summ[,13])), BOGR.summ$Height_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[4], ylab="Height (cm)", cex.lab=1.5, cex.axis=1.1)
+arrows(as.vector(t(BOGR.summ[,13])), BOGR.summ$Height_MN-BOGR.summ$Height_SE, as.vector(t(BOGR.summ[,13])), 
+       BOGR.summ$Height_MN+BOGR.summ$Height_SE, 
+       angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+plot(as.vector(t(BOGR.summ[,14])), BOGR.summ$Height_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[5], ylab="Height (cm)", cex.lab=1.5, cex.axis=1.1)
+arrows(as.vector(t(BOGR.summ[,14])), BOGR.summ$Height_MN-BOGR.summ$Height_SE, as.vector(t(BOGR.summ[,14])), 
+       BOGR.summ$Height_MN+BOGR.summ$Height_SE, 
+       angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+lines(eff.bio17$bio17[,1],eff.bio17$bio17[,2],lwd=2,col="grey")
+plot.new()
+legend("center", unique(BOGR.meds$SdZnAbbrev[order(BOGR.meds$SdZnOrder)]), 
+       col=unique(BOGR.meds$SdZnColful[order(BOGR.meds$SdZnOrder)]), cex=1.54, pch=19)
+
 #for (bb in 10:14) { 
 #  plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Growth_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.2, main="B. gracilis", 
 #       cex.main=1.5, xlab=colnames(BOGR.summ[bb]), ylab="Relative plant growth", cex.lab=1.5, cex.axis=1.1)
@@ -662,6 +710,8 @@ legend("center", unique(BOGR.meds$SdZnAbbrev[order(BOGR.meds$SdZnOrder)]),
 #         angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) }
 
 
+## REPRO
+par(mfrow=c(3,2))
 for (bb in 10:14) { 
   plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$Inf_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.2, main="B. gracilis", 
        cex.main=1.5, xlab=colnames(BOGR.summ[bb]), ylab="Number of inflorescences", cex.lab=1.5, cex.axis=1.1)
@@ -669,12 +719,85 @@ for (bb in 10:14) {
          BOGR.summ$Inf_MN+BOGR.summ$Inf_SE, 
          angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) }
 
+
+## Plot without loop and add model lines to predictors with model support
+Anova(BOGR.inf.bv.mod)
+#effInf.bio4 <- as.data.frame(predictorEffects(BOGR.inf.bv.mod)[1]) #Extract values for plotting model lines
+effInf.bio5 <- as.data.frame(predictorEffects(BOGR.inf.bv.mod)[2]) 
+effInf.bio11 <- as.data.frame(predictorEffects(BOGR.inf.bv.mod)[3]) 
+#effInf.bio17 <- as.data.frame(predictorEffects(BOGR.inf.bv.mod)[5])
+
+plot(as.vector(t(BOGR.summ[,10])), BOGR.summ$Inf_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[1], ylab="Number of inflorescences", cex.lab=1.5, cex.axis=1.1, log='y')
+arrows(as.vector(t(BOGR.summ[,10])), BOGR.summ$Inf_MN-BOGR.summ$Inf_SE, as.vector(t(BOGR.summ[,10])), 
+       BOGR.summ$Inf_MN+BOGR.summ$Inf_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+#lines(effInf.bio4$bio4[,1], effInf.bio4$bio4[,2],lwd=2,col="grey")
+plot(as.vector(t(BOGR.summ[,11])), BOGR.summ$Inf_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[2], ylab="Number of inflorescences", cex.lab=1.5, cex.axis=1.1, log='y')
+arrows(as.vector(t(BOGR.summ[,11])), BOGR.summ$Inf_MN-BOGR.summ$Inf_SE, as.vector(t(BOGR.summ[,11])), 
+       BOGR.summ$Inf_MN+BOGR.summ$Inf_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+lines(effInf.bio5$bio5[,1], effInf.bio5$bio5[,2],lwd=2,col="grey")
+plot(as.vector(t(BOGR.summ[,12])), BOGR.summ$Inf_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[3], ylab="Number of inflorescences", cex.lab=1.5, cex.axis=1.1, log='y')
+arrows(as.vector(t(BOGR.summ[,12])), BOGR.summ$Inf_MN-BOGR.summ$Inf_SE, as.vector(t(BOGR.summ[,12])), 
+       BOGR.summ$Inf_MN+BOGR.summ$Inf_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+lines(effInf.bio11$bio11[,1], effInf.bio11$bio11[,2],lwd=2,col="grey")
+plot(as.vector(t(BOGR.summ[,13])), BOGR.summ$Inf_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[4], ylab="Number of inflorescences", cex.lab=1.5, cex.axis=1.1, log='y')
+arrows(as.vector(t(BOGR.summ[,13])), BOGR.summ$Inf_MN-BOGR.summ$Inf_SE, as.vector(t(BOGR.summ[,13])), 
+       BOGR.summ$Inf_MN+BOGR.summ$Inf_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+plot(as.vector(t(BOGR.summ[,14])), BOGR.summ$Inf_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[5], ylab="Number of inflorescences", cex.lab=1.5, cex.axis=1.1, log='y')
+arrows(as.vector(t(BOGR.summ[,14])), BOGR.summ$Inf_MN-BOGR.summ$Inf_SE, as.vector(t(BOGR.summ[,14])), 
+       BOGR.summ$Inf_MN+BOGR.summ$Inf_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+#lines(effInf.bio17$bio17[,1],effInf.bio17$bio17[,2],lwd=2,col="grey")
+plot.new()
+legend("center", unique(BOGR.meds$SdZnAbbrev[order(BOGR.meds$SdZnOrder)]), 
+       col=unique(BOGR.meds$SdZnColful[order(BOGR.meds$SdZnOrder)]), cex=1.54, pch=19)
+
+
+## PHENOLOGY
+par(mfrow=c(3,2))
 for (bb in 10:14) { 
   plot(as.vector(t(BOGR.summ[,bb])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.2, main="B. gracilis", 
        cex.main=1.5, xlab=colnames(BOGR.summ[bb]), ylab="Days until first flower", cex.lab=1.5, cex.axis=1.1)
   arrows(as.vector(t(BOGR.summ[,bb])), BOGR.summ$DaysToFlwr_MN-BOGR.summ$DaysToFlwr_SE, as.vector(t(BOGR.summ[,bb])), 
          BOGR.summ$DaysToFlwr_MN+BOGR.summ$DaysToFlwr_SE, 
          angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) }
+
+
+## Plot without loop and add model lines to predictors with model support
+Anova(BOGR.df.bv.mod)
+effDf.bio11 <- as.data.frame(predictorEffects(BOGR.df.bv.mod)[3]) 
+effDf.bio12 <- as.data.frame(predictorEffects(BOGR.df.bv.mod)[4]) 
+effDf.bio17 <- as.data.frame(predictorEffects(BOGR.df.bv.mod)[5])
+
+plot(as.vector(t(BOGR.summ[,10])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[1], ylab="Days to first flower", cex.lab=1.5, cex.axis=1.1)
+arrows(as.vector(t(BOGR.summ[,10])), BOGR.summ$DaysToFlwr_MN-BOGR.summ$DaysToFlwr_SE, as.vector(t(BOGR.summ[,10])), 
+       BOGR.summ$DaysToFlwr_MN+BOGR.summ$DaysToFlwr_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+plot(as.vector(t(BOGR.summ[,11])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[2], ylab="Days to first flower", cex.lab=1.5, cex.axis=1.1)
+arrows(as.vector(t(BOGR.summ[,11])), BOGR.summ$DaysToFlwr_MN-BOGR.summ$DaysToFlwr_SE, as.vector(t(BOGR.summ[,11])), 
+       BOGR.summ$DaysToFlwr_MN+BOGR.summ$DaysToFlwr_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+plot(as.vector(t(BOGR.summ[,12])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[3], ylab="Days to first flower", cex.lab=1.5, cex.axis=1.1)
+arrows(as.vector(t(BOGR.summ[,12])), BOGR.summ$DaysToFlwr_MN-BOGR.summ$DaysToFlwr_SE, as.vector(t(BOGR.summ[,12])), 
+       BOGR.summ$DaysToFlwr_MN+BOGR.summ$DaysToFlwr_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+lines(effDf.bio11$bio11[,1], effDf.bio11$bio11[,2],lwd=2,col="grey")
+plot(as.vector(t(BOGR.summ[,13])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[4], ylab="Days to first flower", cex.lab=1.5, cex.axis=1.1)
+arrows(as.vector(t(BOGR.summ[,13])), BOGR.summ$DaysToFlwr_MN-BOGR.summ$DaysToFlwr_SE, as.vector(t(BOGR.summ[,13])), 
+       BOGR.summ$DaysToFlwr_MN+BOGR.summ$DaysToFlwr_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+lines(effDf.bio12$bio12[,1], effDf.bio12$bio12[,2],lwd=2,col="grey")
+plot(as.vector(t(BOGR.summ[,14])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+     cex.main=1.5, xlab=bv.names[5], ylab="Days to first flower", cex.lab=1.5, cex.axis=1.1)
+arrows(as.vector(t(BOGR.summ[,14])), BOGR.summ$DaysToFlwr_MN-BOGR.summ$DaysToFlwr_SE, as.vector(t(BOGR.summ[,14])), 
+       BOGR.summ$DaysToFlwr_MN+BOGR.summ$DaysToFlwr_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+lines(effDf.bio17$bio17[,1],effDf.bio17$bio17[,2],lwd=2,col="grey")
+plot.new()
+legend("center", unique(BOGR.meds$SdZnAbbrev[order(BOGR.meds$SdZnOrder)]), 
+       col=unique(BOGR.meds$SdZnColful[order(BOGR.meds$SdZnOrder)]), cex=1.54, pch=19)
 
 test <- as.data.frame(predictorEffects(BOGR.df.bv.mod)[2])
 line(test$bio5[,1],test$bio5[,2])
