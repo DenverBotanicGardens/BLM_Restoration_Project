@@ -248,6 +248,10 @@ BOGR.cl$DaysToFlwr <- NA
 for (pp in 1:length(BOGR.PhenoCol.List)) {
   BOGR.cl$DaysToFlwr[BOGR.cl[,BOGR.PhenoCol.List[pp]]>=3 & is.na(BOGR.cl$DaysToFlwr)] <- as.integer(BOGR.DaysToFlwr)[pp]
 }
+
+
+
+## 2023
 ## ---------------------------------------------------------------
 
 
@@ -269,6 +273,11 @@ BOGR.cl$NumInf <- c(BOGR.cl$NumInflorescence_20220927[BOGR.cl$Block<7], BOGR.cl$
 BOGR.cl$GrwthRate_Relative <- (BOGR.cl$Length_cm_20220801-BOGR.cl$Length_cm_20220627)/BOGR.cl$Length_cm_20220627
 ## ---------------------------------------------------------------
 
+
+
+## BOGR - ESTIMATE SURVIVAL 
+## For 2023, estimate survival based on if alive at end of season
+## -----------------------------------------------------------------------------------------
 
 
 

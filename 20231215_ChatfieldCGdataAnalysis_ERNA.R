@@ -42,6 +42,7 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 ERNA <- read.csv(file="Chatfield/20230302_ChatfieldData_ERNA.csv", sep=",", header=TRUE, dec=".")
 ERNA.SdZn <- read.csv(file="AGoebl/Seeds/20231215_ERNA_LatLongSdZn_hexcodes.csv", sep=",", header=TRUE, dec=".")
 ERNA.biovar <- readRDS("AGoebl/Seeds/20230825_ERNA_BiovarsAvg1980_2021")
+ERNA23 <- read.csv(file="Chatfield/20240130_ChatfieldData2023_ERNA.csv", sep=",", header=TRUE, dec=".")
 ## ----------------------------------------------------------------------------------------------
 
 
@@ -49,45 +50,134 @@ ERNA.biovar <- readRDS("AGoebl/Seeds/20230825_ERNA_BiovarsAvg1980_2021")
 
 ## ERNA - DATA CLEAN UP ---------------------------------------------
 str(ERNA)
-ERNA$Source <- as.factor(ERNA$Source)
+str(ERNA23)
 
-##If OrigPltSurv_20220518 = 0 & plt not replaced (N), ignore data for this plt, i.e. future surv should be NA, not 0
+ERNA$Source <- as.factor(ERNA$Source)
+ERNA23$Source <- as.factor(ERNA23$Source)
+ERNA23$Survival_20231013 <- as.integer(ERNA23$Survival_20231013)
+ERNA23$Flowering_20231013 <- as.integer(ERNA23$Flowering_20231013)
+#ERNA23$Flowering_20230901 <- as.integer(ERNA23$Flowering_20230901)
+
+
+## 2022
+##If OrigPltSurv_20220518 = 0 & plt not replaced (N), ignore data for this plt, i.e. future surv should be NA, not 0; died from transplant
 ERNA.cl <- ERNA[ERNA$OrigPltSurvival_20220518==1 | (ERNA$OrigPltSurvival_20220518==0 & ERNA$Replaced_YorN=="Y"),]
 
+##If not replaced, but died before planting, don't use subsequent data 
+ERNA.cl <- ERNA.cl[ERNA.cl$DateMortalityObservedPreTransplant=="",] 
 
-## *** CHECK AND EDIT THIS FOR FUTURE ANALYSES !! ** ###
-## ** FOR NOW (20231217) DON'T USE EARLY SURV OR LEN IN ANALYSES ***
 #Note: Don't use OrigPltSurv_20220518 data in days to mort or other field analyses,
-#this surv may not correspond to plt names in Source/Pop col (may correspond to orig planted or assigned)
-#What about 6/8 surv?
+#this surv may be due to transplant shock & may not correspond to pop in Source col (may correspond to orig planted or assigned)
 
-#Plts that were dead and missing on 5/18 were replaced. Surv & sz was taken on 6/8. 
-#If any that were dead on 5/18 were still dead 6/13, they were replaced as well.
-#Ignore surv=0 on 6/8 if replaced=Y? 
-#ERNA.cl[ERNA.cl$OrigPltSurvival_20220518==0 & (ERNA.cl$Survival_20220608==0 & ERNA.cl$Replaced_YorN=="Y"),]
+#Note: Source should match Replacement (when value entered) minus unique plt id 
 
-#Length_0608 should be good to use foir early growth rate? 
+#Note: Seedlings planted 4/20-4/28, first surv 5/18, first replacements 5/18-5/19 (replaced if dead & missing & source available)
+#(not replaced if appeared dead-no green tissue- but not missing.
+#Second surv/sz 6/8-6/10, second replacements 6/13 (replaced if dead on both 5/18 and 6/8, not replaced if only dead 6/8).
 
-#If not replaced, but died before planting, don't use subsequent surv data?
-#ERNA.cl[!is.na(ERNA.cl$DateMortalityObservedPreTransplant),] #All plts that died before planting were replaced
-## ****************************************************** 
+#Note: If 1 in 1st 2 surv cols (Replaced=N or NA), then these and orig sizes correspond to plant named in Source.
+#If 1 in 1st OrigSurv & 0 in 2nd surv (Replaced=N or NA), then ok to keep, only data after OrigLen & OrigSurv is surv=0.
+#The days to mort for these plants could be counted as the date of the second surv survey.
+#If 0 in 1st OrigSurv & 0 in 2nd surv (Replaced=Y if Source available), then OrigLen does not correspond to plt named & no data for 2nd len. 
+#Subsequent data corresponds to plt named. Change OrigLen to NA.
+#If 0 in 1st OrigSurv & 1 in 2nd OrigSurv (Replaced=Y or N), if Replaced=Y then 1st OrigLen does not correspond to plt named (change to NA);
+#2nd len & subsequent data does correspond to Source. If Replaced=N, 1st OrigSurv is wrong (plt 'came back'; ok since wont use this surv in analyses);
+#all other data (including 1st & 2nd len and 2nd surv) corresponds to plt named.
+
+#Due to how confusing this is, it is probably easiest to ignore all plants with Replaced=Y (even if subsequent data corresponds
+#to plt named, the data for these plts may vary do to being planted 1-2 months later).
+ERNA.cl <- ERNA.cl[ERNA.cl$Replaced_YorN !="Y",]
+
+## OR If plt replaced, change all pre-replacement data to NA (even len0608 for plts replaced in 1st round)
+
+#Notes if considering using some early data: 
+#Can use 2nd surv in days to mort if 1st OrigSurv=1, ignore if 1st OrigSurv=0; if this plt wasn't replaced then it died from transplant.
+#Length_0608 should be good to use for early growth rate. 
+#Ok to use OrigPltLength_cm_Greenhouse_20220323 in growth rates if Replaced = N?
+#Don't use surv0608 for days to mort if Replaced=Y 
+#nrow(ERNA.cl[ERNA.cl$OrigPltSurvival_20220518==0 & (ERNA.cl$Survival_20220608==0 & ERNA.cl$Replaced_YorN=="Y"),])
+
+
+
+## 2023 -----------------------------
+## For 2023, if H, harvested, harvest, h., coll AGB in notes (e.g. 'H' in Notes_20231013) subsequent surv should be NA
+setdiff(ERNA23$Notes_20230811,ERNA23$Notes_20230811.1) #Check difference in these two cols
+
+unique(ERNA23$Notes_20230728[ERNA23$Notes_20230728!=""])
+unique(ERNA23$Notes_20230811.1[ERNA23$Notes_20230811.1 !=""])
+unique(ERNA23$Notes_20230901 [ERNA23$Notes_20230901 !=""])
+unique(ERNA23$Notes_20230914[ERNA23$Notes_20230914 !=""])
+unique(ERNA23$Notes_20231013[ERNA23$Notes_20231013 !=""])
+
+ERNA23[grepl("coll",ERNA23$Notes_20230811.1),]
+
+ERNA23[grepl("harvest", ERNA23$Notes_20230901),]          
+ERNA23[grepl("h\\.", ERNA23$Notes_20230901),]          
+ERNA23[grepl("H", ERNA23$Notes_20230901),]          
+
+ERNA23[grepl("H", ERNA23$Notes_20230914),]     
+
+ERNA23[grepl("H", ERNA23$Notes_20231013),]          
+ERNA23$Survival_20231013[grepl("H", ERNA23$Notes_20231013)] <- NA
+
+
+#If plt alive and 1 was not entered in flowering col, enter 0 (not NA)
+ERNA23$Flowering_20230607[ERNA23$Survival_20230607==1 & is.na(ERNA23$Flowering_20230607)] <- 0
+ERNA23$Flowering_20230620[ERNA23$Survival_20230620==1 & is.na(ERNA23$Flowering_20230620)] <- 0
+ERNA23$Flowering_20230627[ERNA23$Survival_20230627==1 & is.na(ERNA23$Flowering_20230627)] <- 0
+ERNA23$Flowering_20230705[ERNA23$Survival_20230705==1 & is.na(ERNA23$Flowering_20230705)] <- 0
+ERNA23$Flowering_20230728[ERNA23$Survival_20230728==1 & is.na(ERNA23$Flowering_20230728)] <- 0
+ERNA23$Flowering_20230811[ERNA23$Survival_20230811==1 & is.na(ERNA23$Flowering_20230811)] <- 0
+#ERNA23$Flowering_20230901[ERNA23$Survival_20230901==1 & is.na(ERNA23$Flowering_20230901)] <- 0 #**Needs fixing?
+#ERNA23$Flowering_20230914[ERNA23$Survival_20230914==1 & is.na(ERNA23$Flowering_20230914)] <- 0
+#ERNA23$Flowering_20231013[ERNA23$Survival_20231013==1 & is.na(ERNA23$Flowering_20231013)] <- 0
+## ---------------------------------------------------------------
+
 
 
 ## Checks 
-## ** Add other checks listed in BOGR ** 
 ## Check that surv is only 1, 0 and maybe NA
 ERNA.cl[ERNA.cl$Survival_20220608 < 0 | ERNA.cl$Survival_20220608 > 1,]
+ERNA.cl[ERNA.cl$Survival_20220719 < 0 | ERNA.cl$Survival_20220719 > 1,]
 ERNA.cl[ERNA.cl$Survival_20221108 < 0 | ERNA.cl$Survival_20221108 > 1,]
+ERNA23[(ERNA23$Survival_20231013 < 0 | ERNA23$Survival_20231013 > 1) & !is.na(ERNA23$Survival_20231013),]
+ERNA23[ERNA23$Survival_20230607 < 0 | ERNA23$Survival_20230607 > 1,]
 
 #Check that surv is only integers
 ERNA.cl[ERNA.cl$Survival_20220608 - floor(ERNA.cl$Survival_20220608) != 0,]
+ERNA.cl[ERNA.cl$Survival_20220719 - floor(ERNA.cl$Survival_20220719) != 0,]
 ERNA.cl[ERNA.cl$Survival_20221108 - floor(ERNA.cl$Survival_20221108) != 0,]
+ERNA23[ERNA23$Survival_20230607 - floor(ERNA23$Survival_20230607) != 0,]
 
+#Flowering cols should only be 1, 0, NA 
+min(ERNA23$Flowering_20230607, na.rm=TRUE)
+min(ERNA23$Flowering_20230620, na.rm=TRUE)
+min(ERNA23$Flowering_20230627, na.rm=TRUE)
+min(ERNA23$Flowering_20230705, na.rm=TRUE)
+min(ERNA23$Flowering_20230728, na.rm=TRUE)
+min(ERNA23$Flowering_20230811, na.rm=TRUE)
+min(ERNA23$Flowering_20230901, na.rm=TRUE)
+min(ERNA23$Flowering_20230914, na.rm=TRUE)
+min(ERNA23$Flowering_20231013, na.rm=TRUE)
+
+max(ERNA23$Flowering_20230607, na.rm=TRUE)
+max(ERNA23$Flowering_20230620, na.rm=TRUE)
+max(ERNA23$Flowering_20230627, na.rm=TRUE)
+max(ERNA23$Flowering_20230705, na.rm=TRUE)
+max(ERNA23$Flowering_20230728, na.rm=TRUE)
+max(ERNA23$Flowering_20230811, na.rm=TRUE)
+max(ERNA23$Flowering_20230901, na.rm=TRUE)
+max(ERNA23$Flowering_20230914, na.rm=TRUE)
+max(ERNA23$Flowering_20231013, na.rm=TRUE)
+
+# ** Check that phenology only increases or stays the same; once flowering=1, it shouldn't go back to 0 
+
+## ** Add other checks listed in BOGR? ** 
 # ** Check that length is only numeric
 # ** Check that if surv=0 for a given date, there are no phenology or height values for that date
 
 ## *** Need to work on this ****
-#Check that once zero in surv on X/X or later, stays zero (if becomes 1 later, could be data entry error)
+#Check that once zero in surv on X/X or later, stays zero (if becomes 1 later, could be data entry error, or not depending on species)
 ## CONSOLIDATE SURVIVAL DATA
 #ERNA.Surv <- ERNA.cl %>% dplyr::select(c(starts_with("Survival_")))
 #for (rr in 1:nrow(ERNA.Surv)) {
@@ -99,47 +189,12 @@ ERNA.cl[ERNA.cl$Survival_20221108 - floor(ERNA.cl$Survival_20221108) != 0,]
 #}
 #ERNA.Surv %>% filter_all(any_vars(.==0))
 #ERNA.cl %>% filter_all(starts_with("Survival_")==0)
-
-
-#ERNA.test <- ERNA.cl[ERNA.cl$Replaced_YorN !="Y",]
-
-#OrigPltLength_cm_Greenhouse_20220323 may not correspond to plt names in Source col 
-#(may correspond to orig planted or assigned. This will be the case if the plant was replaced)'
-#so probably don't use OrigPltLen in growth rates or other field analyses (especially if Replaced = Y)
-
-#Seedlings planted 4/20-4/28
-#First surv 5/18
-#First replacements 5/18-5/19. Replaced if dead and missing and more of source available;
-#not replaced if appeared dead (no green tissue) but not missing.
-#Second surv/sz 6/8-6/10
-#Second replacements 6/13. Replaced if dead on both 5/18 and 6/8. Not replaced if only dead 6/8.
-#If 1 in both OrigPltSurv cols (Replaced=N or NA), then these and orig sizes correspond to plant named in Source.
-#If 1 in first OrigSurv and 0 in second OrigSurv (Replaced=N or NA), then no data other than first OrigLen and first OrigSurv,
-#and subsequent survs. The days to mort for these plants could be counted as the date of the second OrigSurv survey.
-#If 0 in first OrigSurv and 0 in second OrigSurv (Replaced=Y if Source available), 
-#then first OrigLen does not correspond to plant named and no data for second OrigLen. Subsequent data corresponds to plt named.
-#If 0 in first OrigSurv and 1 in second OrigSurv (Replaced=Y or N), if Replaced=Y then first OrigLen does not correspond to plt named;
-#and second OrigLen and subsequent data does correspond to plt named. If Replaced=N then first OrigSurv is wrong,
-#but all other data (including first and second OrigLen and second OrigSurv) corresponds to plt named.
-#Source should match Replacement (when value entered) minus unique plt id 
-
-#Due to how confusing this is, it is probably easiest to ignore all plants with Replaced=Y (even if subsequent data corresponds
-#to plt named, the data for these plts may vary do to being planted 1-2 months later).
-#Also don't use first OrigSurv in days to mort or other field analyses, these deaths are due to transplant shock.
-#Can use second OrigSurv in days to mort if first OrigSurv=1, ignore plt if first OrigSurv=0. If this plt wasn't replaced then it died from transplant.
-
-#ERNA <- left_join(ERNA, ERNA.SdZn, by="Source")
-
-
-## For 2023, if H, harvested, harvest, h., coll AGB in notes (e.g. 'H' in Notes_20231013) subsequent surv should be NA
-## For 2023, estimate survival based on if alive at end of season (ie. 20231013 survey)
-## For 2023, estimate days until first flower and also if flowered at all based on '1' in any pheno survey (not just last as not always consistent)
 ## ----------------------------------------------------------------------------------------------
 
 
 
 
-## ARFR - DATA MODS ------------------------------------
+## ERNA - DATA MODS ------------------------------------
 ## Add Source column where source name format matches Source in main data frame
 ERNA.SdZn$Source <- str_replace(ERNA.SdZn$Code, "10-SOS", "")
 ERNA.biovar$Source <- str_replace(ERNA.biovar$Pop, "10-SOS", "")
@@ -152,8 +207,7 @@ colnames(ERNA.biovar) <- c("Pop","bio1","bio2","bio3","bio4","bio5","bio6","bio7
 
 
 
-
-## Subset of ERNA seed zone colors (all listed in ERNA.SdZn file)
+## Subset of ERNA seed zone colors (all listed in ERNA.SdZn file) ** Delete? **
 #ERNA.SdZn$HexCode[grepl("0 - 5 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "#F0FFF0"     #semi-humid, v.cold #honeydew #
 #ERNA.SdZn$HexCode[grepl("20 - 25 Deg. F. / 12 - 30", ERNA.SdZn$seed_zone)] = "#CD6090" #arid, v.warm #hotpink3 
 #ERNA.SdZn$HexCode[grepl("5 - 10 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "#C1FFC1"    #semi-humid, cold #darkseagreen1 
@@ -179,16 +233,43 @@ ERNA.SdZn$SdZnOrder[grepl("20 - 25 Deg. F. / 12 - 30", ERNA.SdZn$seed_zone)] = "
 
 
 
-## ARFR - COMBINE DATA TYPES --------------------------------------------
+## ERNA - COMBINE DATA TYPES --------------------------------------------
 ERNA.cl <- left_join(ERNA.cl, ERNA.SdZn, by="Source")
 ERNA.cl <- left_join(ERNA.cl, ERNA.biovar, by="Source")
+ERNA23 <- left_join(ERNA23, ERNA.SdZn, by="Source")
+ERNA23 <- left_join(ERNA23, ERNA.biovar, by="Source")
 ## ----------------------------------------------------------------------
 
 
 
-## ERNA - CONSOLIDATE PHENOLOGY DATA AND DO CHECKS ---------------------------------------------
-## Add from 20230129_ChatfieldCGdataAnalysis and BOGR script if want to include.
-## Exclude for now due to lack of data in 2022 
+## ERNA 2023 - CREATE FLOWERING/ PHENOLOGY VARIABLE(S) ---------------------------------------------
+## For 2023, estimate days to 1st flwr & if flowered at all based on '1' in any pheno survey (not just last as not always consistent)
+
+#ERNA.Pheno <- ERNA23 %>% dplyr::select(starts_with("Flowering"))
+#min(ERNA.Pheno, na.rm=TRUE)
+#max(ERNA.Pheno, na.rm=TRUE)
+
+## Calculate days to first flower 
+ERNA.StartDate <- as.Date("2023-01-01")
+ERNA.PhenoCol.List <- colnames(ERNA23)[grepl("Flowering*", colnames(ERNA23))]   #Obtain phenology column names
+ERNA.Pheno.List <- str_replace(ERNA.PhenoCol.List, "Flowering_", "")            #Obtain just date from phenology columns
+ERNA.Pheno.List <- as.Date(ERNA.Pheno.List, "%Y%m%d")
+ERNA.DaysToFlwr <- ERNA.Pheno.List - ERNA.StartDate                             #Calculate days from Jan 1 to each phenology survey 
+
+## Loop over each phenology column & enter the num days since Jan 1 when a 1 (bud or later repro stage) first appears
+ERNA23$DaysToFlwr <- NA
+for (pp in 1:length(ERNA.PhenoCol.List)) {
+  ERNA23$DaysToFlwr[ERNA23[,ERNA.PhenoCol.List[pp]]==1 & is.na(ERNA23$DaysToFlwr)] <- as.integer(ERNA.DaysToFlwr)[pp]
+}
+ERNA23 %>% group_by(Source) %>% dplyr::summarise(Pheno_Avg=mean(DaysToFlwr,na.rm=TRUE))
+
+## Make a flowered Yes or No column
+ERNA23$FlwrYesNo <- NA 
+ERNA23$FlwrYesNo[!is.na(ERNA23$DaysToFlwr)] <- 1                               #If there's a value in Days to Flwr, then enter Yes
+ERNA23$FlwrYesNo[is.na(ERNA23$DaysToFlwr) & ERNA23$Survival_20231013==1] <- 0  #If plt alive and didn't flw, enter No
+nrow(ERNA23[ERNA23$FlwrYesNo==0,])                                             #Num that survived but didn't flower 
+ERNA23 %>% group_by(Source) %>% dplyr::summarise(FlwrYesNo_Avg=mean(FlwrYesNo,na.rm=TRUE)) #Or could try sum and/or NUM=n()
+## ---------------------------------------------------------------
 ## ---------------------------------------------------------------
 
 
@@ -213,11 +294,52 @@ ERNA.cl$GrwthRate_Relative <- (ERNA.cl$Length_cm_20220915-ERNA.cl$Length_cm_2022
 
 
 
+## ERNA - ESTIMATE SURVIVAL 
+## For 2023, estimate survival based on if alive at end of season (i.e. 20231013 survey)
+ERNA23$AliveYesNo <- 0
+ERNA23$AliveYesNo[ERNA23$Survival_20231013==1] <- 1
+# ** Remove plants that died early in 2022 (e.g. from transplant shock) and were not replaced **
 
-## ERNA - TEST FOR TREATMENT EFFECT -------------------------------------------------------
-## Review and update models as needed **
-## Copy code from BOGR and ARFR scripts 
+## 2022
+ERNA.cl$AliveYesNo <- 0
+ERNA.cl$AliveYesNo[ERNA.cl$Survival_20221108==1] <- 1
+ERNA.cl$AliveYesNo[(ERNA.cl$OrigPltSurvival_20220518==0) & (ERNA.cl$Replaced_YorN=="N" | ERNA.cl$Replaced_YorN=="")] <- NA
+#ERNA.cl$AliveYesNo[(ERNA.cl$OrigPltSurvival_20220518==0 | ERNA.cl$Survival_20220608==0) & (ERNA.cl$Replaced_YorN=="N" | ERNA.cl$Replaced_YorN=="")] <- NA
+ERNA.cl %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_Avg=mean(AliveYesNo,na.rm=TRUE))
+## ---------------------------------------------------------------
+
+
+
+
+
+## ERNA - TEST FOR WATER TREATMENT EFFECT in 2022 ---------------------------------------------------
+hist(log(ERNA.cl$Length_cm_20220915))
+hist(ERNA.cl$Length_cm_20220915)
+ERNA.tx.mod <- lmer(Length_cm_20220915 ~ Source + Treatment + (1|Block), data=ERNA.cl)
+ERNA.pop.mod <- lmer(Length_cm_20220915 ~ Source + (1|Block), data=ERNA.cl)
+models <- list(ERNA.tx.mod, ERNA.pop.mod)
+mod.names <- c('IncldTx', 'JustPop')
+aictab(cand.set = models, modnames = mod.names )
+# No strong support for treatment (delta AICc very small)
+
+hist(log(ERNA.cl$GrwthRate_Specific))
+hist(ERNA.cl$GrwthRate_Specific)
+hist(ERNA.cl$GrwthRate_Absolute)
+hist(ERNA.cl$GrwthRate_Relative)
+hist(log(ERNA.cl$GrwthRate_Relative))
+ERNA.tx.mod <- lmer(GrwthRate_Specific ~ Source + Treatment + (1|Block), data=ERNA.cl)
+ERNA.pop.mod <- lmer(GrwthRate_Specific ~ Source + (1|Block), data=ERNA.cl)
+ERNA.tx.mod <- lmer(GrwthRate_Absolute ~ Source + Treatment + (1|Block), data=ERNA.cl)
+ERNA.pop.mod <- lmer(GrwthRate_Absolute ~ Source + (1|Block), data=ERNA.cl)
+ERNA.tx.mod <- lmer(log(GrwthRate_Relative) ~ Source + Treatment + (1|Block), data=ERNA.cl)
+ERNA.pop.mod <- lmer(log(GrwthRate_Relative) ~ Source + (1|Block), data=ERNA.cl)
+models <- list(ERNA.tx.mod, ERNA.pop.mod)
+mod.names <- c('IncldTx', 'JustPop')
+aictab(cand.set = models, modnames = mod.names )
+# No support for treatment
 ## -----------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------------------
+
 
 
 
@@ -225,15 +347,24 @@ ERNA.cl$GrwthRate_Relative <- (ERNA.cl$Length_cm_20220915-ERNA.cl$Length_cm_2022
 ## ERNA - VISUALIZE RAW DATA ---------------------------------------------------------------
 
 ## Order populations for plotting 
-## Order by average size 
+## 2022 - Order by average size 
 ERNA.htByMed <- with(ERNA.cl, reorder(Source, Length_cm_20220915, median, na.rm=TRUE))
 ERNA.meds <- ERNA.cl %>% group_by(Source) %>% 
              dplyr::summarise(Height_MD=median(Length_cm_20220915,na.rm=TRUE), GrowthAb_MD=median(GrwthRate_Absolute,na.rm=TRUE),
-                   GrowthRe_MD=median(GrwthRate_Relative,na.rm=TRUE), GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE))
+             GrowthRe_MD=median(GrwthRate_Relative,na.rm=TRUE), GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE))
 ERNA.meds <- left_join(ERNA.meds, ERNA.SdZn, by="Source")
 
 
+## 2023 - Order by time to flower 
+ERNA.dfByMed <- with(ERNA23, reorder(Source, DaysToFlwr, median, na.rm=TRUE))
+ERNA23.meds <- ERNA23 %>% group_by(Source) %>% 
+               dplyr::summarise(DaysToFlwr_MD=median(DaysToFlwr,na.rm=TRUE), Surv_MD=median(AliveYesNo,na.rm=TRUE),
+               FlwrYesNo_MED=median(FlwrYesNo,na.rm=TRUE))
+ERNA23.meds <- left_join(ERNA23.meds, ERNA.SdZn, by="Source")
+
+
 ## Boxplots of raw data 
+## 2022
 par(mfrow=c(2,2))
 
 ## Size
@@ -265,6 +396,33 @@ boxplot(GrwthRate_Relative ~ ERNA.htByMed, data=ERNA.cl, las=2,
 plot.new()
 legend("center", unique(ERNA.meds$seed_zone[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), col="black",
        pt.bg=unique(ERNA.meds$HexCode[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), cex=1.5, pch=21)
+## -------------------------
+
+
+## 2023
+par(mfrow=c(1,2))
+
+## Days to Flwr
+ERNA23.meds <- ERNA23.meds[order(ERNA23.meds$DaysToFlwr_MD),] #Order by median 
+boxplot(DaysToFlwr ~ ERNA.dfByMed, data=ERNA23,
+        xlab=NA, ylab="Days to first flower", cex.lab=1.25,
+        cex.axis=0.99, names=ERNA23.meds$PopAbbrev, las=2,
+        main="PHENOLOGY", cex.main=1.5, col=ERNA23.meds$HexCode)
+
+## Blank plot
+plot.new()
+legend("center", unique(ERNA.meds$seed_zone[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), col="black",
+       pt.bg=unique(ERNA.meds$HexCode[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), cex=1.25, pch=21)
+## -------------------------
+
+
+## Plots means as points are SE as error bars OR BAR PLOTS
+ERNA23.mn <- ERNA23 %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_MN=mean(AliveYesNo,na.rm=TRUE),
+                                         AliveYesNo_SE=calcSE(AliveYesNo), DaysToFlwr_MN=mean(DaysToFlwr,na.rm=TRUE),
+                                         DaysToFlwr_SE=calcSE(DaysToFlwr), FlwrYesNo_MN=mean(FlwrYesNo,na.rm=TRUE),
+                                         FlwrYesNo_SE=calcSE(FlwrYesNo)) #Or could try sum and/or NUM=n()
+
+## Bar plot of 2023 data (color by seed zone, order by..?)
 ## ---------------------------------------------------
 
 
@@ -288,9 +446,29 @@ plot(ERNA.gr.sd$Growth_SD, ERNA.gr.mn$Growth_MN, pch=19, col="black", cex=1.3,
 
 
 
-
 ## ERNA - LOOK AT CORRELATION BETWEEN TRAITS ----------------------------------------------
 par(mfrow=c(1,1))
 plot(ERNA.ht.mn$Height_MN, ERNA.gr.mn$Growth_MN, pch=19, col="black", cex=1.3,
      xlab="Mean plant height", ylab="Mean relative growth rate", cex.lab=1.2)
 ## ----------------------------------------------------------------------------------------
+
+
+
+
+## ERNA - ESTIMATE VARIATION WITHIN POPULATIONS ------------------------------------------------------
+## Calculate the coefficient of variation 
+#ERNA.cv <- ERNA.cl %>% group_by(Source) %>% summarise(Height_CV=cv(Length_cm_20220801, na.rm=TRUE),
+#                                                      Growth_CV=cv(GrwthRate_Relative, na.rm=TRUE),
+#                                                      DaysToFlwr_CV=cv(DaysToFlwr, na.rm=TRUE),
+#                                                      Inf_CV=cv(NumInf, na.rm=TRUE))
+
+#ERNA.cv <- left_join(ERNA.cv, ERNA.SdZn, by="Source")
+## ----------------------------
+
+
+
+
+## ERNA - EVALUATE RELATIONSHIPS B/W TRAITS AND SOURCE CLIMATE ------------------------------------------
+## Look at PCA of 19 bioclim variables to reduce number of predictors -------------------
+ERNA.biovar <- left_join(ERNA.biovar, ERNA.SdZn, by="Source")
+
