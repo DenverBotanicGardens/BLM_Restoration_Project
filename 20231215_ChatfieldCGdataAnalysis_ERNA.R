@@ -129,6 +129,11 @@ ERNA.cl[ERNA.cl$Survival_20221108 - floor(ERNA.cl$Survival_20221108) != 0,]
 #Can use second OrigSurv in days to mort if first OrigSurv=1, ignore plt if first OrigSurv=0. If this plt wasn't replaced then it died from transplant.
 
 #ERNA <- left_join(ERNA, ERNA.SdZn, by="Source")
+
+
+## For 2023, if H, harvested, harvest, h., coll AGB in notes (e.g. 'H' in Notes_20231013) subsequent surv should be NA
+## For 2023, estimate survival based on if alive at end of season (ie. 20231013 survey)
+## For 2023, estimate days until first flower and also if flowered at all based on '1' in any pheno survey (not just last as not always consistent)
 ## ----------------------------------------------------------------------------------------------
 
 

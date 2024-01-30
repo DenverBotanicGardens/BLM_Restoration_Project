@@ -1362,8 +1362,14 @@ ERNA <- ERNA[ERNA$Replaced_YorN !="Y",]
 ## PEVI ------------------
 #If dead on OrigSurv, ignore plt if not replaced. If replaced, use subsequent surv and sz data
 #Don't use OrgiSurv for days to mort 
-
-
+#Don't estimate days to mort since plants appear and disappear often within and across years
+#Don't use number of days flowering/ length of flowering in 2023 as phenology data is not always consistent
+#Just use data to determine number of days until first flower 
+#Calculate percent flowering for each pop. I.e. how many indivs of each pop flowered. Were there some pops with no flowering? 
+#Could try removing any questionable indivs, eg. any with inconsistent data entry (some highlighted in xls file)...
+#If enough indivs remain, repeat analyses and check for consistency 
+#Add amt repro into datasheet once fruit counts done in lab
+#Add specific leaf data (leaf area and weight) into raw datasheet (csv) or combine in R
 
 
 
