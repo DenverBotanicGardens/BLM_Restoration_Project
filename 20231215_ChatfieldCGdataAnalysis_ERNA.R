@@ -41,7 +41,7 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 ## LOAD DATA --------------------------------------------------------------------------------------
 ERNA <- read.csv(file="Chatfield/20230302_ChatfieldData_ERNA.csv", sep=",", header=TRUE, dec=".")
 ERNA.SdZn <- read.csv(file="AGoebl/Seeds/20231215_ERNA_LatLongSdZn_hexcodes.csv", sep=",", header=TRUE, dec=".")
-ERNA.biovar <- readRDS("AGoebl/Seeds/20230825_ERNA_BiovarsAvg1980_2021")
+ERNA.biovar <- readRDS("AGoebl/Seeds/20240131_ERNA_BiovarsAvg1980_2021")
 ERNA23 <- read.csv(file="Chatfield/20240130_ChatfieldData2023_ERNA.csv", sep=",", header=TRUE, dec=".")
 ## ----------------------------------------------------------------------------------------------
 
@@ -215,9 +215,19 @@ colnames(ERNA.biovar) <- c("Pop","bio1","bio2","bio3","bio4","bio5","bio6","bio7
 ## ---------------------------
 
 
-## Add seed zone name abbreviation column (look at BOGR script).. (for legend)?
+## Add seed zone name abbreviation column
+ERNA.SdZn$SdZnOrder[grepl("15 - 20 Deg. F. / 2 - 3", ERNA.SdZn$seed_zone)] = "humid, warm"  
+ERNA.SdZn$SdZnOrder[grepl("0 - 5 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "semi-humid, v.cold" 
+ERNA.SdZn$SdZnOrder[grepl("5 - 10 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "semi-humid, cold"
+ERNA.SdZn$SdZnOrder[grepl("10 - 15 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "semi-humid, cool"
+ERNA.SdZn$SdZnOrder[grepl("15 - 20 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "semi-humid, warm"
+ERNA.SdZn$SdZnOrder[grepl("20 - 25 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "semi-humid, v.warm"
+ERNA.SdZn$SdZnOrder[grepl("10 - 15 Deg. F. / 6 - 12", ERNA.SdZn$seed_zone)] = "semi-arid, cool"
+ERNA.SdZn$SdZnOrder[grepl("15 - 20 Deg. F. / 6 - 12", ERNA.SdZn$seed_zone)] = "semi-arid, warm"
+ERNA.SdZn$SdZnOrder[grepl("20 - 25 Deg. F. / 6 - 12", ERNA.SdZn$seed_zone)] = "semi-arid, v.warm"
+ERNA.SdZn$SdZnOrder[grepl("20 - 25 Deg. F. / 12 - 30", ERNA.SdZn$seed_zone)] = "arid, v.warm"
 
-## Add column with seed zone or pop 'order' (look at BOGR script)..?
+## Add column with seed zone or pop 'order'
 ERNA.SdZn$SdZnOrder[grepl("15 - 20 Deg. F. / 2 - 3", ERNA.SdZn$seed_zone)] = "A"    #humid, warm  
 ERNA.SdZn$SdZnOrder[grepl("0 - 5 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "B"      #semi-humid, v.cold 
 ERNA.SdZn$SdZnOrder[grepl("5 - 10 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "C"     #semi-humid, cold
@@ -280,6 +290,11 @@ ERNA.cl$GrwthRate_Absolute <- ERNA.cl$Length_cm_20220915-ERNA.cl$Length_cm_20220
 ERNA.cl$GrwthRate_Relative <- (ERNA.cl$Length_cm_20220915-ERNA.cl$Length_cm_20220719)/ERNA.cl$Length_cm_20220719
 
 ## ** Look at early vs late growth if at least 3 height measurements are usable ** 
+ERNA.cl$GrwthRateE_Specific <- log(ERNA.cl$Length_cm_20220719/ERNA.cl$Length_cm_20220608)
+ERNA.cl$GrwthRateE_Absolute <- ERNA.cl$Length_cm_20220719-ERNA.cl$Length_cm_20220608
+ERNA.cl$GrwthRateE_Relative <- (ERNA.cl$Length_cm_20220719-ERNA.cl$Length_cm_20220608)/ERNA.cl$Length_cm_20220608
+
+plot(ERNA.cl$GrwthRate_Relative, ERNA.cl$GrwthRateE_Relative)
 ## ---------------------------------------------------------------
 
 
@@ -351,21 +366,22 @@ aictab(cand.set = models, modnames = mod.names )
 ERNA.htByMed <- with(ERNA.cl, reorder(Source, Length_cm_20220915, median, na.rm=TRUE))
 ERNA.meds <- ERNA.cl %>% group_by(Source) %>% 
              dplyr::summarise(Height_MD=median(Length_cm_20220915,na.rm=TRUE), GrowthAb_MD=median(GrwthRate_Absolute,na.rm=TRUE),
-             GrowthRe_MD=median(GrwthRate_Relative,na.rm=TRUE), GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE))
+             GrowthRe_MD=median(GrwthRate_Relative,na.rm=TRUE), GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE),
+             GrowthAbE_MD=median(GrwthRateE_Absolute,na.rm=TRUE),
+             GrowthReE_MD=median(GrwthRateE_Relative,na.rm=TRUE), GrowthSpE_MD=median(GrwthRateE_Specific,na.rm=TRUE))
 ERNA.meds <- left_join(ERNA.meds, ERNA.SdZn, by="Source")
 
 
 ## 2023 - Order by time to flower 
 ERNA.dfByMed <- with(ERNA23, reorder(Source, DaysToFlwr, median, na.rm=TRUE))
 ERNA23.meds <- ERNA23 %>% group_by(Source) %>% 
-               dplyr::summarise(DaysToFlwr_MD=median(DaysToFlwr,na.rm=TRUE), Surv_MD=median(AliveYesNo,na.rm=TRUE),
-               FlwrYesNo_MED=median(FlwrYesNo,na.rm=TRUE))
+               dplyr::summarise(DaysToFlwr_MD=median(DaysToFlwr,na.rm=TRUE))
 ERNA23.meds <- left_join(ERNA23.meds, ERNA.SdZn, by="Source")
 
 
 ## Boxplots of raw data 
 ## 2022
-par(mfrow=c(2,2))
+par(mfrow=c(2,3))
 
 ## Size
 ERNA.meds <- ERNA.meds[order(ERNA.meds$Height_MD),] #Order by median 
@@ -380,20 +396,34 @@ boxplot(GrwthRate_Relative ~ ERNA.htByMed, data=ERNA.cl, las=2,
         xlab=NA, ylab="Plant relative growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
         cex.main=1.5, col=ERNA.meds$HexCode, main="GROWTH RATE", ylim=c(-0.35,3))
 
-#boxplot(GrwthRate_Absolute ~ ERNA.htByMed, data=ERNA.cl, las=2,
-#        xlab=NA, ylab="Plant absolute growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
-#        cex.main=1.5, col=ERNA.meds$HexCode, main="GROWTH RATE")
+boxplot(GrwthRate_Absolute ~ ERNA.htByMed, data=ERNA.cl, las=2,
+        xlab=NA, ylab="Plant absolute growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
+        cex.main=1.5, col=ERNA.meds$HexCode, main="GROWTH RATE")
 
 #boxplot(GrwthRate_Specific ~ ERNA.htByMed, data=ERNA.cl, las=2,
 #        xlab=NA, ylab="Plant specific growth", cex.lab=1, cex.axis=0.9, names=ERNA.meds$PopAbbrev,
 #        cex.main=1.5, col=ERNA.meds$HexCode)
+
+plot.new()
+
+boxplot(GrwthRateE_Relative ~ ERNA.htByMed, data=ERNA.cl, las=2,
+        xlab=NA, ylab="Plant relative growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
+        cex.main=1.5, col=ERNA.meds$HexCode, main="EARLY GROWTH RATE")
+
+boxplot(GrwthRateE_Absolute ~ ERNA.htByMed, data=ERNA.cl, las=2,
+        xlab=NA, ylab="Plant absolute growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
+        cex.main=1.5, col=ERNA.meds$HexCode, main="EARLY GROWTH RATE", ylim=c(-10,35))
+
+#boxplot(GrwthRateE_Specific ~ ERNA.htByMed, data=ERNA.cl, las=2,
+#        xlab=NA, ylab="Plant specific growth", cex.lab=1, cex.axis=0.9, names=ERNA.meds$PopAbbrev,
+#        cex.main=1.5, col=ERNA.meds$HexCode, main="EARLY GROWTH RATE")
+
 #ERNA.SdZn <- ERNA.SdZn[order(ERNA.SdZn$GR_SP),]
 #boxplot(GrwthRate_Specific ~ ERNA.grsByMed, data=ERNA.cl,
 #        xlab="Population", ylab="Plant specific growth", cex.lab=1.5, names=ERNA.SdZn$PopAbbrev,
 #        cex.axis=0.7, cex.main=1.5, col=ERNA.SdZn$HexCode)
 
 ## Blank plot
-plot.new()
 legend("center", unique(ERNA.meds$seed_zone[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), col="black",
        pt.bg=unique(ERNA.meds$HexCode[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), cex=1.5, pch=21)
 ## -------------------------
@@ -416,13 +446,52 @@ legend("center", unique(ERNA.meds$seed_zone[order(ERNA.meds$SdZnOrder, decreasin
 ## -------------------------
 
 
-## Plots means as points are SE as error bars OR BAR PLOTS
+## 2023 - Plots means as points are SE as error bars
 ERNA23.mn <- ERNA23 %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_MN=mean(AliveYesNo,na.rm=TRUE),
                                          AliveYesNo_SE=calcSE(AliveYesNo), DaysToFlwr_MN=mean(DaysToFlwr,na.rm=TRUE),
                                          DaysToFlwr_SE=calcSE(DaysToFlwr), FlwrYesNo_MN=mean(FlwrYesNo,na.rm=TRUE),
                                          FlwrYesNo_SE=calcSE(FlwrYesNo)) #Or could try sum and/or NUM=n()
 
-## Bar plot of 2023 data (color by seed zone, order by..?)
+ERNA23.mn <- left_join(ERNA23.mn, ERNA.SdZn, by="Source")
+
+ERNA23.mn <- ERNA23.mn[order(ERNA23.mn$SdZnOrder),]
+plot(c(1:20), ERNA23.mn$AliveYesNo_MN, col="black", pch=21, cex=1.5, ylab="Survival rate",xlab="Population",
+     ylim=c(0.45,0.95), bg=ERNA23.mn$HexCode, xaxt="n",cex.lab=1.2)
+arrows(c(1:20), ERNA23.mn$AliveYesNo_MN+ERNA23.mn$AliveYesNo_SE, c(1:20), ERNA23.mn$AliveYesNo_MN-ERNA23.mn$AliveYesNo_SE,
+       angle=90, length=0, col="grey")
+
+plot(c(1:20), ERNA23.mn$FlwrYesNo_MN, col="black", pch=21, cex=1.5, ylab="Flowering rate",xlab="Population",
+     ylim=c(0.6,1.01), bg=ERNA23.mn$HexCode, xaxt="n",cex.lab=1.2)
+arrows(c(1:20), ERNA23.mn$FlwrYesNo_MN+ERNA23.mn$FlwrYesNo_SE, c(1:20), ERNA23.mn$FlwrYesNo_MN-ERNA23.mn$FlwrYesNo_SE,
+       angle=90, length=0, col="grey")
+
+plot(c(1:20), ERNA23.mn$DaysToFlwr_MN, col="black", pch=21, cex=1.5, ylab="Days to first flower",xlab="Population",
+     ylim=c(185,242), bg=ERNA23.mn$HexCode, xaxt="n",cex.lab=1.2)
+arrows(c(1:20), ERNA23.mn$DaysToFlwr_MN+ERNA23.mn$DaysToFlwr_SE, c(1:20), ERNA23.mn$DaysToFlwr_MN-ERNA23.mn$DaysToFlwr_SE,
+       angle=90, length=0, col="grey")
+
+
+
+## 2023 - Bar plots of data (color by seed zone)
+## Order populations for plotting BY VALUE
+par(mfrow=c(1,1))
+ERNA23.mn <- ERNA23.mn[order(ERNA23.mn$AliveYesNo_MN),]
+barXvals<-barplot(ERNA23.mn$AliveYesNo_MN, xlab=NA, ylab="Survival rate", cex.lab=1.3, las=2, 
+        names=ERNA23.mn$PopAbbrev, main="Ericameria nauseosa", cex.main=1.5, col=ERNA23.mn$HexCode, cex.names=0.9)
+arrows(barXvals, ERNA23.mn$AliveYesNo_MN+ERNA23.mn$AliveYesNo_SE, barXvals, ERNA23.mn$AliveYesNo_MN-ERNA23.mn$AliveYesNo_SE,
+       angle=90, length=0, col="black")
+
+ERNA23.mn <- ERNA23.mn[order(ERNA23.mn$FlwrYesNo_MN),]
+barplot(ERNA23.mn$FlwrYesNo_MN, xlab=NA, ylab="Flowering rate", cex.lab=1.3, las=2, 
+        names=ERNA23.mn$PopAbbrev, main="Ericameria nauseosa", cex.main=1.5, col=ERNA23.mn$HexCode, cex.names=0.9)
+arrows(barXvals, ERNA23.mn$FlwrYesNo_MN+ERNA23.mn$FlwrYesNo_SE, barXvals, ERNA23.mn$FlwrYesNo_MN-ERNA23.mn$FlwrYesNo_SE,
+       angle=90, length=0, col="black")
+
+ERNA23.mn <- ERNA23.mn[order(ERNA23.mn$DaysToFlwr_MN),]
+barplot(ERNA23.mn$DaysToFlwr_MN, xlab=NA, ylab="Days to first flower", cex.lab=1.3, las=2, ylim=c(0,250),
+        names=ERNA23.mn$PopAbbrev, main="Ericameria nauseosa", cex.main=1.5, col=ERNA23.mn$HexCode, cex.names=0.9)
+arrows(barXvals, ERNA23.mn$DaysToFlwr_MN+ERNA23.mn$DaysToFlwr_SE, barXvals, ERNA23.mn$DaysToFlwr_MN-ERNA23.mn$DaysToFlwr_SE,
+       angle=90, length=0, col="black")
 ## ---------------------------------------------------
 
 
@@ -450,6 +519,13 @@ plot(ERNA.gr.sd$Growth_SD, ERNA.gr.mn$Growth_MN, pch=19, col="black", cex=1.3,
 par(mfrow=c(1,1))
 plot(ERNA.ht.mn$Height_MN, ERNA.gr.mn$Growth_MN, pch=19, col="black", cex=1.3,
      xlab="Mean plant height", ylab="Mean relative growth rate", cex.lab=1.2)
+
+plot(ERNA23.mn$AliveYesNo_MN, ERNA23.mn$FlwrYesNo_MN, col=ERNA23.mn$HexCode, pch=19, cex=1.5)
+
+## Plot early vs late growth -----------
+plot(ERNA.meds$GrowthRe_MD, ERNA.meds$GrowthReE_MD)
+plot(ERNA.meds$GrowthAb_MD, ERNA.meds$GrowthAbE_MD)
+plot(ERNA.meds$GrowthSp_MD, ERNA.meds$GrowthSpE_MD)
 ## ----------------------------------------------------------------------------------------
 
 
@@ -472,3 +548,19 @@ plot(ERNA.ht.mn$Height_MN, ERNA.gr.mn$Growth_MN, pch=19, col="black", cex=1.3,
 ## Look at PCA of 19 bioclim variables to reduce number of predictors -------------------
 ERNA.biovar <- left_join(ERNA.biovar, ERNA.SdZn, by="Source")
 
+ERNA.pcaBiovar <- prcomp(ERNA.biovar[,2:20], scale=TRUE)
+par(pty="s")
+par(mfrow=c(1,1))
+plot(x=ERNA.pcaBiovar$x[,1], y=ERNA.pcaBiovar$x[,2], pch=19, cex=1.4, col=ERNA.biovar$SdZnColful)
+plot(x=ERNA.pcaBiovar$x[,2], y=ERNA.pcaBiovar$x[,3], pch=19, cex=1.4, col=ERNA.biovar$SdZnColful)
+plot(x=ERNA.pcaBiovar$x[,3], y=ERNA.pcaBiovar$x[,4], pch=19, cex=1.4, col=ERNA.biovar$SdZnColful)
+
+## Look at scree plot
+ERNA.pcaBiovar$sdev[1]**2/sum(ERNA.pcaBiovar$sdev**2)
+ERNA.pcaBV.varExpl <- ERNA.pcaBiovar$sdev^2/sum(ERNA.pcaBiovar$sdev^2)
+barplot(ERNA.pcaBiovar$sdev[1:19]**2/sum(ERNA.pcaBiovar$sdev**2))
+sum(ERNA.pcaBV.varExpl[1:3]) #top 6 PC axes explain over 98% of variation
+
+## Add arrows on PCA plot and look at loadings 
+biplot(ERNA.pcaBiovar)
+ERNA.pcaBiovar$rotation #loadings

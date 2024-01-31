@@ -40,8 +40,8 @@ prism_set_dl_dir("Q:/Research/All_Projects_by_Species/Astragalus SPECIES/Astraga
 
 
 ## LOAD LAT/ LONGS AND ASSIGN DESIRED TEMPORAL RANGE FOR CLIMATE DATA ---------------------------
-#pops_LatLong <- read.table(file ='C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds/20220622_ERNA_LatLong.csv', sep=',', header = TRUE)  
-pops_LatLong <- read.table(file ='C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds/20221129_BOGR_LatLong.csv', sep=',', header = TRUE)  
+pops_LatLong <- read.table(file ='C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds/20220622_ERNA_LatLong.csv', sep=',', header = TRUE)  
+#pops_LatLong <- read.table(file ='C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds/20221129_BOGR_LatLong.csv', sep=',', header = TRUE)  
 #pops_LatLong <- read.table(file ='C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds/20220929_ARFR_LatLong.csv', sep=',', header = TRUE)  
 num.pops <- nrow(pops_LatLong)
 colnames(pops_LatLong)
@@ -178,11 +178,13 @@ for (pp in 1:num.pops) {
 }
 
 
-setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - BLM-Grassland/AGoebl/Seeds")
-date <- as.character(20230311)
-species <- as.character("ARFR")
+setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds")
+#date <- as.character(20240131)
+date <- Sys.Date()  
+date <- gsub("-", "", date)
+species <- as.character("ERNA")
 saveRDS(tmin.means, file=paste(date,species,"tminMonthly",sep="_"))
-saveRDS(tmin.sd, file=paste(date,species,"tminSDmonthly",sep="_"))
+#saveRDS(tmin.sd, file=paste(date,species,"tminSDmonthly",sep="_"))
 
 #tmin.means <- readRDS("20221129_BOGR_tminMonthly")
 #tmin.means <- readRDS("20221129_ERNA_tminMonthly")
@@ -257,12 +259,12 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 #ppt.means <- readRDS("20230311_ARFR_pptMonthly")
 #tmin.means <- readRDS("20230311_ARFR_tminMonthly")
 #tmax.means <- readRDS("20230314_ARFR_tmaxMonthly")
-#ppt.means <- readRDS("20230219_ERNA_pptMonthly")
-#tmin.means <- readRDS("20221129_ERNA_tminMonthly")
-#tmax.means <- readRDS("20230825_ERNA_tmaxMonthly")
-ppt.means <- readRDS("20221129_BOGR_pptMonthly")
-tmin.means <- readRDS("20221129_BOGR_tminMonthly")
-tmax.means <- readRDS("20230824_BOGR_tmaxMonthly")
+ppt.means <- readRDS("20230219_ERNA_pptMonthly")
+tmin.means <- readRDS("20221129_ERNA_tminMonthly")
+tmax.means <- readRDS("20230825_ERNA_tmaxMonthly")
+#ppt.means <- readRDS("20221129_BOGR_pptMonthly")
+#tmin.means <- readRDS("20221129_BOGR_tminMonthly")
+#tmax.means <- readRDS("20230824_BOGR_tmaxMonthly")
 
 ppt.means.nopops <- ppt.means[,2:13]
 tmin.means.nopops <- tmin.means[,2:13]
@@ -286,7 +288,7 @@ for (pp in 1:num.pops) {
 #setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds")
 date <- Sys.Date()  
 date <- gsub("-", "", date)
-species <- as.character("BOGR")
+species <- as.character("ERNA")
 saveRDS(biovar.means, file=paste(date,species,"BiovarsAvg1980_2021",sep="_"))
 #write.csv(biovar.means, file=paste(date,species,"BiovarsAvg1980_2021.csv",sep="_"), row.names=FALSE)
 
