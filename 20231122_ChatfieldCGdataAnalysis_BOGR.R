@@ -606,7 +606,7 @@ BOGR.pcaBiovar$rotation #loadings
 ##BIO4, BIO5, BIO11, BIO12, BIO17
 
 bv.names <- c("Temperature seasonality","Max temp of warmest month","Mean temp of coldest quarter",
-              "Annual precipitation","Precipitation of direst quarter")
+              "Annual precipitation","Precipitation of driest quarter")
 
 BOGR.ht.bv.mod <- lmer(Length_cm_20220801 ~ scale(bio4) + scale(bio5) + scale(bio11) + scale(bio12) + scale(bio17)
                          + (1|Block), data=BOGR.cl)

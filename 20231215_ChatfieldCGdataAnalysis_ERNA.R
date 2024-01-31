@@ -545,22 +545,43 @@ plot(ERNA.meds$GrowthSp_MD, ERNA.meds$GrowthSpE_MD)
 
 
 ## ERNA - EVALUATE RELATIONSHIPS B/W TRAITS AND SOURCE CLIMATE ------------------------------------------
-## Look at PCA of 19 bioclim variables to reduce number of predictors -------------------
+## Look at PCA of 19 bioclim variables to reduce number of predictors 
 ERNA.biovar <- left_join(ERNA.biovar, ERNA.SdZn, by="Source")
 
 ERNA.pcaBiovar <- prcomp(ERNA.biovar[,2:20], scale=TRUE)
 par(pty="s")
 par(mfrow=c(1,1))
-plot(x=ERNA.pcaBiovar$x[,1], y=ERNA.pcaBiovar$x[,2], pch=19, cex=1.4, col=ERNA.biovar$SdZnColful)
-plot(x=ERNA.pcaBiovar$x[,2], y=ERNA.pcaBiovar$x[,3], pch=19, cex=1.4, col=ERNA.biovar$SdZnColful)
-plot(x=ERNA.pcaBiovar$x[,3], y=ERNA.pcaBiovar$x[,4], pch=19, cex=1.4, col=ERNA.biovar$SdZnColful)
+plot(x=ERNA.pcaBiovar$x[,1], y=ERNA.pcaBiovar$x[,2], pch=19, cex=1.4, col=ERNA.biovar$HexCode)
+plot(x=ERNA.pcaBiovar$x[,2], y=ERNA.pcaBiovar$x[,3], pch=19, cex=1.4, col=ERNA.biovar$HexCode)
+plot(x=ERNA.pcaBiovar$x[,3], y=ERNA.pcaBiovar$x[,4], pch=19, cex=1.4, col=ERNA.biovar$HexCode)
 
 ## Look at scree plot
 ERNA.pcaBiovar$sdev[1]**2/sum(ERNA.pcaBiovar$sdev**2)
 ERNA.pcaBV.varExpl <- ERNA.pcaBiovar$sdev^2/sum(ERNA.pcaBiovar$sdev^2)
 barplot(ERNA.pcaBiovar$sdev[1:19]**2/sum(ERNA.pcaBiovar$sdev**2))
-sum(ERNA.pcaBV.varExpl[1:3]) #top 6 PC axes explain over 98% of variation
+sum(ERNA.pcaBV.varExpl[1:2]) #top 2 PC axes explain over 63% of variation
 
 ## Add arrows on PCA plot and look at loadings 
 biplot(ERNA.pcaBiovar)
 ERNA.pcaBiovar$rotation #loadings
+ERNA.pcaBiovar$rotation[,1:2] #loadings
+ERNA.pc1 <- ERNA.pcaBiovar$rotation[,1][order(abs(ERNA.pcaBiovar$rotation[,1]))]
+ERNA.pc2 <- ERNA.pcaBiovar$rotation[,2][order(abs(ERNA.pcaBiovar$rotation[,2]))]
+
+
+## Models
+## Use 'top' biovars as determined by PCA
+## The following bioclim vars selected due to high loadings in orthogonal directions along PC1 and PC2 
+##BIO17 (or 14), BIO11 (or 1), BIO19 (or 16 or 13), BIO7 (or 8 or 4)
+
+bv.names <- c("Precipitation of driest quarter (BIO17)","Precipitation of coldest quarter (BIO19)",
+              "Mean temp of coldest quarter (BIO11)","Temperature annual range (BIO7)",)
+
+BOGR.ht.bv.mod <- lmer(Length_cm_20220801 ~ scale(bio4) + scale(bio5) + scale(bio11) + scale(bio12) + scale(bio17)
+                       + (1|Block), data=BOGR.cl)
+Anova(BOGR.ht.bv.mod)
+plot(allEffects(BOGR.ht.bv.mod))
+plot(predictorEffects(BOGR.ht.bv.mod))
+
+
+#Select model form for growth **
