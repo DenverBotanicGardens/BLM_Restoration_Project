@@ -633,17 +633,27 @@ eff.ht.bio11 <- as.data.frame(predictorEffects(ERNA.ht.bv.mod)[2]) #Extract valu
 eff.ht.bio17 <- as.data.frame(predictorEffects(ERNA.ht.bv.mod)[3])
 eff.ht.bio19 <- as.data.frame(predictorEffects(ERNA.ht.bv.mod)[4])
 
-plot(as.vector(t(ERNA.mn[,19])), ERNA.mn$Height_MN, bg=ERNA.mn$HexCode, pch=21, col="black", cex=1.3, main=NA, 
-     cex.main=1.5, xlab=bv.names[2], ylab="Height (cm)", cex.lab=1.5, cex.axis=1.1)
+plot(as.vector(t(ERNA.mn[,19])), ERNA.mn$Height_MN, bg=ERNA.mn$HexCode, pch=21, col="black", cex=1.5, main=NA, 
+     cex.main=1.5, xlab=bv.names[2], ylab="Height (cm)", cex.lab=1.5, cex.axis=1.1, ylim=c(25,60))
 arrows(as.vector(t(ERNA.mn[,19])), ERNA.mn$Height_MN-ERNA.mn$Height_SE, as.vector(t(ERNA.mn[,19])), 
        ERNA.mn$Height_MN+ERNA.mn$Height_SE, angle=90, col="grey", code=3, length=0, lwd=1.6) #Error bars
 lines(eff.ht.bio11$bio11[,1], eff.ht.bio11$bio11[,2],lwd=1,col="black") #Model fit
-#plot(as.vector(t(ERNA.mn[,11])), ERNA.mn$Height_MN, col=ERNA.mn$SdZnColful, pch=19, cex=1.3, main=NA, 
-#     cex.main=1.5, xlab=bv.names[2], ylab="Height (cm)", cex.lab=1.5, cex.axis=1.1)
-#arrows(as.vector(t(ERNA.mn[,11])), ERNA.mn$Height_MN-ERNA.mn$Height_SE, as.vector(t(ERNA.mn[,11])), 
-#       ERNA.mn$Height_MN+ERNA.mn$Height_SE, 
-#       angle=90, col=ERNA.mn$SdZnColful, code=3, length=0, lwd=1.6) 
-#lines(eff.bio5$bio5[,1], eff.bio5$bio5[,2],lwd=2,col="grey")
+abline(v=ERNA.biovar$bio11[20], col="red")
+
+plot(as.vector(t(ERNA.mn[,25])), ERNA.mn$Height_MN, bg=ERNA.mn$HexCode, pch=21, col="black", cex=1.5, main=NA, 
+     cex.main=1.5, xlab=bv.names[3], ylab="Height (cm)", cex.lab=1.5, cex.axis=1.1, ylim=c(25,60))
+arrows(as.vector(t(ERNA.mn[,25])), ERNA.mn$Height_MN-ERNA.mn$Height_SE, as.vector(t(ERNA.mn[,25])), 
+       ERNA.mn$Height_MN+ERNA.mn$Height_SE, angle=90, col="grey", code=3, length=0, lwd=1.6) #Error bars
+lines(eff.ht.bio17$bio17[,1], eff.ht.bio17$bio17[,2],lwd=1,col="black") #Model fit
+abline(v=ERNA.biovar$bio17[20], col="red")
+
+plot(as.vector(t(ERNA.mn[,27])), ERNA.mn$Height_MN, bg=ERNA.mn$HexCode, pch=21, col="black", cex=1.5, main=NA, 
+     cex.main=1.5, xlab=bv.names[4], ylab="Height (cm)", cex.lab=1.5, cex.axis=1.1, ylim=c(25,60))
+arrows(as.vector(t(ERNA.mn[,27])), ERNA.mn$Height_MN-ERNA.mn$Height_SE, as.vector(t(ERNA.mn[,27])), 
+       ERNA.mn$Height_MN+ERNA.mn$Height_SE, angle=90, col="grey", code=3, length=0, lwd=1.6) #Error bars
+lines(eff.ht.bio19$bio19[,1], eff.ht.bio19$bio19[,2],lwd=1,col="black") #Model fit
+abline(v=ERNA.biovar$bio19[20], col="red")
+
 
 
 
@@ -656,3 +666,4 @@ plot(as.vector(t(ERNA23.mn[,19])), ERNA23.mn$DaysToFlwr_MN, bg=ERNA23.mn$HexCode
 arrows(as.vector(t(ERNA23.mn[,19])), ERNA23.mn$DaysToFlwr_MN-ERNA23.mn$DaysToFlwr_SE, as.vector(t(ERNA.mn[,19])), 
        ERNA23.mn$DaysToFlwr_MN+ERNA23.mn$DaysToFlwr_SE, angle=90, col="grey", code=3, length=0, lwd=1.6) #Error bars
 lines(eff.df.bio11$bio11[,1], eff.df.bio11$bio11[,2],lwd=1,col="black") #Model fit
+abline(v=ERNA.biovar$bio11[20], col="red")
