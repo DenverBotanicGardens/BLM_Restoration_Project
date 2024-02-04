@@ -101,7 +101,7 @@ ERNA.cl <- ERNA.cl[ERNA.cl$Replaced_YorN !="Y",]
 
 ## 2023 -----------------------------
 ## For 2023, if H, harvested, harvest, h., coll AGB in notes (e.g. 'H' in Notes_20231013) subsequent surv should be NA
-setdiff(ERNA23$Notes_20230811,ERNA23$Notes_20230811.1) #Check difference in these two cols
+#setdiff(ERNA23$Notes_20230811,ERNA23$Notes_20230811.1) #Check difference in these two cols
 
 unique(ERNA23$Notes_20230728[ERNA23$Notes_20230728!=""])
 unique(ERNA23$Notes_20230811.1[ERNA23$Notes_20230811.1 !=""])
@@ -279,7 +279,7 @@ ERNA23$FlwrYesNo <- NA
 ERNA23$FlwrYesNo[!is.na(ERNA23$DaysToFlwr)] <- 1                               #If there's a value in Days to Flwr, then enter Yes
 ERNA23$FlwrYesNo[is.na(ERNA23$DaysToFlwr) & ERNA23$Survival_20231013==1] <- 0  #If plt alive and didn't flw, enter No
 nrow(ERNA23[ERNA23$FlwrYesNo==0,])                                             #Num that survived but didn't flower 
-ERNA23 %>% group_by(Source) %>% dplyr::summarise(FlwrYesNo_Avg=mean(FlwrYesNo,na.rm=TRUE)) #Or could try sum and/or NUM=n()
+#ERNA23 %>% group_by(Source) %>% dplyr::summarise(FlwrYesNo_Avg=mean(FlwrYesNo,na.rm=TRUE)) #Or could try sum and/or NUM=n()
 ## ---------------------------------------------------------------
 ## ---------------------------------------------------------------
 
@@ -321,9 +321,15 @@ ERNA.cl$AliveYesNo <- 0
 ERNA.cl$AliveYesNo[ERNA.cl$Survival_20221108==1] <- 1
 ERNA.cl$AliveYesNo[(ERNA.cl$OrigPltSurvival_20220518==0) & (ERNA.cl$Replaced_YorN=="N" | ERNA.cl$Replaced_YorN=="")] <- NA
 #ERNA.cl$AliveYesNo[(ERNA.cl$OrigPltSurvival_20220518==0 | ERNA.cl$Survival_20220608==0) & (ERNA.cl$Replaced_YorN=="N" | ERNA.cl$Replaced_YorN=="")] <- NA
-ERNA.cl %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_Avg=mean(AliveYesNo,na.rm=TRUE))
+#ERNA.cl %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_Avg=mean(AliveYesNo,na.rm=TRUE))
 ## ---------------------------------------------------------------
 
+
+
+## ADD SOME 2023 DATA TO 2022 DATAFRAME TO ALLOW FOR COMPARISONS AND FILTERING 
+ERNA23.sel <- ERNA23 %>% dplyr::select(c("ID","DaysToFlwr","AliveYesNo","FlwrYesNo")) 
+ERNA.cl <- left_join(ERNA.cl, ERNA23.sel, by="ID") 
+## ---------------------------------------------------------------
 
 
 
@@ -444,15 +450,15 @@ boxplot(DaysToFlwr ~ ERNA.dfByMed, data=ERNA23,
 ## Blank plot
 plot.new()
 legend("center", unique(ERNA.meds$seed_zone[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), col="black",
-       pt.bg=unique(ERNA.meds$HexCode[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), cex=2.25, pch=21)
+       pt.bg=unique(ERNA.meds$HexCode[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), cex=1.24, pch=21)
 ## -------------------------
 
 
-## 2023 - Plots means as points are SE as error bars
+## 2023 - Plots means as points and SE as error bars
 ERNA23.mn <- ERNA23 %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_MN=mean(AliveYesNo,na.rm=TRUE),
                                          AliveYesNo_SE=calcSE(AliveYesNo), DaysToFlwr_MN=mean(DaysToFlwr,na.rm=TRUE),
                                          DaysToFlwr_SE=calcSE(DaysToFlwr), FlwrYesNo_MN=mean(FlwrYesNo,na.rm=TRUE),
-                                         FlwrYesNo_SE=calcSE(FlwrYesNo)) #Or could try sum and/or NUM=n()
+                                         FlwrYesNo_SE=calcSE(FlwrYesNo), AliveYesNo_SD=sd(AliveYesNo,na.rm=TRUE)) #Or could try sum and/or NUM=n()
 
 ERNA23.mn <- left_join(ERNA23.mn, ERNA.biovar, by="Source")
 
@@ -474,6 +480,12 @@ arrows(c(1:20), ERNA23.mn$DaysToFlwr_MN+ERNA23.mn$DaysToFlwr_SE, c(1:20), ERNA23
 
 legend("bottonright", unique(ERNA23.mn$SdZnAbbrev[order(ERNA23.mn$SdZnOrder)]), 
        col=unique(BOGR.meds$SdZnColful[order(BOGR.meds$SdZnOrder)]), cex=1.95, pch=19)
+
+
+## *****
+## Filter 2023 survival based on 2022 data (i.e. did plt die early due to transplant shock) an re-plot means and sE ***
+## *****
+
 
 ## 2023 - Bar plots of data (color by seed zone)
 ## Order populations for plotting BY VALUE
@@ -537,13 +549,52 @@ plot(ERNA.meds$GrowthSp_MD, ERNA.meds$GrowthSpE_MD)
 
 ## ERNA - ESTIMATE VARIATION WITHIN POPULATIONS ------------------------------------------------------
 ## Calculate the coefficient of variation 
-#ERNA.cv <- ERNA.cl %>% group_by(Source) %>% summarise(Height_CV=cv(Length_cm_20220801, na.rm=TRUE),
-#                                                      Growth_CV=cv(GrwthRate_Relative, na.rm=TRUE),
-#                                                      DaysToFlwr_CV=cv(DaysToFlwr, na.rm=TRUE),
-#                                                      Inf_CV=cv(NumInf, na.rm=TRUE))
-
-#ERNA.cv <- left_join(ERNA.cv, ERNA.SdZn, by="Source")
+ERNA.cv <- ERNA.cl %>% group_by(Source) %>% summarise(Height_CV=cv(Length_cm_20220915, na.rm=TRUE),
+                                                      Growth_CV=cv(GrwthRate_Relative, na.rm=TRUE),
+                                                      DaysToFlwr_CV=cv(DaysToFlwr, na.rm=TRUE))
+#GrowthE_CV=cv(GrwthRateE_Relative, na.rm=TRUE))
+ERNA.cv$Sum_CV <- rowSums(ERNA.cv[2:5]) #Order by sum of cv
+ERNA.cv <- ERNA.cv[order(ERNA.cv$Sum_CV),]
+ERNA.cv <- left_join(ERNA.cv, ERNA.SdZn, by="Source")
 ## ----------------------------
+
+
+## Make a vertical stripchart showing the CVs for all traits for each population
+par(mfrow=c(1,2))
+
+ERNA.cvH <- as.data.frame(cbind(ERNA.cv$Source, ERNA.cv$Height_CV))
+ERNA.cvH$Trait <- "Height_CV"
+ERNA.cvG <- as.data.frame(cbind(ERNA.cv$Source, ERNA.cv$Growth_CV))
+ERNA.cvG$Trait <- "Growth_CV"
+#ERNA.cvGE <- as.data.frame(cbind(ERNA.cv$Source, ERNA.cv$GrowthE_CV))
+#ERNA.cvGE$Trait <- "GrowthE_CV"
+ERNA.cvP <- as.data.frame(cbind(ERNA.cv$Source, ERNA.cv$DaysToFlwr_CV))
+ERNA.cvP$Trait <- "DaysToFlwr_CV"
+ERNA.cvAll <- rbind(ERNA.cvH, ERNA.cvG, ERNA.cvP) #ERNA.cvGE, 
+colnames(ERNA.cvAll) <- c("Source","CV","Trait")
+
+stripchart(as.numeric(CV) ~ Source, data=ERNA.cvAll, vertical=TRUE, pch=19, group.names=ERNA.cv$PopAbbrev, 
+           las=2, ylab="Coefficient of variation", cex.lab=1.4, cex=1.25)
+ERNA.Gcol <- ERNA.cvAll$Trait == "Growth_CV"
+stripchart(as.numeric(CV) ~ Source, data=ERNA.cvAll[ERNA.Gcol,], col="dodgerblue", vertical=TRUE, pch=19,cex=1.25, add=TRUE)
+#ERNA.GEcol <- ERNA.cvAll$Trait == "GrowthE_CV"
+#stripchart(as.numeric(CV) ~ Source, data=ERNA.cvAll[ERNA.GEcol,], col="blueviolet", vertical=TRUE, pch=19,cex=1.25, add=TRUE)
+ERNA.Pcol <- ERNA.cvAll$Trait == "DaysToFlwr_CV"
+stripchart(as.numeric(CV) ~ Source, data=ERNA.cvAll[ERNA.Pcol,], col="bisque3", vertical=TRUE, pch=19,cex=1.25, add=TRUE)
+
+## Make stacked barplot to visualize cv for each trait and population
+ERNA.cvT <- as.matrix(rbind(as.vector(ERNA.cv$Height_CV), as.vector(ERNA.cv$Growth_CV),
+                                as.vector(ERNA.cv$DaysToFlwr_CV)))#, as.vector(ERNA.cv$GrowthE_CV)
+colnames(ERNA.cvT) <- ERNA.cv$Source
+
+barplot(ERNA.cvT, names=ERNA.cv$PopAbbrev, las=2, col=c("black","dodgerblue","bisque3"),
+        ylab="Coefficient of variation", cex.lab=1.3)
+plot.new()
+legend("center", c("Flowering phenology","Growth rate","Plant height"), 
+       col=c("bisque3","dodgerblue","black"), cex=1.7, pch=15, bty="n")
+## ------------------------------------------------------------------------------
+
+
 
 
 
