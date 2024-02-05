@@ -41,7 +41,6 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 
 ## LOAD DATA --------------------------------------------------------------------------------------
 BOGR <- read.csv(file="Chatfield/20230301_ChatfieldData_BOGR.csv", sep=",", header=TRUE, dec=".")
-
 BOGR.SdZn <- read.csv(file="AGoebl/Seeds/20230824_BOGR_LatLongSdZn.csv", sep=",", header=TRUE, dec=".")
 BOGR.biovar <- readRDS("AGoebl/Seeds/20230825_BOGR_BiovarsAvg1980_2021")
 ## ----------------------------------------------------------------------------------------------
@@ -250,6 +249,13 @@ for (pp in 1:length(BOGR.PhenoCol.List)) {
 }
 
 
+## Make a flowered Yes or No column
+BOGR.cl$FlwrYesNo <- NA 
+BOGR.cl$FlwrYesNo[!is.na(BOGR.cl$DaysToFlwr)] <- 1                                #If there's a value in Days to Flwr, then enter Yes
+BOGR.cl$FlwrYesNo[is.na(BOGR.cl$DaysToFlwr) & BOGR.cl$Survival_20220927==1] <- 0  #If plt alive and didn't flw, enter No
+nrow(BOGR.cl[BOGR.cl$FlwrYesNo==0,])                                              #Num that survived but didn't flower 
+BOGR.cl %>% group_by(Source) %>% dplyr::summarise(FlwrYesNo_Avg=mean(FlwrYesNo,na.rm=TRUE)) #Or could try sum and/or NUM=n()?
+
 
 ## 2023
 ## ---------------------------------------------------------------
@@ -276,7 +282,16 @@ BOGR.cl$GrwthRate_Relative <- (BOGR.cl$Length_cm_20220801-BOGR.cl$Length_cm_2022
 
 
 ## BOGR - ESTIMATE SURVIVAL 
+## 2022
+BOGR.cl$AliveYesNo <- 0
+BOGR.cl$AliveYesNo[BOGR.cl$Survival_20220927==1] <- 1
+BOGR.cl$AliveYesNo[(BOGR.cl$OrigPltSurvival_20220531==0) & (BOGR.cl$Replaced_YorN_20220606=="N" | BOGR.cl$Replaced_YorN_20220606=="")] <- NA
+BOGR.cl %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_Avg=mean(AliveYesNo,na.rm=TRUE))
+
 ## For 2023, estimate survival based on if alive at end of season
+#BOGR23$AliveYesNo <- 0
+#BOGR23$AliveYesNo[BOGR23$Survival_20231013==1] <- 1
+# ** Remove plants that died early in 2022 (e.g. from transplant shock) and were not replaced **
 ## -----------------------------------------------------------------------------------------
 
 

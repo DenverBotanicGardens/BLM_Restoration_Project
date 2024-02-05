@@ -206,15 +206,6 @@ colnames(ERNA.biovar) <- c("Pop","bio1","bio2","bio3","bio4","bio5","bio6","bio7
                            "bio17","bio18","bio19","Source")
 
 
-
-## Subset of ERNA seed zone colors (all listed in ERNA.SdZn file) ** Delete? **
-#ERNA.SdZn$HexCode[grepl("0 - 5 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "#F0FFF0"     #semi-humid, v.cold #honeydew #
-#ERNA.SdZn$HexCode[grepl("20 - 25 Deg. F. / 12 - 30", ERNA.SdZn$seed_zone)] = "#CD6090" #arid, v.warm #hotpink3 
-#ERNA.SdZn$HexCode[grepl("5 - 10 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "#C1FFC1"    #semi-humid, cold #darkseagreen1 
-#ERNA.SdZn$HexCode[grepl("15 - 20 Deg. F. / 2 - 3", ERNA.SdZn$seed_zone)] = "#87CEFF"   #humid, warm #skyblue1 
-## ---------------------------
-
-
 ## Add seed zone name abbreviation column
 ERNA.SdZn$SdZnAbbrev[grepl("15 - 20 Deg. F. / 2 - 3", ERNA.SdZn$seed_zone)] = "humid, warm"  
 ERNA.SdZn$SdZnAbbrev[grepl("0 - 5 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "semi-humid, v.cold" 
