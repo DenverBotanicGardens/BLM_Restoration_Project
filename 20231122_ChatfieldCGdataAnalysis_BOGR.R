@@ -43,13 +43,16 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 BOGR <- read.csv(file="Chatfield/20230301_ChatfieldData_BOGR.csv", sep=",", header=TRUE, dec=".")
 BOGR.SdZn <- read.csv(file="AGoebl/Seeds/20230824_BOGR_LatLongSdZn.csv", sep=",", header=TRUE, dec=".")
 BOGR.biovar <- readRDS("AGoebl/Seeds/20230825_BOGR_BiovarsAvg1980_2021")
+BOGR23 <- read.csv(file="Chatfield/20240205_ChatfieldData2023_BOGR.csv", sep=",", header=TRUE, dec=".")
 ## ----------------------------------------------------------------------------------------------
 
 
 
 ## BOGR - DATA CLEAN UP ---------------------------------------------------------------------------
 #str(BOGR)
+str(BOGR23)
 BOGR$Source <- as.factor(BOGR$Source)
+BOGR23$Source <- as.factor(BOGR23$Source)
 
 ## If OrigPltSurv_20220531=0 & plt not replaced (N), ignore data for this plt, i.e. future surv should be NA, not 0
 BOGR.cl <- BOGR[BOGR$OrigPltSurvival_20220531==1 | (BOGR$OrigPltSurvival_20220531==0 & BOGR$Replaced_YorN_20220606=="Y"),]
@@ -69,6 +72,11 @@ BOGR.cl[BOGR.cl$Phenology_20220701 - floor(BOGR.cl$Phenology_20220701) != 0 &
        !is.na(BOGR.cl$Phenology_20220701),]
 BOGR.cl[BOGR.cl$NumInflorescence_20220927 - floor(BOGR.cl$NumInflorescence_20220927) != 0 & 
        !is.na(BOGR.cl$NumInflorescence_20220927),]
+BOGR23[BOGR23$Survival_20230922 - floor(BOGR23$Survival_20230922) != 0,]
+BOGR23[BOGR23$Flowering_20230922 - floor(BOGR23$Flowering_20230922) != 0 &
+       !is.na(BOGR23$Flowering_20230922),]
+BOGR23[BOGR23$Flowering_20230613 - floor(BOGR23$Flowering_20230613) != 0 &
+         !is.na(BOGR23$Flowering_20230613),]
 
 # ** Check that length is only numeric
 # ** Check that once zero in surv on 6/27 or later, stays zero (cannot become 1 later) ** Look at attempt for ARFR **
@@ -82,6 +90,8 @@ BOGR.cl[BOGR.cl$NumInflorescence_20220927 - floor(BOGR.cl$NumInflorescence_20220
 #Some plts that weren't dead & had sz measure on 5/27 were replaced. In this case, don't use length_0527.
 #If length_0527 is not NA and Replaced = Y, then ignore length_527 as it doesn't correspond to plt names in source col
 #ARFR.cl$Length_cm_20220527[!is.na(ARFR.cl$Length_cm_20220527) & ARFR.cl$Replaced_YorN_20220531=="Y"] <- NA
+
+## ** Add checks for 2023 data **
 ## ----------------------------------------------------------------------------------------------
 
 
@@ -187,8 +197,10 @@ BOGR.SdZn$SdZnOrder[grepl("5 - 10 Deg. F. / 12 - 30", BOGR.SdZn$seed_zone)] = "I
 
 
 ## BOGR - COMBINE DATA TYPES --------------------------------------------
-BOGR.cl <- left_join(BOGR.cl, BOGR.SdZn, by="Source")
+BOGR.biovar <- left_join(BOGR.biovar, BOGR.SdZn, by="Source")
+#BOGR.cl <- left_join(BOGR.cl, BOGR.SdZn, by="Source")
 BOGR.cl <- left_join(BOGR.cl, BOGR.biovar, by="Source")
+BOGR23 <- left_join(BOGR23, BOGR.biovar, by="Source")
 ## ---------------------------------------------------------------
 
 
@@ -248,7 +260,6 @@ for (pp in 1:length(BOGR.PhenoCol.List)) {
   BOGR.cl$DaysToFlwr[BOGR.cl[,BOGR.PhenoCol.List[pp]]>=3 & is.na(BOGR.cl$DaysToFlwr)] <- as.integer(BOGR.DaysToFlwr)[pp]
 }
 
-
 ## Make a flowered Yes or No column
 BOGR.cl$FlwrYesNo <- NA 
 BOGR.cl$FlwrYesNo[!is.na(BOGR.cl$DaysToFlwr)] <- 1                                #If there's a value in Days to Flwr, then enter Yes
@@ -257,7 +268,28 @@ nrow(BOGR.cl[BOGR.cl$FlwrYesNo==0,])                                            
 BOGR.cl %>% group_by(Source) %>% dplyr::summarise(FlwrYesNo_Avg=mean(FlwrYesNo,na.rm=TRUE)) #Or could try sum and/or NUM=n()?
 
 
+
 ## 2023
+## Calculate days to first flower 
+BOGR.StartDate <- as.Date("2023-01-01")
+BOGR.PhenoCol.List <- colnames(BOGR23)[grepl("Flowering*", colnames(BOGR23))]   #Obtain phenology column names
+BOGR.Pheno.List <- str_replace(BOGR.PhenoCol.List, "Flowering_", "")            #Obtain just date from phenology columns
+BOGR.Pheno.List <- as.Date(BOGR.Pheno.List, "%Y%m%d")
+BOGR.DaysToFlwr <- BOGR.Pheno.List - BOGR.StartDate                             #Calculate days from Jan 1 to each phenology survey 
+
+## Loop over each phenology column & enter the num days since Jan 1 when a 1 (bud or later repro stage) first appears
+BOGR23$DaysToFlwr <- NA
+for (pp in 1:length(BOGR.PhenoCol.List)) {
+  BOGR23$DaysToFlwr[BOGR23[,BOGR.PhenoCol.List[pp]]==1 & is.na(BOGR23$DaysToFlwr)] <- as.integer(BOGR.DaysToFlwr)[pp]
+}
+BOGR23 %>% group_by(Source) %>% dplyr::summarise(Pheno_Avg=mean(DaysToFlwr,na.rm=TRUE))
+
+## Make a flowered Yes or No column
+BOGR23$FlwrYesNo <- NA 
+BOGR23$FlwrYesNo[!is.na(BOGR23$DaysToFlwr)] <- 1                               #If there's a value in Days to Flwr, then enter Yes
+BOGR23$FlwrYesNo[is.na(BOGR23$DaysToFlwr) & BOGR23$Survival_20230922==1] <- 0  #If plt alive and didn't flw, enter No
+nrow(BOGR23[BOGR23$FlwrYesNo==0,])                                             #Num that survived but didn't flower 
+BOGR23 %>% group_by(Source) %>% dplyr::summarise(FlwrYesNo_Avg=mean(FlwrYesNo,na.rm=TRUE)) #Or could try sum and/or NUM=n()?
 ## ---------------------------------------------------------------
 
 
@@ -268,7 +300,7 @@ BOGR.cl %>% group_by(Source) %>% dplyr::summarise(FlwrYesNo_Avg=mean(FlwrYesNo,n
 BOGR.cl$NumInf <- c(BOGR.cl$NumInflorescence_20220927[BOGR.cl$Block<7], BOGR.cl$NumInf_Coll_20221014[BOGR.cl$Block>=7])
 #BOGR.cl %/% unite(BOGR.cl, col='NumInfAll', c('NumInf','NumInc_Coll_20221108'), sep='-')
 
-# ** If numInf col has value greater than 0, phenol for corresponding date should be >2 **
+# ** If numInf col has value greater than 0, pheno for corresponding date should be >2 **
 ## ---------------------------------------------------------------
 
 
@@ -289,8 +321,9 @@ BOGR.cl$AliveYesNo[(BOGR.cl$OrigPltSurvival_20220531==0) & (BOGR.cl$Replaced_Yor
 BOGR.cl %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_Avg=mean(AliveYesNo,na.rm=TRUE))
 
 ## For 2023, estimate survival based on if alive at end of season
-#BOGR23$AliveYesNo <- 0
-#BOGR23$AliveYesNo[BOGR23$Survival_20231013==1] <- 1
+BOGR23$AliveYesNo <- 0
+BOGR23$AliveYesNo[BOGR23$Survival_20230922==1] <- 1
+BOGR23 %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_Avg=mean(AliveYesNo,na.rm=TRUE))
 # ** Remove plants that died early in 2022 (e.g. from transplant shock) and were not replaced **
 ## -----------------------------------------------------------------------------------------
 
@@ -352,7 +385,7 @@ BOGR.meds <- BOGR.cl %>% group_by(Source) %>%
              dplyr::summarise(Height_MD=median(Length_cm_20220801,na.rm=TRUE),
                               Inf_MD=median(NumInf,na.rm=TRUE),Growth_MD=median(GrwthRate_Relative,na.rm=TRUE),
                               DaysToFlwr_MD=median(DaysToFlwr,na.rm=TRUE))
-BOGR.meds <- left_join(BOGR.meds, BOGR.SdZn, by="Source") 
+BOGR.meds <- left_join(BOGR.meds, BOGR.biovar, by="Source") 
 
 ## Boxplots of raw data 
 par(mfrow=c(1,1))
@@ -398,6 +431,67 @@ boxplot(NumInf ~ BOGR.htByMed, data=BOGR.cl, las=2,
 boxplot(DaysToFlwr ~ BOGR.htByMed, data=BOGR.cl, las=2,
         xlab="Population", ylab="Days to flower", cex.lab=1.25, names=BOGR.meds$PopAbbrev,
         cex.axis=0.7, main="Bouteloua gracilis", cex.main=1.5, col=BOGR.meds$SdZnColful)
+## ------------------------------------------
+
+
+
+
+## 2023
+## Order by time to flower 
+BOGR.dfByMed <- with(BOGR23, reorder(Source, DaysToFlwr, median, na.rm=TRUE))
+BOGR23.meds <- BOGR23 %>% group_by(Source) %>% 
+  dplyr::summarise(DaysToFlwr_MD=median(DaysToFlwr,na.rm=TRUE))
+BOGR23.meds <- left_join(BOGR23.meds, BOGR.biovar, by="Source")
+
+par(mfrow=c(1,2))
+
+## Days to Flwr
+BOGR23.meds <- BOGR23.meds[order(BOGR23.meds$DaysToFlwr_MD),] #Order by median 
+boxplot(DaysToFlwr ~ BOGR.dfByMed, data=BOGR23,
+        xlab=NA, ylab="Days to first flower", cex.lab=1.25,
+        cex.axis=0.99, names=BOGR23.meds$PopAbbrev, las=2,
+        main="PHENOLOGY", cex.main=1.5, col=BOGR23.meds$HexCode)
+
+## Blank plot
+plot.new()
+legend("center", unique(BOGR23.meds$SdZnAbbrev[order(BOGR23.meds$SdZnOrder, decreasing=FALSE)]), col="black",
+       pt.bg=unique(BOGR23.meds$HexCode[order(BOGR23.meds$SdZnOrder, decreasing=FALSE)]), cex=1.24, pch=21)
+## -------------------------
+
+
+
+## 2023 - Plots means as points and SE as error bars
+BOGR23.mn <- BOGR23 %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_MN=mean(AliveYesNo,na.rm=TRUE),
+                                                              AliveYesNo_SE=calcSE(AliveYesNo), DaysToFlwr_MN=mean(DaysToFlwr,na.rm=TRUE),
+                                                              DaysToFlwr_SE=calcSE(DaysToFlwr), FlwrYesNo_MN=mean(FlwrYesNo,na.rm=TRUE),
+                                                              FlwrYesNo_SE=calcSE(FlwrYesNo), AliveYesNo_SD=sd(AliveYesNo,na.rm=TRUE),
+                                                              NUM=n()) #Or could try sum and/or NUM=n()
+
+BOGR23.mn <- left_join(BOGR23.mn, BOGR.biovar, by="Source")
+
+BOGR23.mn <- BOGR23.mn[order(BOGR23.mn$SdZnOrder),]
+plot(c(1:21), BOGR23.mn$AliveYesNo_MN, col="black", pch=21, cex=1.5, ylab="Survival rate",xlab="Population",
+     ylim=c(0.65,1.05), bg=BOGR23.mn$HexCode, xaxt="n",cex.lab=1.2)
+arrows(c(1:21), BOGR23.mn$AliveYesNo_MN+BOGR23.mn$AliveYesNo_SE, c(1:21), BOGR23.mn$AliveYesNo_MN-BOGR23.mn$AliveYesNo_SE,
+       angle=90, length=0, col="grey")
+
+plot(c(1:21), BOGR23.mn$FlwrYesNo_MN, col="black", pch=21, cex=1.5, ylab="Flowering rate",xlab="Population",
+     ylim=c(0.7,1.01), bg=BOGR23.mn$HexCode, xaxt="n",cex.lab=1.2)
+arrows(c(1:21), BOGR23.mn$FlwrYesNo_MN+BOGR23.mn$FlwrYesNo_SE, c(1:21), BOGR23.mn$FlwrYesNo_MN-BOGR23.mn$FlwrYesNo_SE,
+       angle=90, length=0, col="grey")
+
+plot(c(1:21), BOGR23.mn$DaysToFlwr_MN, col="black", pch=21, cex=1.5, ylab="Days to first flower",xlab="Population",
+     ylim=c(165,215), bg=BOGR23.mn$HexCode, xaxt="n",cex.lab=1.2)
+arrows(c(1:21), BOGR23.mn$DaysToFlwr_MN+BOGR23.mn$DaysToFlwr_SE, c(1:21), BOGR23.mn$DaysToFlwr_MN-BOGR23.mn$DaysToFlwr_SE,
+       angle=90, length=0, col="grey")
+
+legend("bottonright", unique(BOGR23.mn$SdZnAbbrev[order(BOGR23.mn$SdZnOrder)]), 
+       col=unique(BOGR.meds$SdZnColful[order(BOGR.meds$SdZnOrder)]), cex=1.95, pch=19)
+
+
+## *****
+## Filter 2023 survival based on 2022 data (i.e. did plt die early due to transplant shock) an re-plot means and sE ***
+## *****
 ## ---------------------------------------------------
 
 
@@ -669,7 +763,7 @@ BOGR.summ <- BOGR.cl %>% group_by(Source) %>%
                    Growth_MN=mean(GrwthRate_Relative, na.rm=TRUE), Growth_SE=calcSE(GrwthRate_Relative), 
                    BIO4=mean(bio4, na.rm=TRUE), BIO5=mean(bio5, na.rm=TRUE),BIO11=mean(bio11, na.rm=TRUE),
                    BIO12=mean(bio12, na.rm=TRUE), BIO17=mean(bio17, na.rm=TRUE))
-BOGR.summ <- left_join(BOGR.summ, BOGR.SdZn, by="Source")
+BOGR.summ <- left_join(BOGR.summ, BOGR.biovar, by="Source")
 
 
 #Loop over columns with biovars and plot
@@ -751,16 +845,18 @@ effInf.bio5 <- as.data.frame(predictorEffects(BOGR.inf.bv.mod)[2])
 effInf.bio11 <- as.data.frame(predictorEffects(BOGR.inf.bv.mod)[3]) 
 #effInf.bio17 <- as.data.frame(predictorEffects(BOGR.inf.bv.mod)[5])
 
-plot(as.vector(t(BOGR.summ[,10])), BOGR.summ$Inf_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
-     cex.main=1.5, xlab=bv.names[1], ylab="Number of inflorescences", cex.lab=1.5, cex.axis=1.1, log='y')
-arrows(as.vector(t(BOGR.summ[,10])), BOGR.summ$Inf_MN-BOGR.summ$Inf_SE, as.vector(t(BOGR.summ[,10])), 
-       BOGR.summ$Inf_MN+BOGR.summ$Inf_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+#plot(as.vector(t(BOGR.summ[,10])), BOGR.summ$Inf_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+#     cex.main=1.5, xlab=bv.names[1], ylab="Number of inflorescences", cex.lab=1.5, cex.axis=1.1, log='y')
+#arrows(as.vector(t(BOGR.summ[,10])), BOGR.summ$Inf_MN-BOGR.summ$Inf_SE, as.vector(t(BOGR.summ[,10])), 
+#       BOGR.summ$Inf_MN+BOGR.summ$Inf_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
 #lines(effInf.bio4$bio4[,1], effInf.bio4$bio4[,2],lwd=2,col="grey")
-plot(as.vector(t(BOGR.summ[,11])), BOGR.summ$Inf_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+plot(as.vector(t(BOGR.summ[,11])), BOGR.summ$Inf_MN, col=BOGR.summ$HexCode.x, pch=19, cex=1.3, main=NA, 
      cex.main=1.5, xlab=bv.names[2], ylab="Number of inflorescences", cex.lab=1.5, cex.axis=1.1, log='y')
 arrows(as.vector(t(BOGR.summ[,11])), BOGR.summ$Inf_MN-BOGR.summ$Inf_SE, as.vector(t(BOGR.summ[,11])), 
-       BOGR.summ$Inf_MN+BOGR.summ$Inf_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
-lines(effInf.bio5$bio5[,1], effInf.bio5$bio5[,2],lwd=2,col="grey")
+       BOGR.summ$Inf_MN+BOGR.summ$Inf_SE, angle=90, col=BOGR.summ$HexCode.x, code=3, length=0, lwd=1.6) 
+lines(effInf.bio5$bio5[,1], effInf.bio5$bio5[,2],lwd=1,col="grey")
+abline(v=ERNA.biovar$bio5[20], col="red")
+
 plot(as.vector(t(BOGR.summ[,12])), BOGR.summ$Inf_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
      cex.main=1.5, xlab=bv.names[3], ylab="Number of inflorescences", cex.lab=1.5, cex.axis=1.1, log='y')
 arrows(as.vector(t(BOGR.summ[,12])), BOGR.summ$Inf_MN-BOGR.summ$Inf_SE, as.vector(t(BOGR.summ[,12])), 
@@ -796,19 +892,21 @@ effDf.bio11 <- as.data.frame(predictorEffects(BOGR.df.bv.mod)[3])
 effDf.bio12 <- as.data.frame(predictorEffects(BOGR.df.bv.mod)[4]) 
 effDf.bio17 <- as.data.frame(predictorEffects(BOGR.df.bv.mod)[5])
 
-plot(as.vector(t(BOGR.summ[,10])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
-     cex.main=1.5, xlab=bv.names[1], ylab="Days to first flower", cex.lab=1.5, cex.axis=1.1)
-arrows(as.vector(t(BOGR.summ[,10])), BOGR.summ$DaysToFlwr_MN-BOGR.summ$DaysToFlwr_SE, as.vector(t(BOGR.summ[,10])), 
-       BOGR.summ$DaysToFlwr_MN+BOGR.summ$DaysToFlwr_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
-plot(as.vector(t(BOGR.summ[,11])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
-     cex.main=1.5, xlab=bv.names[2], ylab="Days to first flower", cex.lab=1.5, cex.axis=1.1)
-arrows(as.vector(t(BOGR.summ[,11])), BOGR.summ$DaysToFlwr_MN-BOGR.summ$DaysToFlwr_SE, as.vector(t(BOGR.summ[,11])), 
-       BOGR.summ$DaysToFlwr_MN+BOGR.summ$DaysToFlwr_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
-plot(as.vector(t(BOGR.summ[,12])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+#plot(as.vector(t(BOGR.summ[,10])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+#     cex.main=1.5, xlab=bv.names[1], ylab="Days to first flower", cex.lab=1.5, cex.axis=1.1)
+#arrows(as.vector(t(BOGR.summ[,10])), BOGR.summ$DaysToFlwr_MN-BOGR.summ$DaysToFlwr_SE, as.vector(t(BOGR.summ[,10])), 
+#       BOGR.summ$DaysToFlwr_MN+BOGR.summ$DaysToFlwr_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+#plot(as.vector(t(BOGR.summ[,11])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
+#     cex.main=1.5, xlab=bv.names[2], ylab="Days to first flower", cex.lab=1.5, cex.axis=1.1)
+#arrows(as.vector(t(BOGR.summ[,11])), BOGR.summ$DaysToFlwr_MN-BOGR.summ$DaysToFlwr_SE, as.vector(t(BOGR.summ[,11])), 
+#       BOGR.summ$DaysToFlwr_MN+BOGR.summ$DaysToFlwr_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
+plot(as.vector(t(BOGR.summ[,12])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$HexCode.x, pch=19, cex=1.3, main=NA, 
      cex.main=1.5, xlab=bv.names[3], ylab="Days to first flower", cex.lab=1.5, cex.axis=1.1)
 arrows(as.vector(t(BOGR.summ[,12])), BOGR.summ$DaysToFlwr_MN-BOGR.summ$DaysToFlwr_SE, as.vector(t(BOGR.summ[,12])), 
-       BOGR.summ$DaysToFlwr_MN+BOGR.summ$DaysToFlwr_SE, angle=90, col=BOGR.summ$SdZnColful, code=3, length=0, lwd=1.6) 
-lines(effDf.bio11$bio11[,1], effDf.bio11$bio11[,2],lwd=2,col="grey")
+       BOGR.summ$DaysToFlwr_MN+BOGR.summ$DaysToFlwr_SE, angle=90, col=BOGR.summ$HexCode.x, code=3, length=0, lwd=1.6) 
+lines(effDf.bio11$bio11[,1], effDf.bio11$bio11[,2],lwd=1,col="grey")
+abline(v=ERNA.biovar$bio11[20], col="red")
+
 plot(as.vector(t(BOGR.summ[,13])), BOGR.summ$DaysToFlwr_MN, col=BOGR.summ$SdZnColful, pch=19, cex=1.3, main=NA, 
      cex.main=1.5, xlab=bv.names[4], ylab="Days to first flower", cex.lab=1.5, cex.axis=1.1)
 arrows(as.vector(t(BOGR.summ[,13])), BOGR.summ$DaysToFlwr_MN-BOGR.summ$DaysToFlwr_SE, as.vector(t(BOGR.summ[,13])), 
