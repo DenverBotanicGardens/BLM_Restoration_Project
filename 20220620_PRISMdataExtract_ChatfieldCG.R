@@ -48,7 +48,6 @@ colnames(pops_LatLong)
 colnames(pops_LatLong)[1] <- "Code" 
 
 
-
 ## MAKE LIST OF DESIRED YEAR & MONTH TO EXTRACT CLIMATE DATA FROM
 year.span <- as.character(c(1980:2021))
 month.span <- str_pad(as.character(c(1:12)), width=2, side="left", pad="0")
@@ -64,6 +63,20 @@ for (yy in 1:length(year.span)) {
 ## Morph year & month labels into matrix  
 yyyymm <- as.data.frame(matrix(yyyymm, length(month.span), length(year.span)), row.names = FALSE)
 colnames(yyyymm) <- as.character(c(1980:2021))
+
+
+
+## USE IF WANT FOR JUST SUBSET OF YEARS ** COMMENT-OUT OTHERWISE **
+pops_LatLong <- as.data.frame(matrix(NA,ncol=3, nrow=1)) #Chatfield common garden site 
+colnames(pops_LatLong)[1:3] <- c("Code","Longitude","Latitude")             
+pops_LatLong[2:3] <- c(-105.0999776, 39.5508672)  
+pops_LatLong[1] <- "Chatfield"
+
+## Make vector for just experimental year(s)
+CGyr <- as.character(2022)
+yyyymm <- as.data.frame(paste(CGyr,month.span, sep=""))
+colnames(yyyymm) <- as.character(2022)
+num.pops <- ncol(yyyymm)
 ## --------------------------------------------------------------------------------------------
 
 
@@ -72,7 +85,8 @@ colnames(yyyymm) <- as.character(c(1980:2021))
 
 ## MONTHLY PRECIP ----------------------------------------------------------
 setwd("Q:/Research/All_Projects_by_Species/Astragalus SPECIES/Astragalus_microcymbus/PRISM_asmiclimate") #Directory containing climate data 
-dirs.ppt <- prism_archive_subset("ppt", "monthly", year=1980:2021)
+dirs.ppt <- prism_archive_subset("ppt", "monthly", year=2022)
+#dirs.ppt <- prism_archive_subset("ppt", "monthly", year=1980:2021)
 bils.ppt <- pd_to_file(dirs.ppt)
 
 
@@ -114,10 +128,10 @@ for (pp in 1:num.pops) {
   }
 }
 
-setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - BLM-Grassland/AGoebl/Seeds")
+setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds")
 date <- Sys.Date()  
 date <- gsub("-", "", date)
-species <- as.character("ARFR")
+species <- as.character("Chatfield2022")
 saveRDS(ppt.means, file=paste(date,species,"pptMonthly",sep="_"))
 
 ## Sum ppt over all months (annual precip)
@@ -135,7 +149,8 @@ write.csv(ppt.means.ann, file=paste(date,species,"pptAnnual.csv",sep="_"), row.n
 
 ## MONTHLY MIN TEMP ----------------------------------------------------------
 setwd("Q:/Research/All_Projects_by_Species/Astragalus SPECIES/Astragalus_microcymbus/PRISM_asmiclimate") #Directory containing climate data 
-dirs.tmin <- prism_archive_subset("tmin", "monthly", year=1980:2021)
+dirs.tmin <- prism_archive_subset("tmin", "monthly", year=2022)
+#dirs.tmin <- prism_archive_subset("tmin", "monthly", year=1980:2021)
 bils.tmin <- pd_to_file(dirs.tmin)
 
 
@@ -182,7 +197,7 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 #date <- as.character(20240131)
 date <- Sys.Date()  
 date <- gsub("-", "", date)
-species <- as.character("ERNA")
+species <- as.character("Chatfield2022")
 saveRDS(tmin.means, file=paste(date,species,"tminMonthly",sep="_"))
 #saveRDS(tmin.sd, file=paste(date,species,"tminSDmonthly",sep="_"))
 
@@ -208,8 +223,9 @@ write.csv(tmin.means.winter, file=paste(date,species,"tminWinter.csv",sep="_"), 
 
 
 ## MONTHLY MAX TEMP ----------------------------------------------------------
-#setwd("Q:/Research/All_Projects_by_Species/Astragalus SPECIES/Astragalus_microcymbus/PRISM_asmiclimate") #Directory containing climate data 
-dirs.tmax <- prism_archive_subset("tmax", "monthly", year=1980:2021)
+setwd("Q:/Research/All_Projects_by_Species/Astragalus SPECIES/Astragalus_microcymbus/PRISM_asmiclimate") #Directory containing climate data 
+dirs.tmax <- prism_archive_subset("tmax", "monthly", year=2022)
+#dirs.tmax <- prism_archive_subset("tmax", "monthly", year=1980:2021)
 bils.tmax <- pd_to_file(dirs.tmax)
 
 
@@ -243,7 +259,7 @@ for (pp in 1:num.pops) {
 setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds")
 date <- Sys.Date()  
 date <- gsub("-", "", date)
-species <- as.character("ERNA")
+species <- as.character("Chatfield2022")
 saveRDS(tmax.means, file=paste(date,species,"tmaxMonthly",sep="_"))
 
 #tmax.means <- readRDS("20230312_ARFR_tmaxMonthly")
@@ -288,7 +304,8 @@ for (pp in 1:num.pops) {
 #setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds")
 date <- Sys.Date()  
 date <- gsub("-", "", date)
-species <- as.character("ERNA")
-saveRDS(biovar.means, file=paste(date,species,"BiovarsAvg1980_2021",sep="_"))
+species <- as.character("Chatfield")
+saveRDS(biovar.means, file=paste(date,species,"Biovars2022",sep="_"))
+#saveRDS(biovar.means, file=paste(date,species,"BiovarsAvg1980_2021",sep="_"))
 #write.csv(biovar.means, file=paste(date,species,"BiovarsAvg1980_2021.csv",sep="_"), row.names=FALSE)
 

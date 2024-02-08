@@ -43,6 +43,7 @@ ERNA <- read.csv(file="Chatfield/20230302_ChatfieldData_ERNA.csv", sep=",", head
 ERNA.SdZn <- read.csv(file="AGoebl/Seeds/20231215_ERNA_LatLongSdZn_hexcodes.csv", sep=",", header=TRUE, dec=".")
 ERNA.biovar <- readRDS("AGoebl/Seeds/20240131_ERNA_BiovarsAvg1980_2021")
 ERNA23 <- read.csv(file="Chatfield/20240130_ChatfieldData2023_ERNA.csv", sep=",", header=TRUE, dec=".")
+ERNA.bioVarCG <- readRDS("AGoebl/Seeds/20240207_Chatfield_Biovars2022")
 ## ----------------------------------------------------------------------------------------------
 
 

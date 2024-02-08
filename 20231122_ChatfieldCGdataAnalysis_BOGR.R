@@ -265,22 +265,22 @@ BOGR.cl$FlwrYesNo <- NA
 BOGR.cl$FlwrYesNo[!is.na(BOGR.cl$DaysToFlwr)] <- 1                                #If there's a value in Days to Flwr, then enter Yes
 BOGR.cl$FlwrYesNo[is.na(BOGR.cl$DaysToFlwr) & BOGR.cl$Survival_20220927==1] <- 0  #If plt alive and didn't flw, enter No
 nrow(BOGR.cl[BOGR.cl$FlwrYesNo==0,])                                              #Num that survived but didn't flower 
-BOGR.cl %>% group_by(Source) %>% dplyr::summarise(FlwrYesNo_Avg=mean(FlwrYesNo,na.rm=TRUE)) #Or could try sum and/or NUM=n()?
+print(BOGR.cl %>% group_by(Source) %>% dplyr::summarise(FlwrYesNo_Avg=mean(FlwrYesNo,na.rm=TRUE), NUM=n()), n=21) #Or could try sum?
 
 
 
 ## 2023
 ## Calculate days to first flower 
 BOGR.StartDate <- as.Date("2023-01-01")
-BOGR.PhenoCol.List <- colnames(BOGR23)[grepl("Flowering*", colnames(BOGR23))]   #Obtain phenology column names
-BOGR.Pheno.List <- str_replace(BOGR.PhenoCol.List, "Flowering_", "")            #Obtain just date from phenology columns
-BOGR.Pheno.List <- as.Date(BOGR.Pheno.List, "%Y%m%d")
-BOGR.DaysToFlwr <- BOGR.Pheno.List - BOGR.StartDate                             #Calculate days from Jan 1 to each phenology survey 
+BOGR23.PhenoCol.List <- colnames(BOGR23)[grepl("Flowering*", colnames(BOGR23))]   #Obtain phenology column names
+BOGR23.Pheno.List <- str_replace(BOGR.PhenoCol.List, "Flowering_", "")            #Obtain just date from phenology columns
+BOGR23.Pheno.List <- as.Date(BOGR.Pheno.List, "%Y%m%d")
+BOGR23.DaysToFlwr <- BOGR.Pheno.List - BOGR.StartDate                             #Calculate days from Jan 1 to each phenology survey 
 
 ## Loop over each phenology column & enter the num days since Jan 1 when a 1 (bud or later repro stage) first appears
 BOGR23$DaysToFlwr <- NA
-for (pp in 1:length(BOGR.PhenoCol.List)) {
-  BOGR23$DaysToFlwr[BOGR23[,BOGR.PhenoCol.List[pp]]==1 & is.na(BOGR23$DaysToFlwr)] <- as.integer(BOGR.DaysToFlwr)[pp]
+for (pp in 1:length(BOGR23.PhenoCol.List)) {
+  BOGR23$DaysToFlwr[BOGR23[,BOGR23.PhenoCol.List[pp]]==1 & is.na(BOGR23$DaysToFlwr)] <- as.integer(BOGR23.DaysToFlwr)[pp]
 }
 BOGR23 %>% group_by(Source) %>% dplyr::summarise(Pheno_Avg=mean(DaysToFlwr,na.rm=TRUE))
 
@@ -318,12 +318,12 @@ BOGR.cl$GrwthRate_Relative <- (BOGR.cl$Length_cm_20220801-BOGR.cl$Length_cm_2022
 BOGR.cl$AliveYesNo <- 0
 BOGR.cl$AliveYesNo[BOGR.cl$Survival_20220927==1] <- 1
 BOGR.cl$AliveYesNo[(BOGR.cl$OrigPltSurvival_20220531==0) & (BOGR.cl$Replaced_YorN_20220606=="N" | BOGR.cl$Replaced_YorN_20220606=="")] <- NA
-BOGR.cl %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_Avg=mean(AliveYesNo,na.rm=TRUE))
+print(BOGR.cl %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_Avg=mean(AliveYesNo,na.rm=TRUE)), n=21)
 
 ## For 2023, estimate survival based on if alive at end of season
 BOGR23$AliveYesNo <- 0
 BOGR23$AliveYesNo[BOGR23$Survival_20230922==1] <- 1
-BOGR23 %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_Avg=mean(AliveYesNo,na.rm=TRUE))
+print(BOGR23 %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_Avg=mean(AliveYesNo,na.rm=TRUE)), n=21)
 # ** Remove plants that died early in 2022 (e.g. from transplant shock) and were not replaced **
 ## -----------------------------------------------------------------------------------------
 
@@ -535,7 +535,7 @@ Anova(BOGR.survMod) #No support for Source in Surv model
 
 ## Days until flower
 
-## Number of inflorescences
+## Number of inflorescence
 BOGR.infMod <- glmer(NumInf ~ Source + (1|Block), data= BOGR.cl, family=poisson (link="log"))
 Anova(BOGR.infMod) #Support for Source in Inf model
 ## ----------------------
@@ -546,14 +546,35 @@ Anova(BOGR.infMod) #Support for Source in Inf model
 
 
 ## BOGR - ESTIMATE VARIATION WITHIN POPULATIONS ------------------------------------------------------
+## Try binning repro data to make more comparable to phenology data and see how cv affected
+hist(BOGR.cl$NumInf)
+minInf <- min(BOGR.cl$NumInf, na.rm=NA)
+maxInf <- max(BOGR.cl$NumInf, na.rm=NA)
+binSz <- max(BOGR.cl$NumInf, na.rm=NA)/length(BOGR.DaysToFlwr)
+(maxInf-minInf)/binSz
+
+binBounds <- as.vector(c(0, rep(NA,length(BOGR.DaysToFlwr)-1))) #loop to create bin boundaries
+for (aa in 1:(length(binBounds)-1)) {
+  binBounds[aa+1] <- binBounds[aa] + binSz
+}
+binBounds[12] <- maxInf
+
+## Loop over bin bounds and assign inf numbers to bins
+BOGR.cl$NumInfBinned <- NA
+for (bb in 1:(length(binBounds)-1)) {
+  BOGR.cl$NumInfBinned[BOGR.cl$NumInf > binBounds[bb] & BOGR.cl$NumInf <= binBounds[bb+1]] <- binBounds[bb]
+}
+
+
 ## Calculate the coefficient of variation 
 BOGR.cv <- BOGR.cl %>% group_by(Source) %>% summarise(Height_CV=cv(Length_cm_20220801, na.rm=TRUE),
                                                          Growth_CV=cv(GrwthRate_Relative, na.rm=TRUE),
                                                          DaysToFlwr_CV=cv(DaysToFlwr, na.rm=TRUE),
-                                                         Inf_CV=cv(NumInf, na.rm=TRUE))
+                                                         Inf_CV=cv(NumInf, na.rm=TRUE), InfBin_CV=cv(NumInfBinned, na.rm=TRUE))
 
 BOGR.cv <- left_join(BOGR.cv, BOGR.SdZn, by="Source")
 ## ---------
+
 
 
 ## Barplots
@@ -604,11 +625,11 @@ stripchart(as.numeric(CV) ~ Source, data=BOGR.cvAll[BOGR.Pcol,], col="bisque3", 
 
 
 #test <- BOGR.cv %>% dplyr::select(c(ends_with("_CV")))
-BOGR.cvT <- as.data.frame(rbind(as.vector(BOGR.cv$Height_CV), as.vector(BOGR.cv$Growth_CV),
-                  as.vector(BOGR.cv$DaysToFlwr_CV), as.vector(BOGR.cv$Inf_CV)))
+BOGR.cvT <- as.matrix(rbind(as.vector(BOGR.cv$Height_CV), as.vector(BOGR.cv$Growth_CV),
+                  as.vector(BOGR.cv$DaysToFlwr_CV), as.vector(BOGR.cv$Inf_CV)))#, as.vector(BOGR.cv$InfBin_CV)))
 #BOGR.cvT[5,] <- colSums(BOGR.cvT)
 colnames(BOGR.cvT) <- BOGR.cv$Source
-barplot(BOGR.cvT, names=BOGR.cv$PopAbbrev, las=2, col=c("black","dodgerblue","bisque3","mediumpurple3"))
+barplot(BOGR.cvT, names=BOGR.cv$PopAbbrev, las=2, col=c("black","dodgerblue","bisque3","mediumpurple3"))#,"seagreen"))
 ## ------------------------------------------------------------------------------
 
 
