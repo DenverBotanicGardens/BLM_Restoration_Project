@@ -5,7 +5,7 @@
 
 
 rm(list=ls())
-dev.off()
+#dev.off()
 
 
 ## LOAD PACKAGES AND FUNCTIONS --------------------------------------------------------------------
@@ -44,6 +44,9 @@ PEVI.LatLong <- read.csv(file="AGoebl/Seeds/20230127_PEVI_LatLong.csv", sep=",",
 PEVI23 <- read.csv(file="Chatfield/20240129_ChatfieldData2023_PEVI.csv", sep=",", header=TRUE, dec=".")
 
 GravelTemps <- read.csv(file="Chatfield/ClimateData/20240409_GravelTemps2022_ChatfieldCG.csv", sep=",", header=TRUE, dec=".")
+WhtGravTmp <- read.csv(file="Chatfield/ClimateData/20240412_whitePEVI_soilTempLogger_20220621to20230504.csv", sep=",", header=TRUE, dec=".")
+BlkGravTmp <- read.csv(file="Chatfield/ClimateData/20240412_blackPEVI_soilTempLogger_20220621to20230504.csv", sep=",", header=TRUE, dec=".")
+SoilGravTmp <- read.csv(file="Chatfield/ClimateData/20240412_soilPEVI_soilTempLogger_20220621to20230504.csv", sep=",", header=TRUE, dec=".")
 ## ----------------------------------------------------------------------------------------------
 
 
@@ -278,5 +281,27 @@ barXvals<-barplot(GravTmp.mn$TEMP_MN, xlab=NA, ylab="Temperature (°C)", cex.lab
                   names=c("Black gravel","No gravel","White gravel"), main="Soil surface temperatures", cex.main=1.5, 
                   col=c("black","grey","white"), cex.names=1.1, ylim=c(0,110))
 arrows(barXvals, GravTmp.mn$TEMP_MN+GravTmp.mn$TEMP_SE, barXvals, GravTmp.mn$TEMP_MN-GravTmp.mn$TEMP_SE,
+       angle=90, length=0, col="black")
+## -------------------------------------------------------------------
+
+
+
+
+## MAKE PLOT OF GRAVEL SOIL TEMPS
+## June-Oct
+WhtTmp.HrMn <- WhtGravTmp[1:3177,] %>% group_by(Time) %>% dplyr::summarise(TEMP_HR_MN=mean(Ch..1...Temperature.Avg...Avg...C.,na.rm=TRUE), 
+                                                                  TEMP_HR_SE=calcSE(Ch..1...Temperature.Avg...Avg...C.))
+BlkTmp.HrMn <- BlkGravTmp[1:3177,] %>% group_by(Time) %>% dplyr::summarise(TEMP_HR_MN=mean(Ch..1...Temperature.Avg...Avg...C.,na.rm=TRUE), 
+                                                                  TEMP_HR_SE=calcSE(Ch..1...Temperature.Avg...Avg...C.))
+SoilTmp.HrMn <- SoilGravTmp[1:3177,] %>% group_by(Time) %>% dplyr::summarise(TEMP_HR_MN=mean(Ch..1...Temperature.Avg...Avg...C.,na.rm=TRUE), 
+                                                                  TEMP_HR_SE=calcSE(Ch..1...Temperature.Avg...Avg...C.))
+
+pm3 <- c(WhtTmp.HrMn$TEMP_HR_MN[12], SoilTmp.HrMn$TEMP_HR_MN[12], BlkTmp.HrMn$TEMP_HR_MN[12])
+pm3.SE <- c(WhtTmp.HrMn$TEMP_HR_SE[12], SoilTmp.HrMn$TEMP_HR_SE[12], BlkTmp.HrMn$TEMP_HR_SE[12])
+
+barXvals<-barplot(pm3, xlab=NA, ylab="Temperature (°C)", cex.lab=1.4, las=1, 
+                  names=c("White gravel","No gravel","Black gravel"), main="Soil temperature", cex.main=1.5, 
+                  col=c("white","grey","black"), cex.names=1.1, ylim=c(0,46))
+arrows(barXvals, pm3+pm3.SE, barXvals, pm3-pm3.SE,
        angle=90, length=0, col="black")
 ## -------------------------------------------------------------------
