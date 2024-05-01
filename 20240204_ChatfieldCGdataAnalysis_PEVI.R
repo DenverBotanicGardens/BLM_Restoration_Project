@@ -152,7 +152,7 @@ nrow(PEVI23[PEVI23$FlwrYesNo==0,])                                             #
 
 
 
-## CALCULATE RAW FLOWERING RESULTS BY SOURCE AND TREATMENT
+## CALCULATE RAW FLOWERING RESULTS BY SOURCE AND TREATMENT ------------------------------
 PEVI23 %>% group_by(Source) %>% dplyr::summarise(Pheno_Avg=mean(DaysToFlwr,na.rm=TRUE), Pheno_SD=sd(DaysToFlwr,na.rm=TRUE))
 PEVI23 %>% group_by(Source, Treatment) %>% dplyr::summarise(Pheno_Avg=mean(DaysToFlwr,na.rm=TRUE), Pheno_SD=sd(DaysToFlwr,na.rm=TRUE))
 # Most, but not all, pops in blk tx flowered earlier
@@ -160,7 +160,32 @@ PEVI23 %>% group_by(Source, Treatment) %>% dplyr::summarise(Pheno_Avg=mean(DaysT
 PEVI23 %>% group_by(Source) %>% dplyr::summarise(FlwrYesNo_Avg=mean(FlwrYesNo,na.rm=TRUE)) #Or could try sum and/or NUM=n()
 PEVI23 %>% group_by(Source, Treatment) %>% dplyr::summarise(FlwrYesNo_Avg=mean(FlwrYesNo,na.rm=TRUE))
 # All pops had higher prob of repro in blk tx
+## --------------------------------------------------------------------------------------
 
+
+
+
+## PEVI - SURVIVAL -------------------------------------
+## Was plt alive at any stage in 2023
+PEVI.SurvCol.List <- colnames(PEVI23)[grepl("Survival*", colnames(PEVI23))]   #Obtain survival column names
+PEVI.SurvCol.List <- PEVI.SurvCol.List[2:8]                                         #Remove 2022
+#PEVI.Surv.List <- str_replace(PEVI.SurvCol.List, "Survival_", "")             #Obtain just date from phenology columns
+#PEVI.Surv.List <- PEVI.Surv.List[2:8]                                         #Remove 2022
+#PEVI.Surv.List <- as.Date(PEVI.Surv.List, "%Y%m%d")
+
+## Loop over each survival column & enter 1 if alive
+PEVI23$Alive2023 <- NA
+for (pp in 1:length(PEVI.SurvCol.List)) {
+  PEVI23$Alive2023[PEVI23[,PEVI.SurvCol.List[pp]]==1 & is.na(PEVI23$Alive2023)] <- 1
+}
+
+## Look at just the Surv cols to visualize results
+PEVIsurv <- PEVI23 %>% select(c(starts_with("Survival_2023"), Alive2023))
+## Other checks, like a a col that is the num of the survival cols. Then test is whenever theres a sum>0, there is a 1 in Alive col
+
+## Save output
+write.csv(PEVI23, "Chatfield/20240501_ChatfieldData2023_PEVI.csv", row.names=FALSE)
+## --------------------------------------------------------------------------------------
 
 
 
