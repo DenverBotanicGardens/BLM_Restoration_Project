@@ -14,15 +14,15 @@ library(dplyr)
 library(stringr)
 library(tidyr)
 library(lme4)
-library(emmeans)
+#library(emmeans)
 library(plotrix)
 library(EnvStats)
 library(car)
 library(effects)
 library(reshape2)
 library(gplots)
-library(tidyverse)
-library(AICcmodavg)
+#library(tidyverse)
+#library(AICcmodavg)
 library(corrplot)
 library(PerformanceAnalytics)
 calcSE <- function(x){sd(x, na.rm=TRUE)/sqrt(length(x))}
@@ -34,16 +34,18 @@ calcSE <- function(x){sd(x, na.rm=TRUE)/sqrt(length(x))}
 
 ## SET WORKING DIRECTORY --------------------------------------------------------------------------
 setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland")
+setwd("C:/Users/april/Denver Botanic Gardens/Conservation - BLM-Grassland")
 ## ------------------------------------------------------------------------------------------------
 
 
 
 ## LOAD DATA --------------------------------------------------------------------------------------
-ERNA <- read.csv(file="Chatfield/20230302_ChatfieldData_ERNA.csv", sep=",", header=TRUE, dec=".")
+ERNA <- read.csv(file="Chatfield/20230302_ChatfieldData2022_ERNA.csv", sep=",", header=TRUE, dec=".")
 ERNA.SdZn <- read.csv(file="AGoebl/Seeds/20231215_ERNA_LatLongSdZn_hexcodes.csv", sep=",", header=TRUE, dec=".")
 ERNA.biovar <- readRDS("AGoebl/Seeds/20240131_ERNA_BiovarsAvg1980_2021")
-ERNA23 <- read.csv(file="Chatfield/20240130_ChatfieldData2023_ERNA.csv", sep=",", header=TRUE, dec=".")
+ERNA23 <- read.csv(file="Chatfield/20241017_ChatfieldData2023_ERNA.csv", sep=",", header=TRUE, dec=".")
 ERNA.bioVarCG <- readRDS("AGoebl/Seeds/20240207_Chatfield_Biovars2022")
+ERNA.sla <- read.csv(file="Chatfield/20241017_ChatfieldSLAdata_ERNA.csv", sep=",", header=TRUE, dec=".")
 ## ----------------------------------------------------------------------------------------------
 
 
@@ -55,17 +57,22 @@ str(ERNA23)
 
 ERNA$Source <- as.factor(ERNA$Source)
 ERNA23$Source <- as.factor(ERNA23$Source)
-ERNA23$Survival_20231013 <- as.integer(ERNA23$Survival_20231013)
-ERNA23$Flowering_20231013 <- as.integer(ERNA23$Flowering_20231013)
-#ERNA23$Flowering_20230901 <- as.integer(ERNA23$Flowering_20230901)
+ERNA23$Survival_20231013 <- as.integer(as.character(ERNA23$Survival_20231013))
+ERNA23$Flowering_20231013 <- as.integer(as.character(ERNA23$Flowering_20231013))
 
 
 ## 2022
 ##If OrigPltSurv_20220518 = 0 & plt not replaced (N), ignore data for this plt, i.e. future surv should be NA, not 0; died from transplant
 ERNA.cl <- ERNA[ERNA$OrigPltSurvival_20220518==1 | (ERNA$OrigPltSurvival_20220518==0 & ERNA$Replaced_YorN=="Y"),]
+## OR, instead of removing rows:
+ERNA[ERNA$OrigPltSurvival_20220518==0 & ERNA$Replaced_YorN=="N",13:30] <- NA
+
 
 ##If not replaced, but died before planting, don't use subsequent data 
 ERNA.cl <- ERNA.cl[ERNA.cl$DateMortalityObservedPreTransplant=="",] 
+## OR, instead of removing rows:
+ERNA[ERNA$DateMortalityObservedPreTransplant!="",13:30] <- NA 
+
 
 #Note: Don't use OrigPltSurv_20220518 data in days to mort or other field analyses,
 #this surv may be due to transplant shock & may not correspond to pop in Source col (may correspond to orig planted or assigned)
@@ -90,6 +97,8 @@ ERNA.cl <- ERNA.cl[ERNA.cl$DateMortalityObservedPreTransplant=="",]
 ERNA.cl <- ERNA.cl[ERNA.cl$Replaced_YorN !="Y",]
 
 ## OR If plt replaced, change all pre-replacement data to NA (even len0608 for plts replaced in 1st round)
+ERNA$Length_cm_20220608[ERNA$Replaced_YorN =="Y"] <- NA
+ERNA.cl <- ERNA
 
 #Notes if considering using some early data: 
 #Can use 2nd surv in days to mort if 1st OrigSurv=1, ignore if 1st OrigSurv=0; if this plt wasn't replaced then it died from transplant.
@@ -103,7 +112,6 @@ ERNA.cl <- ERNA.cl[ERNA.cl$Replaced_YorN !="Y",]
 ## 2023 -----------------------------
 ## For 2023, if H, harvested, harvest, h., coll AGB in notes (e.g. 'H' in Notes_20231013) subsequent surv should be NA
 #setdiff(ERNA23$Notes_20230811,ERNA23$Notes_20230811.1) #Check difference in these two cols
-
 unique(ERNA23$Notes_20230728[ERNA23$Notes_20230728!=""])
 unique(ERNA23$Notes_20230811.1[ERNA23$Notes_20230811.1 !=""])
 unique(ERNA23$Notes_20230901 [ERNA23$Notes_20230901 !=""])
@@ -129,9 +137,9 @@ ERNA23$Flowering_20230627[ERNA23$Survival_20230627==1 & is.na(ERNA23$Flowering_2
 ERNA23$Flowering_20230705[ERNA23$Survival_20230705==1 & is.na(ERNA23$Flowering_20230705)] <- 0
 ERNA23$Flowering_20230728[ERNA23$Survival_20230728==1 & is.na(ERNA23$Flowering_20230728)] <- 0
 ERNA23$Flowering_20230811[ERNA23$Survival_20230811==1 & is.na(ERNA23$Flowering_20230811)] <- 0
-#ERNA23$Flowering_20230901[ERNA23$Survival_20230901==1 & is.na(ERNA23$Flowering_20230901)] <- 0 #**Needs fixing?
-#ERNA23$Flowering_20230914[ERNA23$Survival_20230914==1 & is.na(ERNA23$Flowering_20230914)] <- 0
-#ERNA23$Flowering_20231013[ERNA23$Survival_20231013==1 & is.na(ERNA23$Flowering_20231013)] <- 0
+ERNA23$Flowering_20230901[ERNA23$Survival_20230901==1 & is.na(ERNA23$Flowering_20230901)] <- 0 #**Needs fixing?
+ERNA23$Flowering_20230914[ERNA23$Survival_20230914==1 & is.na(ERNA23$Flowering_20230914)] <- 0
+ERNA23$Flowering_20231013[ERNA23$Survival_20231013==1 & is.na(ERNA23$Flowering_20231013)] <- 0
 ## ---------------------------------------------------------------
 
 
@@ -169,7 +177,9 @@ max(ERNA23$Flowering_20230728, na.rm=TRUE)
 max(ERNA23$Flowering_20230811, na.rm=TRUE)
 max(ERNA23$Flowering_20230901, na.rm=TRUE)
 max(ERNA23$Flowering_20230914, na.rm=TRUE)
-max(ERNA23$Flowering_20231013, na.rm=TRUE)
+max(ERNA23$Flowering_20231013, na.rm=TRUE) 
+#which.max(ERNA23$Flowering_20231013) 
+#ERNA23$Flowering_20231013[which.max(ERNA23$Flowering_20231013)] <- 1
 
 # ** Check that phenology only increases or stays the same; once flowering=1, it shouldn't go back to 0 
 
@@ -319,9 +329,30 @@ ERNA.cl$AliveYesNo[(ERNA.cl$OrigPltSurvival_20220518==0) & (ERNA.cl$Replaced_Yor
 
 
 ## ADD SOME 2023 DATA TO 2022 DATAFRAME TO ALLOW FOR COMPARISONS AND FILTERING 
-ERNA23.sel <- ERNA23 %>% dplyr::select(c("ID","DaysToFlwr","AliveYesNo","FlwrYesNo")) 
+ERNA23.sel <- ERNA23 %>% dplyr::select(c("ID","SentForSequencing_20230803","DaysToFlwr","AliveYesNo","FlwrYesNo")) 
 ERNA.cl <- left_join(ERNA.cl, ERNA23.sel, by="ID") 
+
+
+## Add in SLA data
+ERNA.cl <- left_join(ERNA.cl, ERNA.sla, by="ID")
 ## ---------------------------------------------------------------
+
+
+
+
+
+
+## MAKE FILE WITH JUST COLUMNS/ PHENOTYPES OF INTEREST FOR ANALYSIS WITH GENOTYPE DATA --------------
+ERNA.clSel <- ERNA.cl %>% dplyr::select(c("Source","ID","SentForSequencing_20230803","Length_cm_20220608",
+                                          "Length_cm_20220719","Length_cm_20220915","DaysToFlwr","SLA_mm2permg",
+                                          "bio1","bio2","bio3","bio4","bio5","bio6","bio7","bio8","bio9","bio10",
+                                          "bio11","bio12","bio13","bio14","bio15","bio16","bio17","bio18","bio19",
+                                          "Longitude","Latitude","HexCode","seed_zone","SdZnAbbrev","PopAbbrev")) 
+
+write.csv(ERNA.clSel, "Chatfield/20241018_ChatfieldPhenotypes_ERNA.csv", row.names=FALSE)
+## --------------------------------------------------------------------------------------------------
+
+
 
 
 
