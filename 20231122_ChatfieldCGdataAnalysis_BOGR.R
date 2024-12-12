@@ -92,6 +92,12 @@ BOGR23[BOGR23$Flowering_20230613 - floor(BOGR23$Flowering_20230613) != 0 &
 #ARFR.cl$Length_cm_20220527[!is.na(ARFR.cl$Length_cm_20220527) & ARFR.cl$Replaced_YorN_20220531=="Y"] <- NA
 
 ## ** Add checks for 2023 data **
+## If ExcludePheno column = Y, the exclude this row from phenology analyses since record is inconsistent and reality unknown
+## In Flowering cols, if no data entered and survival=1, then enter 0. If survival=0, then enter NA
+## Add survival col for 0817 based on if height measure taken or not? Maybe not super reliable, sometimes height may have been skipped
+## If survival=0, then flowering should be NA, not 0 or anything else
+## If early surv=0 but then consistently alive, may have just looked dead early on, count as alive or exclude
+##
 ## ----------------------------------------------------------------------------------------------
 
 
