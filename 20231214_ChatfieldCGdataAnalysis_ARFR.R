@@ -9,12 +9,11 @@ rm(list=ls())
 
 
 ## LOAD PACKAGES AND FUNCTIONS --------------------------------------------------------------------
-library(Hmisc)
+#library(Hmisc)
 library(dplyr)
 library(stringr)
 library(tidyr)
 library(lme4)
-#library(emmeans)
 library(plotrix)
 library(EnvStats)
 library(car)
@@ -39,8 +38,9 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 
 
 ## LOAD DATA --------------------------------------------------------------------------------------
-ARFR22 <- read.csv(file="Chatfield/20230616_ChatfieldData2022_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
-ARFR23 <- read.csv(file="Chatfield/20240301_ChatfieldData2023_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
+ARFR22 <- read.csv(file="Chatfield/2022_data/20230616_ChatfieldData2022_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
+ARFR23 <- read.csv(file="Chatfield/2023_data/20240301_ChatfieldData2023_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
+ARFR24 <- read.csv(file="Chatfield/2024_data/20241219_ChatfieldData2024_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
 
 ARFR.SdZn <- read.csv(file="AGoebl/Seeds/20231212_ARFR_LatLong_hexcodes.csv", sep=",", header=TRUE, dec=".")
 ARFR.biovar <- readRDS("AGoebl/Seeds/20230814_ARFR_BiovarsAvg1980_2021")
