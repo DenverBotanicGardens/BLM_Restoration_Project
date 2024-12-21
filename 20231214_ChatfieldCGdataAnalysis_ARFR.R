@@ -367,8 +367,7 @@ ARFR.meds <- ARFR.cl %>% group_by(Source) %>%
              dplyr::summarise(Height22_MD=median(Length_cm_20220726,na.rm=TRUE), AGB22_MD=median(AGB2022_MinusBag,na.rm=TRUE),
              ReproBMrw_MD=median(InfBM2022smpls_2024reweigh,na.rm=TRUE), Height23_MD=median(Height_20230927,na.rm=TRUE),
              GrowthRe_MD=median(GrwthRate_Relative,na.rm=TRUE), ReproBM22_MD=median(InfBM2022_Wobag_g,na.rm=TRUE),
-             GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE), GrowthAb_MD=median(GrwthRate_Absolute,na.rm=TRUE),
-             Latitude=median(Lat,na.rm=TRUE))
+             GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE), GrowthAb_MD=median(GrwthRate_Absolute,na.rm=TRUE))
 ARFR.meds <- left_join(ARFR.meds, ARFR.SdZn, by="Source")
 
 

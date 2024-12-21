@@ -14,7 +14,6 @@ library(dplyr)
 library(stringr)
 library(tidyr)
 library(lme4)
-#library(emmeans)
 library(plotrix)
 library(EnvStats)
 library(car)
@@ -34,28 +33,28 @@ calcSE <- function(x){sd(x, na.rm=TRUE)/sqrt(length(x))}
 
 ## SET WORKING DIRECTORY --------------------------------------------------------------------------
 setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland")
-setwd("C:/Users/april/Denver Botanic Gardens/Conservation - BLM-Grassland")
+#setwd("C:/Users/april/Denver Botanic Gardens/Conservation - BLM-Grassland")
 ## ------------------------------------------------------------------------------------------------
 
 
 
 ## LOAD DATA --------------------------------------------------------------------------------------
-ERNA <- read.csv(file="Chatfield/20230302_ChatfieldData2022_ERNA.csv", sep=",", header=TRUE, dec=".")
+ERNA22 <- read.csv(file="Chatfield/2022_data/20230302_ChatfieldData2022_ERNA.csv", sep=",", header=TRUE, dec=".")
 ERNA.SdZn <- read.csv(file="AGoebl/Seeds/20231215_ERNA_LatLongSdZn_hexcodes.csv", sep=",", header=TRUE, dec=".")
 ERNA.biovar <- readRDS("AGoebl/Seeds/20240131_ERNA_BiovarsAvg1980_2021")
-ERNA23 <- read.csv(file="Chatfield/20241017_ChatfieldData2023_ERNA.csv", sep=",", header=TRUE, dec=".")
+ERNA23 <- read.csv(file="Chatfield/2023_data/20241017_ChatfieldData2023_ERNA.csv", sep=",", header=TRUE, dec=".")
 ERNA.bioVarCG <- readRDS("AGoebl/Seeds/20240207_Chatfield_Biovars2022")
-ERNA.sla <- read.csv(file="Chatfield/20241017_ChatfieldSLAdata_ERNA.csv", sep=",", header=TRUE, dec=".")
+ERNA.sla <- read.csv(file="Chatfield/2023_data/20241017_ChatfieldSLAdata2023_ERNA.csv", sep=",", header=TRUE, dec=".")
 ## ----------------------------------------------------------------------------------------------
 
 
 
 
 ## ERNA - DATA CLEAN UP ---------------------------------------------
-str(ERNA)
+str(ERNA22)
 str(ERNA23)
 
-ERNA$Source <- as.factor(ERNA$Source)
+ERNA22$Source <- as.factor(ERNA22$Source)
 ERNA23$Source <- as.factor(ERNA23$Source)
 ERNA23$Survival_20231013 <- as.integer(as.character(ERNA23$Survival_20231013))
 ERNA23$Flowering_20231013 <- as.integer(as.character(ERNA23$Flowering_20231013))
@@ -63,15 +62,15 @@ ERNA23$Flowering_20231013 <- as.integer(as.character(ERNA23$Flowering_20231013))
 
 ## 2022
 ##If OrigPltSurv_20220518 = 0 & plt not replaced (N), ignore data for this plt, i.e. future surv should be NA, not 0; died from transplant
-ERNA.cl <- ERNA[ERNA$OrigPltSurvival_20220518==1 | (ERNA$OrigPltSurvival_20220518==0 & ERNA$Replaced_YorN=="Y"),]
-## OR, instead of removing rows:
-ERNA[ERNA$OrigPltSurvival_20220518==0 & ERNA$Replaced_YorN=="N",13:30] <- NA
+#ERNA22.cl <- ERNA22[ERNA22$OrigPltSurvival_20220518==1 | (ERNA22$OrigPltSurvival_20220518==0 & ERNA22$Replaced_YorN=="Y"),]
+## OR, instead of removing rows: ** confirm that these are relevant rows **
+ERNA22[ERNA22$OrigPltSurvival_20220518==0 & ERNA22$Replaced_YorN=="N",13:30] <- NA
 
 
 ##If not replaced, but died before planting, don't use subsequent data 
-ERNA.cl <- ERNA.cl[ERNA.cl$DateMortalityObservedPreTransplant=="",] 
-## OR, instead of removing rows:
-ERNA[ERNA$DateMortalityObservedPreTransplant!="",13:30] <- NA 
+#ERNA.cl <- ERNA.cl[ERNA.cl$DateMortalityObservedPreTransplant=="",] 
+## OR, instead of removing rows: ** confirm that these are relevant rows **
+ERNA22[ERNA22$DateMortalityObservedPreTransplant!="",13:30] <- NA 
 
 
 #Note: Don't use OrigPltSurv_20220518 data in days to mort or other field analyses,
@@ -94,11 +93,12 @@ ERNA[ERNA$DateMortalityObservedPreTransplant!="",13:30] <- NA
 
 #Due to how confusing this is, it is probably easiest to ignore all plants with Replaced=Y (even if subsequent data corresponds
 #to plt named, the data for these plts may vary do to being planted 1-2 months later).
-ERNA.cl <- ERNA.cl[ERNA.cl$Replaced_YorN !="Y",]
+#ERNA.cl <- ERNA.cl[ERNA.cl$Replaced_YorN !="Y",]
+#ERNA.cl <- ERNA22[ERNA22$Replaced_YorN !="Y",]
 
 ## OR If plt replaced, change all pre-replacement data to NA (even len0608 for plts replaced in 1st round)
-ERNA$Length_cm_20220608[ERNA$Replaced_YorN =="Y"] <- NA
-ERNA.cl <- ERNA
+ERNA22$Length_cm_20220608[ERNA22$Replaced_YorN =="Y"] <- NA
+ERNA22.cl <- ERNA22
 
 #Notes if considering using some early data: 
 #Can use 2nd surv in days to mort if 1st OrigSurv=1, ignore if 1st OrigSurv=0; if this plt wasn't replaced then it died from transplant.
@@ -146,16 +146,16 @@ ERNA23$Flowering_20231013[ERNA23$Survival_20231013==1 & is.na(ERNA23$Flowering_2
 
 ## Checks 
 ## Check that surv is only 1, 0 and maybe NA
-ERNA.cl[ERNA.cl$Survival_20220608 < 0 | ERNA.cl$Survival_20220608 > 1,]
-ERNA.cl[ERNA.cl$Survival_20220719 < 0 | ERNA.cl$Survival_20220719 > 1,]
-ERNA.cl[ERNA.cl$Survival_20221108 < 0 | ERNA.cl$Survival_20221108 > 1,]
+ERNA22.cl[ERNA22.cl$Survival_20220608 < 0 | ERNA22.cl$Survival_20220608 > 1,]
+ERNA22.cl[(ERNA22.cl$Survival_20220719 < 0 | ERNA22.cl$Survival_20220719 > 1) & !is.na(ERNA22.cl$Survival_20220719),]
+ERNA22.cl[(ERNA22.cl$Survival_20221108 < 0 | ERNA22.cl$Survival_20221108 > 1) & !is.na(ERNA22.cl$Survival_20221108),]
 ERNA23[(ERNA23$Survival_20231013 < 0 | ERNA23$Survival_20231013 > 1) & !is.na(ERNA23$Survival_20231013),]
 ERNA23[ERNA23$Survival_20230607 < 0 | ERNA23$Survival_20230607 > 1,]
 
 #Check that surv is only integers
-ERNA.cl[ERNA.cl$Survival_20220608 - floor(ERNA.cl$Survival_20220608) != 0,]
-ERNA.cl[ERNA.cl$Survival_20220719 - floor(ERNA.cl$Survival_20220719) != 0,]
-ERNA.cl[ERNA.cl$Survival_20221108 - floor(ERNA.cl$Survival_20221108) != 0,]
+ERNA22.cl[ERNA22.cl$Survival_20220608 - floor(ERNA22.cl$Survival_20220608) != 0,]
+ERNA22.cl[ERNA22.cl$Survival_20220719 - floor(ERNA22.cl$Survival_20220719) != 0,]
+ERNA22.cl[ERNA22.cl$Survival_20221108 - floor(ERNA22.cl$Survival_20221108) != 0,]
 ERNA23[ERNA23$Survival_20230607 - floor(ERNA23$Survival_20230607) != 0,]
 
 #Flowering cols should only be 1, 0, NA 
@@ -187,10 +187,10 @@ max(ERNA23$Flowering_20231013, na.rm=TRUE)
 # ** Check that length is only numeric
 # ** Check that if surv=0 for a given date, there are no phenology or height values for that date
 
-## *** Need to work on this ****
+## *** Need to work on this **** Look at ARFR for maybe some progress ** 
 #Check that once zero in surv on X/X or later, stays zero (if becomes 1 later, could be data entry error, or not depending on species)
 ## CONSOLIDATE SURVIVAL DATA
-#ERNA.Surv <- ERNA.cl %>% dplyr::select(c(starts_with("Survival_")))
+#ERNA.Surv <- ERNA22.cl %>% dplyr::select(c(starts_with("Survival_")))
 #for (rr in 1:nrow(ERNA.Surv)) {
 #  for (cc in 1:(ncol(ERNA.Surv)-1)) {
 #    if(ERNA.Surv[rr,cc]==0 & ERNA.Surv[rr,cc+1]==1) {
@@ -199,7 +199,7 @@ max(ERNA23$Flowering_20231013, na.rm=TRUE)
 #  }
 #}
 #ERNA.Surv %>% filter_all(any_vars(.==0))
-#ERNA.cl %>% filter_all(starts_with("Survival_")==0)
+#ERNA22.cl %>% filter_all(starts_with("Survival_")==0)
 ## ----------------------------------------------------------------------------------------------
 
 
@@ -240,6 +240,17 @@ ERNA.SdZn$SdZnOrder[grepl("10 - 15 Deg. F. / 6 - 12", ERNA.SdZn$seed_zone)] = "G
 ERNA.SdZn$SdZnOrder[grepl("15 - 20 Deg. F. / 6 - 12", ERNA.SdZn$seed_zone)] = "H"   #semi-arid, warm
 ERNA.SdZn$SdZnOrder[grepl("20 - 25 Deg. F. / 6 - 12", ERNA.SdZn$seed_zone)] = "I"   #semi-arid, v.warm
 ERNA.SdZn$SdZnOrder[grepl("20 - 25 Deg. F. / 12 - 30", ERNA.SdZn$seed_zone)] = "J"  #arid, v.warm
+
+ERNA.SdZn$SdZnOrderNum[grepl("15 - 20 Deg. F. / 2 - 3", ERNA.SdZn$seed_zone)] = "1"    #humid, warm  
+ERNA.SdZn$SdZnOrderNum[grepl("0 - 5 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "2"      #semi-humid, v.cold 
+ERNA.SdZn$SdZnOrderNum[grepl("5 - 10 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "3"     #semi-humid, cold
+ERNA.SdZn$SdZnOrderNum[grepl("10 - 15 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "4"    #semi-humid, cool
+ERNA.SdZn$SdZnOrderNum[grepl("15 - 20 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "5"    #semi-humid, warm
+ERNA.SdZn$SdZnOrderNum[grepl("20 - 25 Deg. F. / 3 - 6", ERNA.SdZn$seed_zone)] = "6"    #semi-humid, v.warm
+ERNA.SdZn$SdZnOrderNum[grepl("10 - 15 Deg. F. / 6 - 12", ERNA.SdZn$seed_zone)] = "7"   #semi-arid, cool
+ERNA.SdZn$SdZnOrderNum[grepl("15 - 20 Deg. F. / 6 - 12", ERNA.SdZn$seed_zone)] = "8"   #semi-arid, warm
+ERNA.SdZn$SdZnOrderNum[grepl("20 - 25 Deg. F. / 6 - 12", ERNA.SdZn$seed_zone)] = "9"   #semi-arid, v.warm
+ERNA.SdZn$SdZnOrderNum[grepl("20 - 25 Deg. F. / 12 - 30", ERNA.SdZn$seed_zone)] = "10"  #arid, v.warm
 ## ----------------------------------------------------------------------------------------------
 
 
@@ -247,8 +258,7 @@ ERNA.SdZn$SdZnOrder[grepl("20 - 25 Deg. F. / 12 - 30", ERNA.SdZn$seed_zone)] = "
 
 ## ERNA - COMBINE DATA TYPES --------------------------------------------
 ERNA.biovar <- left_join(ERNA.biovar, ERNA.SdZn, by="Source")
-#ERNA.cl <- left_join(ERNA.cl, ERNA.SdZn, by="Source")
-ERNA.cl <- left_join(ERNA.cl, ERNA.biovar, by="Source")
+ERNA22.cl <- left_join(ERNA22.cl, ERNA.biovar, by="Source")
 #ERNA23 <- left_join(ERNA23, ERNA.SdZn, by="Source")
 ERNA23 <- left_join(ERNA23, ERNA.biovar, by="Source")
 ## ----------------------------------------------------------------------
@@ -288,26 +298,37 @@ nrow(ERNA23[ERNA23$FlwrYesNo==0,])                                             #
 
 
 ## ERNA - ADD GROWTH RATE VARIABLES ------------------------------
-ERNA.cl$GrwthRate_Specific <- log(ERNA.cl$Length_cm_20220915/ERNA.cl$Length_cm_20220719)
-ERNA.cl$GrwthRate_Absolute <- ERNA.cl$Length_cm_20220915-ERNA.cl$Length_cm_20220719
-ERNA.cl$GrwthRate_Relative <- (ERNA.cl$Length_cm_20220915-ERNA.cl$Length_cm_20220719)/ERNA.cl$Length_cm_20220719
+ERNA22.cl$GrwthRate_Specific <- log(ERNA22.cl$Length_cm_20220915/ERNA22.cl$Length_cm_20220719)
+ERNA22.cl$GrwthRate_Absolute <- ERNA22.cl$Length_cm_20220915-ERNA22.cl$Length_cm_20220719
+ERNA22.cl$GrwthRate_Relative <- (ERNA22.cl$Length_cm_20220915-ERNA22.cl$Length_cm_20220719)/ERNA22.cl$Length_cm_20220719
 
 ## ** Look at early vs late growth if at least 3 height measurements are usable ** 
-ERNA.cl$GrwthRateE_Specific <- log(ERNA.cl$Length_cm_20220719/ERNA.cl$Length_cm_20220608)
-ERNA.cl$GrwthRateE_Absolute <- ERNA.cl$Length_cm_20220719-ERNA.cl$Length_cm_20220608
-ERNA.cl$GrwthRateE_Relative <- (ERNA.cl$Length_cm_20220719-ERNA.cl$Length_cm_20220608)/ERNA.cl$Length_cm_20220608
+ERNA22.cl$GrwthRateE_Specific <- log(ERNA22.cl$Length_cm_20220719/ERNA22.cl$Length_cm_20220608)
+ERNA22.cl$GrwthRateE_Absolute <- ERNA22.cl$Length_cm_20220719-ERNA22.cl$Length_cm_20220608
+ERNA22.cl$GrwthRateE_Relative <- (ERNA22.cl$Length_cm_20220719-ERNA22.cl$Length_cm_20220608)/ERNA22.cl$Length_cm_20220608
 
-plot(ERNA.cl$GrwthRate_Relative, ERNA.cl$GrwthRateE_Relative)
+plot(ERNA22.cl$GrwthRate_Relative, ERNA22.cl$GrwthRateE_Relative)
+## ---------------------------------------------------------------
+
+
+
+## LOOK AT AGB FOR 2023
+## Add any mods? 
+ERNA23$AboveGroundBiomass_g
+ERNA23$AboveGroundBiomass_g[!is.na(ERNA23$AboveGroundBiomass_g)] #Number of plts with bm data
+length(ERNA23$AboveGroundBiomass_g[!is.na(ERNA23$AboveGroundBiomass_g)])
+hist(ERNA23$AboveGroundBiomass_g)
+str(ERNA23$AboveGroundBiomass_g)
 ## ---------------------------------------------------------------
 
 
 
 ## LOOK AT REPRO BM DATA FOR 2023
-## ---------------------------------------------------------------
-
-
-
-## ADD AGB FOR 2023
+ERNA23$ReproBiomass_g
+ERNA23$ReproBiomass_g[!is.na(ERNA23$ReproBiomass_g)] #Number of plts with bm data
+length(ERNA23$ReproBiomass_g[!is.na(ERNA23$ReproBiomass_g)])
+hist(ERNA23$ReproBiomass_g)
+str(ERNA23$ReproBiomass_g)
 ## ---------------------------------------------------------------
 
 
@@ -319,9 +340,9 @@ ERNA23$AliveYesNo[ERNA23$Survival_20231013==1] <- 1
 # ** Remove plants that died early in 2022 (e.g. from transplant shock) and were not replaced **
 
 ## 2022
-ERNA.cl$AliveYesNo <- 0
-ERNA.cl$AliveYesNo[ERNA.cl$Survival_20221108==1] <- 1
-ERNA.cl$AliveYesNo[(ERNA.cl$OrigPltSurvival_20220518==0) & (ERNA.cl$Replaced_YorN=="N" | ERNA.cl$Replaced_YorN=="")] <- NA
+ERNA22.cl$AliveYesNo <- 0
+ERNA22.cl$AliveYesNo[ERNA22.cl$Survival_20221108==1] <- 1
+ERNA22.cl$AliveYesNo[(ERNA22.cl$OrigPltSurvival_20220518==0) & (ERNA22.cl$Replaced_YorN=="N" | ERNA22.cl$Replaced_YorN=="")] <- NA
 #ERNA.cl$AliveYesNo[(ERNA.cl$OrigPltSurvival_20220518==0 | ERNA.cl$Survival_20220608==0) & (ERNA.cl$Replaced_YorN=="N" | ERNA.cl$Replaced_YorN=="")] <- NA
 #ERNA.cl %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_Avg=mean(AliveYesNo,na.rm=TRUE))
 ## ---------------------------------------------------------------
@@ -329,12 +350,15 @@ ERNA.cl$AliveYesNo[(ERNA.cl$OrigPltSurvival_20220518==0) & (ERNA.cl$Replaced_Yor
 
 
 ## ADD SOME 2023 DATA TO 2022 DATAFRAME TO ALLOW FOR COMPARISONS AND FILTERING 
-ERNA23.sel <- ERNA23 %>% dplyr::select(c("ID","SentForSequencing_20230803","DaysToFlwr","AliveYesNo","FlwrYesNo")) 
-ERNA.cl <- left_join(ERNA.cl, ERNA23.sel, by="ID") 
+ERNA23.sel <- ERNA23 %>% dplyr::select(c("ID","SentForSequencing_20230803","DaysToFlwr","AliveYesNo","FlwrYesNo",
+                                         "AboveGroundBiomass_g","ReproBiomass_g")) 
+ERNA.cl <- left_join(ERNA22.cl, ERNA23.sel, by="ID") 
 
 
 ## Add in SLA data
 ERNA.cl <- left_join(ERNA.cl, ERNA.sla, by="ID")
+str(ERNA.cl$SLA_mm2permg)
+ERNA.cl$SLA_mm2permg <- as.numeric(as.character(ERNA.cl$SLA_mm2permg))
 ## ---------------------------------------------------------------
 
 
@@ -392,89 +416,129 @@ aictab(cand.set = models, modnames = mod.names )
 ## ERNA - VISUALIZE RAW DATA ---------------------------------------------------------------
 
 ## Order populations for plotting 
-## 2022 - Order by average size 
-ERNA.htByMed <- with(ERNA.cl, reorder(Source, Length_cm_20220915, median, na.rm=TRUE))
+## 2022 and 2023 - Order by average size or longitude or seed zone
+#ERNA.htByMed <- with(ERNA.cl, reorder(Source, Length_cm_20220915, median, na.rm=TRUE))
+ERNA.longByMed <- with(ERNA.cl, reorder(Source, Longitude, median, na.rm=TRUE))
+str(ERNA.cl$SdZnOrderNum)
+ERNA.cl$SdZnOrderNum <- as.integer(ERNA.cl$SdZnOrderNum)
+ERNA.sdznByMed <- with(ERNA.cl, reorder(Source, as.integer(SdZnOrderNum), median, na.rm=TRUE))
+
+
 ERNA.meds <- ERNA.cl %>% group_by(Source) %>% 
-             dplyr::summarise(Height_MD=median(Length_cm_20220915,na.rm=TRUE), GrowthAb_MD=median(GrwthRate_Absolute,na.rm=TRUE),
+             dplyr::summarise(Height22_MD=median(Length_cm_20220915,na.rm=TRUE), GrowthAb_MD=median(GrwthRate_Absolute,na.rm=TRUE),
              GrowthRe_MD=median(GrwthRate_Relative,na.rm=TRUE), GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE),
-             GrowthAbE_MD=median(GrwthRateE_Absolute,na.rm=TRUE),
-             GrowthReE_MD=median(GrwthRateE_Relative,na.rm=TRUE), GrowthSpE_MD=median(GrwthRateE_Specific,na.rm=TRUE))
+             GrowthAbE_MD=median(GrwthRateE_Absolute,na.rm=TRUE), GrowthReE_MD=median(GrwthRateE_Relative,na.rm=TRUE), 
+             GrowthSpE_MD=median(GrwthRateE_Specific,na.rm=TRUE), DaysToFlwr23_MD=median(DaysToFlwr,na.rm=TRUE),
+             AGB23_MD=median(AboveGroundBiomass_g,na.rm=TRUE), ReproBM23_MD=median(ReproBiomass_g,na.rm=TRUE))
 ERNA.meds <- left_join(ERNA.meds, ERNA.SdZn, by="Source")
 
 
 ## 2023 - Order by time to flower 
-ERNA.dfByMed <- with(ERNA23, reorder(Source, DaysToFlwr, median, na.rm=TRUE))
-ERNA23.meds <- ERNA23 %>% group_by(Source) %>% 
-               dplyr::summarise(DaysToFlwr_MD=median(DaysToFlwr,na.rm=TRUE))
-ERNA23.meds <- left_join(ERNA23.meds, ERNA.SdZn, by="Source")
+#ERNA.dfByMed <- with(ERNA23, reorder(Source, DaysToFlwr, median, na.rm=TRUE))
+#ERNA23.meds <- ERNA23 %>% group_by(Source) %>% 
+#               dplyr::summarise(DaysToFlwr_MD=median(DaysToFlwr,na.rm=TRUE))
+#ERNA23.meds <- left_join(ERNA23.meds, ERNA.SdZn, by="Source")
 
 
 ## Boxplots of raw data 
-## 2022
-par(mfrow=c(2,2))
+#ERNA.meds <- ERNA.meds[order(ERNA.meds$Longitude),] #Order by longitude
+ERNA.meds$SdZnOrderNum <- as.integer(ERNA.meds$SdZnOrderNum)
+str(ERNA.meds$SdZnOrderNum)
+ERNA.meds <- ERNA.meds[order(ERNA.meds$SdZnOrderNum),] #Order by seed zone
 
-## Size
-ERNA.meds <- ERNA.meds[order(ERNA.meds$Height_MD),] #Order by median 
-boxplot(Length_cm_20220915 ~ ERNA.htByMed, data=ERNA.cl,
+
+par(mfrow=c(4,2))
+
+## Size 2022
+#ERNA.meds <- ERNA.meds[order(ERNA.meds$Height22_MD),] #Order by median 
+boxplot(Length_cm_20220915 ~ ERNA.sdznByMed, data=ERNA.cl,
         xlab=NA, ylab="Height (cm)", cex.lab=1.25,
         cex.axis=0.99, names=ERNA.meds$PopAbbrev, las=2,
-        main="FINAL SIZE", cex.main=1.5, col=ERNA.meds$HexCode)
+        main="FINAL SIZE 2022", cex.main=1.1, col=ERNA.meds$HexCode)
 
-## Growth rate(s) ** Add time interval to growth rate calcs? **
+## Growth rate(s) 2022 ** Add time interval to growth rate calcs? **
+#boxplot(GrwthRateE_Relative ~ ERNA.longByMed, data=ERNA.cl, las=2,
+#        xlab=NA, ylab="Plant relative growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
+#        cex.main=1.5, col=ERNA.meds$HexCode, main="EARLY GROWTH RATE", ylim=c(-0.25,5.6))
+
+boxplot(GrwthRateE_Absolute ~ ERNA.sdznByMed, data=ERNA.cl, las=2,
+        xlab=NA, ylab="Plant absolute growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
+        cex.main=1.1, col=ERNA.meds$HexCode, main="EARLY SEASON GROWTH RATE 2022", ylim=c(-10,35))
+
+#boxplot(GrwthRateE_Specific ~ ERNA.longByMed, data=ERNA.cl, las=2,
+#        xlab=NA, ylab="Plant specific growth", cex.lab=1, cex.axis=0.9, names=ERNA.meds$PopAbbrev,
+#        cex.main=1.5, col=ERNA.meds$HexCode, main="EARLY GROWTH RATE")
+
+
 #ERNA.meds <- ERNA.meds[order(ERNA.meds$Growth_MD),]
-boxplot(GrwthRate_Relative ~ ERNA.htByMed, data=ERNA.cl, las=2,
-        xlab=NA, ylab="Plant relative growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
-        cex.main=1.5, col=ERNA.meds$HexCode, main="GROWTH RATE", ylim=c(-0.35,3))
+#boxplot(GrwthRate_Relative ~ ERNA.longByMed, data=ERNA.cl, las=2,
+#        xlab=NA, ylab="Plant relative growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
+#        cex.main=1.5, col=ERNA.meds$HexCode, main="GROWTH RATE", ylim=c(-0.35,3))
 
-#boxplot(GrwthRate_Absolute ~ ERNA.htByMed, data=ERNA.cl, las=2,
-#        xlab=NA, ylab="Plant absolute growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
-#        cex.main=1.5, col=ERNA.meds$HexCode, main="GROWTH RATE")
+boxplot(GrwthRate_Absolute ~ ERNA.sdznByMed, data=ERNA.cl, las=2,
+        xlab=NA, ylab="Plant absolute growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
+        cex.main=1.1, col=ERNA.meds$HexCode, main="LATER SEASON GROWTH RATE 2022")
 
-#boxplot(GrwthRate_Specific ~ ERNA.htByMed, data=ERNA.cl, las=2,
+#boxplot(GrwthRate_Specific ~ ERNA.longByMed, data=ERNA.cl, las=2,
 #        xlab=NA, ylab="Plant specific growth", cex.lab=1, cex.axis=0.9, names=ERNA.meds$PopAbbrev,
 #        cex.main=1.5, col=ERNA.meds$HexCode)
 
 #plot.new()
-
-boxplot(GrwthRateE_Relative ~ ERNA.htByMed, data=ERNA.cl, las=2,
-        xlab=NA, ylab="Plant relative growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
-        cex.main=1.5, col=ERNA.meds$HexCode, main="EARLY GROWTH RATE", ylim=c(-0.25,5.6))
-
-#boxplot(GrwthRateE_Absolute ~ ERNA.htByMed, data=ERNA.cl, las=2,
-#        xlab=NA, ylab="Plant absolute growth", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
-#        cex.main=1.5, col=ERNA.meds$HexCode, main="EARLY GROWTH RATE", ylim=c(-10,35))
-
-#boxplot(GrwthRateE_Specific ~ ERNA.htByMed, data=ERNA.cl, las=2,
-#        xlab=NA, ylab="Plant specific growth", cex.lab=1, cex.axis=0.9, names=ERNA.meds$PopAbbrev,
-#        cex.main=1.5, col=ERNA.meds$HexCode, main="EARLY GROWTH RATE")
 
 #ERNA.SdZn <- ERNA.SdZn[order(ERNA.SdZn$GR_SP),]
 #boxplot(GrwthRate_Specific ~ ERNA.grsByMed, data=ERNA.cl,
 #        xlab="Population", ylab="Plant specific growth", cex.lab=1.5, names=ERNA.SdZn$PopAbbrev,
 #        cex.axis=0.7, cex.main=1.5, col=ERNA.SdZn$HexCode)
 #par(mfrow=c(1,1))
+
+
+## Flowering time 2023
+boxplot(DaysToFlwr ~ ERNA.sdznByMed, data=ERNA.cl, las=2,
+        xlab=NA, ylab="Days to first flower", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
+        cex.main=1.1, col=ERNA.meds$HexCode, main="PHENOLOGY 2023")
+
+## ABG 2023
+boxplot(AboveGroundBiomass_g ~ ERNA.sdznByMed, data=ERNA.cl, las=2,
+        xlab=NA, ylab="Above-ground biomass (g)", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
+        cex.main=1.1, col=ERNA.meds$HexCode, main="PLANT BIOMASS 2023", ylim=c(0,350))
+
+## Repro BM 2023
+boxplot(ReproBiomass_g ~ ERNA.sdznByMed, data=ERNA.cl, las=2,
+        xlab=NA, ylab="Reproductive biomass (g)", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
+        cex.main=1.1, col=ERNA.meds$HexCode, main="REPRODUCTIVE OUTPUT 2023")
+
+## SLA 2023
+boxplot(SLA_mm2permg ~ ERNA.sdznByMed, data=ERNA.cl, las=2,
+        xlab=NA, ylab="Specific leaf area (mm2/mg)", cex.lab=1.25, cex.axis=0.99, names=ERNA.meds$PopAbbrev,
+        cex.main=1.1, col=ERNA.meds$HexCode, main="SPECIFIC LEAF AREA 2023", ylim=c(2,12))
+
+
 ## Blank plot
 plot.new()
+par(mfrow=c(1,1))
 legend("center", unique(ERNA.meds$SdZnAbbrev[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), col="black",
-       pt.bg=unique(ERNA.meds$HexCode[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), cex=2.95, pch=21)
+       pt.bg=unique(ERNA.meds$HexCode[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), cex=1.65, pch=21)
 ## -------------------------
 
 
 ## 2023
-par(mfrow=c(1,2))
+#par(mfrow=c(1,2))
 
 ## Days to Flwr
-ERNA23.meds <- ERNA23.meds[order(ERNA23.meds$DaysToFlwr_MD),] #Order by median 
-boxplot(DaysToFlwr ~ ERNA.dfByMed, data=ERNA23,
-        xlab=NA, ylab="Days to first flower", cex.lab=1.25,
-        cex.axis=0.99, names=ERNA23.meds$PopAbbrev, las=2,
-        main="PHENOLOGY", cex.main=1.5, col=ERNA23.meds$HexCode)
+#ERNA23.meds <- ERNA23.meds[order(ERNA23.meds$DaysToFlwr_MD),] #Order by median 
+#boxplot(DaysToFlwr ~ ERNA.dfByMed, data=ERNA23,
+#        xlab=NA, ylab="Days to first flower", cex.lab=1.25,
+#        cex.axis=0.99, names=ERNA23.meds$PopAbbrev, las=2,
+#        main="PHENOLOGY", cex.main=1.5, col=ERNA23.meds$HexCode)
 
 ## Blank plot
-plot.new()
-legend("center", unique(ERNA.meds$seed_zone[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), col="black",
-       pt.bg=unique(ERNA.meds$HexCode[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), cex=1.24, pch=21)
+#plot.new()
+#legend("center", unique(ERNA.meds$seed_zone[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), col="black",
+#       pt.bg=unique(ERNA.meds$HexCode[order(ERNA.meds$SdZnOrder, decreasing=FALSE)]), cex=1.24, pch=21)
 ## -------------------------
+
+
+
 
 
 ## 2023 - Plots means as points and SE as error bars
