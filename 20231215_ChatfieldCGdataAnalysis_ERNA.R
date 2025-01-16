@@ -64,13 +64,13 @@ ERNA23$Flowering_20231013 <- as.integer(as.character(ERNA23$Flowering_20231013))
 ##If OrigPltSurv_20220518 = 0 & plt not replaced (N), ignore data for this plt, i.e. future surv should be NA, not 0; died from transplant
 #ERNA22.cl <- ERNA22[ERNA22$OrigPltSurvival_20220518==1 | (ERNA22$OrigPltSurvival_20220518==0 & ERNA22$Replaced_YorN=="Y"),]
 ## OR, instead of removing rows: ** confirm that these are relevant rows **
-ERNA22[ERNA22$OrigPltSurvival_20220518==0 & ERNA22$Replaced_YorN=="N",13:30] <- NA
+ERNA22[ERNA22$OrigPltSurvival_20220518==0 & ERNA22$Replaced_YorN=="N",13:29] <- NA
 
 
 ##If not replaced, but died before planting, don't use subsequent data 
 #ERNA.cl <- ERNA.cl[ERNA.cl$DateMortalityObservedPreTransplant=="",] 
 ## OR, instead of removing rows: ** confirm that these are relevant rows **
-ERNA22[ERNA22$DateMortalityObservedPreTransplant!="",13:30] <- NA 
+ERNA22[ERNA22$DateMortalityObservedPreTransplant!="",13:29] <- NA 
 
 
 #Note: Don't use OrigPltSurv_20220518 data in days to mort or other field analyses,
@@ -154,7 +154,7 @@ ERNA23[ERNA23$Survival_20230607 < 0 | ERNA23$Survival_20230607 > 1,]
 
 #Check that surv is only integers
 ERNA22.cl[ERNA22.cl$Survival_20220608 - floor(ERNA22.cl$Survival_20220608) != 0,]
-ERNA22.cl[ERNA22.cl$Survival_20220719 - floor(ERNA22.cl$Survival_20220719) != 0,]
+ERNA22.cl[ERNA22.cl$Survival_20220719 - floor(ERNA22.cl$Survival_20220719) != 0,] #*Should this be zero rows?*
 ERNA22.cl[ERNA22.cl$Survival_20221108 - floor(ERNA22.cl$Survival_20221108) != 0,]
 ERNA23[ERNA23$Survival_20230607 - floor(ERNA23$Survival_20230607) != 0,]
 
@@ -714,12 +714,12 @@ ERNA.pc2 <- ERNA.pcaBiovar$rotation[,2][order(abs(ERNA.pcaBiovar$rotation[,2]))]
 ## The following bioclim vars selected due to high loadings in orthogonal directions along PC1 and PC2 
 ##BIO17 (or 14), BIO11 (or 1), BIO19 (or 16 or 13), BIO7 (or 8 or 4)
 
-bv.names <- c("Temperature annual range (BIO7)",
-              "Mean temp of coldest quarter (BIO11)","Precipitation of driest quarter (BIO17)",
-              "Precipitation of coldest quarter (BIO19)")
+bv.names <- c("Temperature Annual Range (BIO7)",
+              "Mean Temp. Coldest Quarter (Deg. C)","Precipitation Driest Quarter (BIO17)",
+              "Precipitation Coldest Quarter (BIO19)")
 
 ERNA.ht.bv.mod <- lmer(Length_cm_20220915 ~ scale(bio7) + scale(bio11) + scale(bio17) + scale(bio19) 
-                       + (1|Block), data=ERNA.cl)
+                       + (1|Block), data=ERNA22.cl)
 summary(ERNA.ht.bv.mod)
 Anova(ERNA.ht.bv.mod)
 plot(allEffects(ERNA.ht.bv.mod))
@@ -756,7 +756,7 @@ abline(v=ERNA.biovar$bio11[20], col="red")
 
 
 ## Calculate trait means
-ERNA.mn <- ERNA.cl %>% group_by(Source) %>% 
+ERNA.mn <- ERNA22.cl %>% group_by(Source) %>% 
            dplyr::summarise(Height_MN=mean(Length_cm_20220915,na.rm=TRUE), Height_SE=calcSE(Length_cm_20220915),
                    GrowthRe_MN=mean(GrwthRate_Relative,na.rm=TRUE), GrowthRe_SE=calcSE(GrwthRate_Relative),
                    GrowthReE_MN=mean(GrwthRateE_Relative,na.rm=TRUE),GrowthReE_SE=calcSE(GrwthRateE_Relative))
@@ -799,9 +799,12 @@ abline(v=ERNA.biovar$bio19[20], col="red")
 Anova(ERNA.df.bv.mod)
 eff.df.bio11 <- as.data.frame(predictorEffects(ERNA.df.bv.mod)[2]) #Extract values for plotting model lines
 
-plot(as.vector(t(ERNA23.mn[,19])), ERNA23.mn$DaysToFlwr_MN, bg=ERNA23.mn$HexCode, pch=21, col="black", cex=1.5, main=NA, 
-     cex.main=1.5, xlab=bv.names[2], ylab="Days to first flower", cex.lab=1.5, cex.axis=1.1, ylim=c(185,245))
-arrows(as.vector(t(ERNA23.mn[,19])), ERNA23.mn$DaysToFlwr_MN-ERNA23.mn$DaysToFlwr_SE, as.vector(t(ERNA.mn[,19])), 
-       ERNA23.mn$DaysToFlwr_MN+ERNA23.mn$DaysToFlwr_SE, angle=90, col="grey", code=3, length=0, lwd=1.6) #Error bars
-lines(eff.df.bio11$bio11[,1], eff.df.bio11$bio11[,2],lwd=1,col="black") #Model fit
-abline(v=ERNA.biovar$bio11[20], col="red")
+png("20250116_ERNAphenoVSclim.png", width=550, height=550, res=300, pointsize=6)
+plot(as.vector(t(ERNA23.mn[,20])), ERNA23.mn$DaysToFlwr_MN, bg=ERNA23.mn$HexCode, pch=21, col="black", cex=1.2, main=NA, 
+     cex.main=1.5, xlab=bv.names[2], ylab="Days to first flower", cex.lab=1, cex.axis=1, ylim=c(187,240))#,
+     #xlab="Mean Temp. Coldest Quarter (Deg. C)")
+arrows(as.vector(t(ERNA23.mn[,20])), ERNA23.mn$DaysToFlwr_MN-ERNA23.mn$DaysToFlwr_SE, as.vector(t(ERNA23.mn[,20])), 
+       ERNA23.mn$DaysToFlwr_MN+ERNA23.mn$DaysToFlwr_SE, angle=90, col="grey", code=3, length=0, lwd=0.9) #Error bars
+lines(eff.df.bio11$bio11[,1], eff.df.bio11$bio11[,2],lwd=0.9,col="black") #Model fit
+#abline(v=ERNA.biovar$bio11[20], col="red")
+dev.off()
