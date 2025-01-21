@@ -808,3 +808,10 @@ arrows(as.vector(t(ERNA23.mn[,20])), ERNA23.mn$DaysToFlwr_MN-ERNA23.mn$DaysToFlw
 lines(eff.df.bio11$bio11[,1], eff.df.bio11$bio11[,2],lwd=0.9,col="black") #Model fit
 #abline(v=ERNA.biovar$bio11[20], col="red")
 dev.off()
+
+## Blank plot
+plot.new()
+par(mfrow=c(1,1))
+legend("center", unique(ERNA23.mn$SdZnAbbrev[order(ERNA23.mn$SdZnOrder, decreasing=FALSE)]), col="black",
+       pt.bg=unique(ERNA23.mn$HexCode[order(ERNA23.mn$SdZnOrder, decreasing=FALSE)]), cex=1.65, pch=21)
+## -----------------------------------------------------------------------------------------------------
