@@ -7,7 +7,7 @@
 
 
 rm(list=ls())
-dev.off()
+#dev.off()
 
 
 ## LOAD PACKAGES AND FUNCTIONS --------------------------------------------------------------------
@@ -30,7 +30,7 @@ calcSE <- function(x){sd(x, na.rm=TRUE)/sqrt(length(x))}
 ## SET WORKING DIRECTORY --------------------------------------------------------------------------
 #setwd("C:/Users/april.goebl/OneDrive - Denver Botanic Gardens/AGoebl_NonProject_WorkRelated/BLM_Restoration_Project")
 #setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/CanyonCity")
-setwd("C:/Users/april/Denver Botanic Gardens/Conservation - BLM-Grassland/CanyonCity")
+setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/CanyonCity")
 ## ------------------------------------------------------------------------------------------------
 
 
@@ -45,67 +45,89 @@ dats <- read.csv(file="20250203_CanonCityData_ARFRforAnalysis.csv", sep=",", hea
 ## LOOK AT AND MODIFY STRUCTURE OF DATA -----------------------------------------------------------
 str(dats)
 dats$Plot.Number <- as.factor(dats$Plot.Number)
-dats$PlotTagNum <- as.factor(dats$PlotTagNum)
+#dats$PlotTagNum <- as.factor(dats$PlotTagNum)
 dats$Site <- as.factor(dats$Site)
 dats$Treatment <- as.factor(dats$Treatment)
 #dats$Contents <- as.factor(dats$Contents)
+#Change 'Date' to date or parse out year, etc?
 ## ------------------------------------------------------------------------------------------------
 
 
 
 ## ADD AND REMOVE FROM DATAFRAME ------------------------------------------------------------------
 unique(dats$Contents)
-#Remove empty, control, and pilot categories 
-dats <- dats[dats$Contents != "empty",]
-dats <- dats[dats$Contents != "controlAndSave",]  #Or should we keep negative control? 
-dats <- dats[dats$Contents != "Fre12_1200seeds",]
-dats <- dats[dats$Contents != "Fre12_800seeds",]
-dats <- dats[dats$Contents != "422Nav_1200seeds",]
-dats <- dats[dats$Contents != "422Nav_800seeds",]
-dats <- dats[dats$Contents != "WY71_ClearPlot",]
-dats <- dats[dats$Contents != "ERNA_Rio",]
-dats <- dats[dats$Contents != "ERNA_Rou",]
+unique(dats$Treatment)
+## Remove empty, control, and pilot categories 
+#dats <- dats[dats$Contents != "empty",]
+#dats <- dats[dats$Contents != "controlAndSave",]  #Or should we keep negative control? 
+#dats <- dats[dats$Contents != "Fre12_1200seeds",]
+#dats <- dats[dats$Contents != "Fre12_800seeds",]
+#dats <- dats[dats$Contents != "422Nav_1200seeds",]
+#dats <- dats[dats$Contents != "422Nav_800seeds",]
+#dats <- dats[dats$Contents != "WY71_ClearPlot",]
+#dats <- dats[dats$Contents != "ERNA_Rio",]
+#dats <- dats[dats$Contents != "ERNA_Rou",]
+#dats <- dats[dats$Contents != "ERNA_Gun",]
+
+dats <- dats[dats$Treatment != "skip",]
+dats <- dats[dats$Treatment != "pilot",]
 #droplevels function
 
-#Add column for number of seeds planted
+## Add column for number of seeds planted
 dats$NumSeeds <- 400
 
-#Add column with mix type or single 
-dats$SeedMix[grepl("mix_d", dats$Contents)] <- "Mix_D"
-dats$SeedMix[grepl("mix_s", dats$Contents)] <- "Mix_S"
+## Add column with mix type or single 
+dats$SeedMix[grepl("mix_d", dats$Contents)] <- "Mix_B"  #Broad mixes
+dats$SeedMix[grepl("mix_s", dats$Contents)] <- "Mix_C"  #Close mixes
 dats$SeedMix[grepl("single_", dats$Contents)] <- "Single"
 dats$SeedMix <- as.factor(dats$SeedMix)
+
+
+## Data checks
+#seedling count should only be numeric
+#seedling count on 20240918 should only be 1 or 0
+#other checks..?
+
+## Check if any ARFR seen in negative controls?
+unique(dats$ARFR.Seedling.Count[dats$Treatment=="17"])
+dats[dats$Treatment=="17" & dats$ARFR.Seedling.Count==1,]
+##There is one incidence of a single ARFR seedling being counted in one survey in a single control plot
+## Remove negative control rows
+dats <- dats[dats$Treatment != "17",] #Negative controls
 ## ------------------------------------------------------------------------------------------------
 
 
 
 
 ## PLOT RAW DATA AS BOX PLOTS ----------------------------------------------------------------------------------
-cols <- c(rep("darkseagreen4", 10), rep("red4",10), rep("steelblue4",12))
-par(las=2)
-boxplot(ARFR.Seedling.Count ~ Site + Contents, data=dats, col=cols, ylim=c(0,80),
-        at=c(1:2,4:5,7:8,10:11,13:14,16:17,19:20,22:23,25:26,28:29,31:32,34:35,37:38,40:41,43:44,46:47))
+#cols <- c(rep("darkseagreen4", 10), rep("red4",10), rep("steelblue4",12))
+#par(las=2)
+#boxplot(ARFR.Seedling.Count ~ Site + Contents, data=dats, col=cols, ylim=c(0,80),
+#        at=c(1:2,4:5,7:8,10:11,13:14,16:17,19:20,22:23,25:26,28:29,31:32,34:35,37:38,40:41,43:44,46:47))
 
+## 2023 emergence
+dats23 <- dats[grepl("2023", dats$Date),]
 cols <- c(rep("darkseagreen4", 5), rep("red4",5), rep("steelblue4",6),
           rep("darkseagreen4", 5), rep("red4",5), rep("steelblue4",6))
-boxplot((ARFR.Seedling.Count/NumSeeds) ~ Contents + Site, data=dats, col=cols, ylim=c(0,0.14),
+boxplot((ARFR.Seedling.Count/NumSeeds) ~ Contents + Site, data=dats23, col=cols, ylim=c(0,0.14),
         xlab=NA, ylab="Emergence Rate", xaxt="n", cex.lab=1.5)
 
 
-boxplot(ARFR.Seedling.Count ~ SeedMix + Site, data=dats)
+boxplot(ARFR.Seedling.Count ~ SeedMix + Site, data=dats23)
 
 
-EmrgByMed <- with(dats, reorder(Contents, ARFR.Seedling.Count, median, na.rm=TRUE))
-boxplot(ARFR.Seedling.Count ~ EmrgByMed, data=dats,
+EmrgByMed <- with(dats23, reorder(Contents, ARFR.Seedling.Count, median, na.rm=TRUE))
+boxplot(ARFR.Seedling.Count ~ EmrgByMed, data=dats23,
         xlab="Seed composition", ylab="Emergence rate", cex.lab=1.25)
 
 
-EmrgAvgs <- dats %>% group_by(Contents) %>% 
+EmrgAvgs <- dats23 %>% group_by(Contents) %>% 
   dplyr::summarise(Emrg_MD=median(ARFR.Seedling.Count,na.rm=TRUE),
                    Emrg_MN=mean(ARFR.Seedling.Count,na.rm=TRUE),
                    Emrg_SE=calcSE(ARFR.Seedling.Count))
 
 #EmrgAvgs <- left_join(EmrgAvgs, dats, by="Contents") 
+EmrgAvgs$PopCol <- NA
 EmrgAvgs$PopCol[grepl("mix_s1", EmrgAvgs$Contents)] = "red4"  
 EmrgAvgs$PopCol[grepl("mix_s2", EmrgAvgs$Contents)] = "red4"     
 EmrgAvgs$PopCol[grepl("mix_s3", EmrgAvgs$Contents)] = "red4"        
@@ -126,21 +148,55 @@ EmrgAvgs$PopCol[grepl("single_LasAn", EmrgAvgs$Contents)] = "steelblue4"
 plot(1:16, EmrgAvgs$Emrg_MN, col=EmrgAvgs$PopCol, pch=19, cex=1.25)
 
 
-EmrgAvgs_PC <- PC %>% group_by(Contents) %>% 
-  dplyr::summarise(Emrg_MD=median(ARFR.Seedling.Count,na.rm=TRUE),
-                   Emrg_MN=mean(ARFR.Seedling.Count,na.rm=TRUE),
-                   Emrg_SE=calcSE(ARFR.Seedling.Count))
+#EmrgAvgs_PC <- PC %>% group_by(Contents) %>% 
+#  dplyr::summarise(Emrg_MD=median(ARFR.Seedling.Count,na.rm=TRUE),
+#                   Emrg_MN=mean(ARFR.Seedling.Count,na.rm=TRUE),
+#                   Emrg_SE=calcSE(ARFR.Seedling.Count))
 
-plot(1:16, EmrgAvgs_PC$Emrg_MN, col=EmrgAvgs$PopCol, pch=19, cex=1.25)
+#plot(1:16, EmrgAvgs_PC$Emrg_MN, col=EmrgAvgs$PopCol, pch=19, cex=1.25)
+
+#EmrgAvgs_EP <- EP %>% group_by(Contents) %>% 
+#  dplyr::summarise(Emrg_MD=median(ARFR.Seedling.Count,na.rm=TRUE),
+#                   Emrg_MN=mean(ARFR.Seedling.Count,na.rm=TRUE),
+#                   Emrg_SE=calcSE(ARFR.Seedling.Count))
+
+#plot(1:16, EmrgAvgs_EP$Emrg_MN, col=EmrgAvgs$PopCol, pch=19, cex=1.25)
 
 
 
-EmrgAvgs_EP <- EP %>% group_by(Contents) %>% 
-  dplyr::summarise(Emrg_MD=median(ARFR.Seedling.Count,na.rm=TRUE),
-                   Emrg_MN=mean(ARFR.Seedling.Count,na.rm=TRUE),
-                   Emrg_SE=calcSE(ARFR.Seedling.Count))
+## 2024 
+dats24 <- dats[grepl("2024", dats$Date),]
+dats2406 <- dats24[dats24$Date!="9/18/2024 18:00",]
 
-plot(1:16, EmrgAvgs_EP$Emrg_MN, col=EmrgAvgs$PopCol, pch=19, cex=1.25)
+## Counts
+cols <- c(rep("darkseagreen4", 5), rep("red4",5), rep("steelblue4",6),
+          rep("darkseagreen4", 5), rep("red4",5), rep("steelblue4",6))
+boxplot((ARFR.Seedling.Count) ~ Contents + Site, data=dats2406, col=cols, ylim=c(0,20),
+        xlab=NA, ylab="Number of plants per plot", xaxt="n", cex.lab=1.5)
+
+boxplot(ARFR.Seedling.Count ~ SeedMix + Site, data=dats2406)
+
+## ** Look at total counts ** 
+## ** Look at sites separately **
+
+## Percent vegetative cover
+boxplot((ARFR.Percent.Cover) ~ Contents + Site, data=dats2406, col=cols, ylim=c(0,60),
+        xlab=NA, ylab="Percent cover/plot", xaxt="n", cex.lab=1.5)
+
+boxplot(ARFR.Percent.Cover ~ SeedMix + Site, data=dats2406)
+
+
+## Percent reproductive cover
+dats2409 <- dats24[dats24$Date=="9/18/2024 18:00",]
+boxplot((ARFR.Reproductive.Percent.Cover) ~ Contents + Site, data=dats2409, col=cols, ylim=c(0,80),
+        xlab=NA, ylab="Percent reproductive cover/plot", xaxt="n", cex.lab=1.5)
+
+boxplot(ARFR.Reproductive.Percent.Cover ~ SeedMix + Site, data=dats2409)
+
+
+
+
+
 
 
 
@@ -217,7 +273,10 @@ abline(0,1)
 #Even with this, I don't know if these comparisons are appropriate. And if ordering by ascending val is ok.
 
 
-## TRY PLOTTING DEVIATION FROM EXPECTED 
+
+
+
+## TRY PLOTTING DEVIATION FROM EXPECTED ------------------------------------------------------
 ## Calculate 'expected' num emerged for each mix based on additive of components
 e_s1 <- ((mean(Emrg_LasAn$RATE)*(400/3)) + (mean(Emrg_314Jeff$RATE)*(400/3)) 
          + (mean(Emrg_316Jeff$RATE)*(400/3)))/400
