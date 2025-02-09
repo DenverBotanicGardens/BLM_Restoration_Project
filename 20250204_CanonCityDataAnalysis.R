@@ -193,9 +193,10 @@ EmrgAvgs.EP$MixCol[grepl("mix_b", EmrgAvgs.EP$Contents)] = "grey30"
 
 plot(1:2, 0:1, type="n",ylim=c(0,0.07), xaxt="n", ylab="Emergence rate", xlab="Site", cex.lab=1.5)
 for (ee in 1:length(unique(dats$Contents))) { 
-points(1:2, c(EmrgAvgs.PC$Emrg_MN[ee],EmrgAvgs.EP$Emrg_MN[ee]), col=EmrgAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  points(1:2, c(EmrgAvgs.PC$Emrg_MN[ee],EmrgAvgs.EP$Emrg_MN[ee]), col=EmrgAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  lines(1:2, c(EmrgAvgs.PC$Emrg_MN[ee],EmrgAvgs.EP$Emrg_MN[ee]), col=EmrgAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  
 }
-## ** Add lines to connect points **
 
 
 #EmrgAvgs <- left_join(EmrgAvgs, dats, by="Contents") 
@@ -288,6 +289,22 @@ boxplot(Surv ~ SeedMix, data=dats2406.PC, ylim=c(0,1), col=c("grey40", "grey80",
 #        ylab="Survival rate")
 
 
+## Plots means at each site
+SurvAvgs.EP <- dats2406.EP %>% group_by(Contents) %>% 
+  dplyr::summarise(Surv_MD=median(Surv,na.rm=TRUE),
+                   Surv_MN=mean(Surv,na.rm=TRUE),
+                   Surv_SE=calcSE(Surv))
+SurvAvgs.EP$MixCol[grepl("single", SurvAvgs.EP$Contents)] = "plum4"    
+SurvAvgs.EP$MixCol[grepl("mix_c", SurvAvgs.EP$Contents)] = "grey80"     
+SurvAvgs.EP$MixCol[grepl("mix_b", SurvAvgs.EP$Contents)] = "grey30"  
+
+plot(1:2, 0:1, type="n",ylim=c(0,0.6), xaxt="n", ylab="Survival rate", xlab="Site", cex.lab=1.5)
+for (ee in 1:length(unique(dats$Contents))) { 
+  points(1:2, c(SurvAvgs.PC$Surv_MN[ee],SurvAvgs.EP$Surv_MN[ee]), col=SurvAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  lines(1:2, c(SurvAvgs.PC$Surv_MN[ee],SurvAvgs.EP$Surv_MN[ee]), col=SurvAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  
+}
+
 
 
 ## Counts
@@ -342,6 +359,23 @@ CountAvgs.EP$MixCol[grepl("mix_b", CountAvgs.EP$Contents)] = "grey30"
 #        las=2)
 
 
+## Plots means at each site
+CountAvgs.EP <- dats2406.EP %>% group_by(Contents) %>% 
+  dplyr::summarise(Count_MD=median(ARFR.Seedling.Count,na.rm=TRUE),
+                   Count_MN=mean(ARFR.Seedling.Count,na.rm=TRUE),
+                   Count_SE=calcSE(ARFR.Seedling.Count))
+CountAvgs.EP$MixCol[grepl("single", CountAvgs.EP$Contents)] = "plum4"    
+CountAvgs.EP$MixCol[grepl("mix_c", CountAvgs.EP$Contents)] = "grey80"     
+CountAvgs.EP$MixCol[grepl("mix_b", CountAvgs.EP$Contents)] = "grey30"  
+
+plot(1:2, 0:1, type="n",ylim=c(0,9), xaxt="n", ylab="Count", xlab="Site", cex.lab=1.5)
+for (ee in 1:length(unique(dats$Contents))) { 
+  points(1:2, c(CountAvgs.PC$Count_MN[ee],CountAvgs.EP$Count_MN[ee]), col=CountAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  lines(1:2, c(CountAvgs.PC$Count_MN[ee],CountAvgs.EP$Count_MN[ee]), col=CountAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  
+}
+
+
 ## Total counts across all plots
 CountAvgs.PC <- CountAvgs.PC[order(CountAvgs.PC$Count_SUM),] #Order by total count
 barplot(CountAvgs.PC$Count_SUM, xlab=NA, ylab="Total number of plants", cex.lab=1.25, las=2, 
@@ -387,7 +421,23 @@ boxplot(ARFR.Percent.Cover ~ SeedMix, data=dats2406.PC, ylim=c(0,60), col=c("gre
 boxplot(ARFR.Percent.Cover ~ SeedMix, data=dats2406.EP, ylim=c(0,10), col=c("grey40", "grey80", "plum4"), main="Site 2",
         ylab="Percent A. frigida cover")
 
+ 
+ 
+## Plots means at each site
+CovrAvgs.EP <- dats2406.EP %>% group_by(Contents) %>% 
+  dplyr::summarise(Covr_MD=median(ARFR.Percent.Cover,na.rm=TRUE),
+                   Covr_MN=mean(ARFR.Percent.Cover,na.rm=TRUE),
+                   Covr_SE=calcSE(ARFR.Percent.Cover))
+CovrAvgs.EP$MixCol[grepl("single", CovrAvgs.EP$Contents)] = "plum4"    
+CovrAvgs.EP$MixCol[grepl("mix_c", CovrAvgs.EP$Contents)] = "grey80"     
+CovrAvgs.EP$MixCol[grepl("mix_b", CovrAvgs.EP$Contents)] = "grey30"  
+
+plot(1:2, 0:1, type="n",ylim=c(0,30), xaxt="n", ylab="Vegetative Cover", xlab="Site", cex.lab=1.5)
+for (ee in 1:length(unique(dats$Contents))) { 
+  points(1:2, c(CovrAvgs.PC$Covr_MN[ee],CovrAvgs.EP$Covr_MN[ee]), col=CovrAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  lines(1:2, c(CovrAvgs.PC$Covr_MN[ee],CovrAvgs.EP$Covr_MN[ee]), col=CovrAvgs.PC$MixCol[ee], pch=19, cex=1.5)
   
+}
   
   
   
@@ -447,6 +497,24 @@ boxplot(ARFR.Reproductive.Percent.Cover ~ Site, data=dats2409, ylim=c(0,86),
 
 
 
+## Plot means at each site
+ReproAvgs.EP <- dats2409.EP %>% group_by(Contents) %>% 
+  dplyr::summarise(Repro_MD=median(ARFR.Reproductive.Percent.Cover,na.rm=TRUE),
+                   Repro_MN=mean(ARFR.Reproductive.Percent.Cover,na.rm=TRUE),
+                   Repro_SE=calcSE(ARFR.Reproductive.Percent.Cover))
+ReproAvgs.EP$MixCol[grepl("single", ReproAvgs.EP$Contents)] = "plum4"    
+ReproAvgs.EP$MixCol[grepl("mix_c", ReproAvgs.EP$Contents)] = "grey80"     
+ReproAvgs.EP$MixCol[grepl("mix_b", ReproAvgs.EP$Contents)] = "grey30"  
+
+plot(1:2, 0:1, type="n",ylim=c(0,45), xaxt="n", ylab="Reproductive Cover", xlab="Site", cex.lab=1.5)
+for (ee in 1:length(unique(dats$Contents))) { 
+  points(1:2, c(ReproAvgs.PC$Repro_MN[ee],ReproAvgs.EP$Repro_MN[ee]), col=ReproAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  lines(1:2, c(ReproAvgs.PC$Repro_MN[ee],ReproAvgs.EP$Repro_MN[ee]), col=ReproAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  
+}
+
+
+
 
 
 
@@ -484,6 +552,23 @@ boxplot(CombPerf ~ SeedMix, data=dats2409.EP, ylim=c(0,0.22),
 boxplot(CombPerf ~ Site, data=dats2409, ylim=c(0,6), 
         ylab="Combined performance", cex.lab=1.5)
 
+
+
+## Plot means at each site
+CombAvgs.EP <- dats2409.EP %>% group_by(Contents) %>% 
+  dplyr::summarise(Comb_MD=median(CombPerf,na.rm=TRUE),
+                   Comb_MN=mean(CombPerf,na.rm=TRUE),
+                   Comb_SE=calcSE(CombPerf))
+CombAvgs.EP$MixCol[grepl("single", CombAvgs.EP$Contents)] = "plum4"    
+CombAvgs.EP$MixCol[grepl("mix_c", CombAvgs.EP$Contents)] = "grey80"     
+CombAvgs.EP$MixCol[grepl("mix_b", CombAvgs.EP$Contents)] = "grey30"  
+
+plot(1:2, 0:1, type="n",ylim=c(0,1.3), xaxt="n", ylab="Combined performance", xlab="Site", cex.lab=1.5)
+for (ee in 1:length(unique(dats$Contents))) { 
+  points(1:2, c(CombAvgs.PC$Comb_MN[ee],CombAvgs.EP$Comb_MN[ee]), col=CombAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  lines(1:2, c(CombAvgs.PC$Comb_MN[ee],CombAvgs.EP$Comb_MN[ee]), col=CombAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  
+}
 
 
 
@@ -1282,16 +1367,43 @@ boxplot(ARFR.Percent.Cover ~ HalfSplit, data=dats2406.PC, ylim=c(0,60),
         ylab="Cover", cex.lab=1.5, main="Site 1")
 boxplot(ARFR.Percent.Cover ~ HalfSplit, data=dats2406.EP, ylim=c(0,15), 
         ylab="Cover", cex.lab=1.5, main="Site 2")
+modCovr <- lm(ARFR.Percent.Cover ~ HalfSplit, data=dats2406.PC)
+summary(modCovr)
+modCovr.EP <- lm(ARFR.Percent.Cover ~ HalfSplit, data=dats2406.EP)
+summary(modCovr.EP)
 
 boxplot(ARFR.Reproductive.Percent.Cover ~ HalfSplit, data=dats2409.PC, ylim=c(0,80), 
         ylab="Reproduction", cex.lab=1.5)
 boxplot(ARFR.Reproductive.Percent.Cover ~ HalfSplit, data=dats2409.EP, ylim=c(0,25), 
         ylab="Reproduction", cex.lab=1.5)
+modRepro.PC <- lm(ARFR.Reproductive.Percent.Cover ~ HalfSplit, data=dats2409.PC)
+summary(modRepro.PC)
 
 boxplot(CombPerf ~ HalfSplit, data=dats2409.PC, ylim=c(0,6), 
         ylab="Combined performance", cex.lab=1.5)
 boxplot(CombPerf ~ HalfSplit, data=dats2409.EP, ylim=c(0,0.25), 
         ylab="Combined performance", cex.lab=1.5)
+modComb.EP <- lm(CombPerf ~ HalfSplit, data=dats2409.EP)
+summary(modComb.EP)
+
+
+
+## Look at performance across environment quality ***
+## Plot means at each site
+#CombAvgs.EP <- dats2409.EP %>% group_by(Contents) %>% 
+#  dplyr::summarise(Comb_MD=median(CombPerf,na.rm=TRUE),
+#                   Comb_MN=mean(CombPerf,na.rm=TRUE),
+#                   Comb_SE=calcSE(CombPerf))
+#CombAvgs.EP$MixCol[grepl("single", CombAvgs.EP$Contents)] = "plum4"    
+#CombAvgs.EP$MixCol[grepl("mix_c", CombAvgs.EP$Contents)] = "grey80"     
+#CombAvgs.EP$MixCol[grepl("mix_b", CombAvgs.EP$Contents)] = "grey30"  
+
+#plot(1:2, 0:1, type="n",ylim=c(0,1.3), xaxt="n", ylab="Combined performance", xlab="Site", cex.lab=1.5)
+#for (ee in 1:length(unique(dats$Contents))) { 
+#  points(1:2, c(CombAvgs.PC$Comb_MN[ee],CombAvgs.EP$Comb_MN[ee]), col=CombAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+#  lines(1:2, c(CombAvgs.PC$Comb_MN[ee],CombAvgs.EP$Comb_MN[ee]), col=CombAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+ #}
+## ****
 ## ---------------------------------------------------------------------
 
 
@@ -1300,7 +1412,7 @@ boxplot(CombPerf ~ HalfSplit, data=dats2409.EP, ylim=c(0,0.25),
 
 
 
-## LOOK AT COEFFICIENT OF VARIATION **********
+## LOOK AT COEFFICIENT OF VARIATION ------------------------------------
 ## Calculate the coefficient of variation 
 dats23PC.cv <- dats23.PC %>% group_by(Contents) %>% summarise(Emrg_CV=cv(Emrg, na.rm=TRUE))
 dats23EP.cv <- dats23.EP %>% group_by(Contents) %>% summarise(Emrg_CV=cv(Emrg, na.rm=TRUE))
@@ -1357,6 +1469,12 @@ barplot(dats2406PC.cv$Counts_CV, xlab=NA, ylab="Coefficient of variation in coun
 barplot(dats2406PC.cv$Covr_CV, xlab=NA, ylab="Coefficient of variation in cover", cex.lab=1.25, las=2, 
         names=dats2406PC.cv$Contents, main="Site 1", cex.main=1.5, col=dats2406PC.cv$MixCol, cex.names=1)
 
+barplot(dats2406.cv$Counts_CV, xlab=NA, ylab="Coefficient of variation in counts", cex.lab=1.25, las=2, 
+        names=dats2406.cv$Contents, main="Both sites", cex.main=1.5, col=dats2406.cv$MixCol, cex.names=1)
+
+barplot(dats2406.cv$Covr_CV, xlab=NA, ylab="Coefficient of variation in cover", cex.lab=1.25, las=2, 
+        names=dats2406.cv$Contents, main="Both sites", cex.main=1.5, col=dats2406.cv$MixCol, cex.names=1)
+
 
 #barplot(dats2406EP.cv$Surv_CV, xlab=NA, ylab="Coefficient of variation uin survival", cex.lab=1.25, las=2, 
 #        names=dats2406EP.cv$Contents, main="Site 2", cex.main=1.5, col=dats2406EP.cv$MixCol, cex.names=1)
@@ -1373,6 +1491,7 @@ barplot(dats2406EP.cv$Covr_CV, xlab=NA, ylab="Coefficient of variation in percen
 ## 2024 September
 dats2409PC.cv <- dats2409.PC %>% group_by(Contents) %>% summarise(Repro_CV=cv(ARFR.Reproductive.Percent.Cover, na.rm=TRUE))
 dats2409EP.cv <- dats2409.EP %>% group_by(Contents) %>% summarise(Repro_CV=cv(ARFR.Reproductive.Percent.Cover, na.rm=TRUE))
+dats2409.cv <- dats2409 %>% group_by(Contents) %>% summarise(Repro_CV=cv(ARFR.Reproductive.Percent.Cover, na.rm=TRUE))
 
 dats2409PC.cv$MixCol[grepl("single", dats2409PC.cv$Contents)] = "plum4"    
 dats2409PC.cv$MixCol[grepl("mix_c", dats2409PC.cv$Contents)] = "grey80"    
@@ -1382,12 +1501,18 @@ dats2409EP.cv$MixCol[grepl("single", dats2409EP.cv$Contents)] = "plum4"
 dats2409EP.cv$MixCol[grepl("mix_c", dats2409EP.cv$Contents)] = "grey80"    
 dats2409EP.cv$MixCol[grepl("mix_b", dats2409EP.cv$Contents)] = "grey40"    
 
+dats2409.cv$MixCol[grepl("single", dats2409.cv$Contents)] = "plum4"    
+dats2409.cv$MixCol[grepl("mix_c", dats2409.cv$Contents)] = "grey80"    
+dats2409.cv$MixCol[grepl("mix_b", dats2409.cv$Contents)] = "grey40"    
+
 barplot(dats2409PC.cv$Repro_CV, xlab=NA, ylab="Coefficient of variation in reproduction", cex.lab=1.25, las=2, 
         names=dats2409PC.cv$Contents, main="Site 1", cex.main=1.5, col=dats2409PC.cv$MixCol, cex.names=1)
 
 #barplot(dats2409EP.cv$Repro_CV, xlab=NA, ylab="Coefficient of variation in reproduction", cex.lab=1.25, las=2, 
 #        names=dats2409EP.cv$Contents, main="Site 2", cex.main=1.5, col=dats2409EP.cv$MixCol, cex.names=1)
 
+barplot(dats2409.cv$Repro_CV, xlab=NA, ylab="Coefficient of variation in reproduction", cex.lab=1.25, las=2, 
+        names=dats2409.cv$Contents, main="Both sites", cex.main=1.5, col=dats2409.cv$MixCol, cex.names=1)
 ## ---------
 
 
