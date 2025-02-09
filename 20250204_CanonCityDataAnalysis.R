@@ -1225,6 +1225,9 @@ plot(as.numeric(dats23.PC$Plot.Number), dats2406.PC$ARFR.Percent.Cover)
 plot(as.numeric(dats23.EP$Plot.Number), dats2406.EP$ARFR.Percent.Cover)
 plot(as.numeric(dats23.PC$Plot.Number), dats2409.PC$ARFR.Reproductive.Percent.Cover)
 plot(as.numeric(dats23.EP$Plot.Number), dats2409.EP$ARFR.Reproductive.Percent.Cover)
+
+#cols <- c(rep("darkseagreen4", 10), rep("red4",10), rep("steelblue4",12))
+dats23$HalfSplit <- (c(rep("H1",12), rep("H2",13),10))
 ## ---------------------------------------------------------------------
 
 
