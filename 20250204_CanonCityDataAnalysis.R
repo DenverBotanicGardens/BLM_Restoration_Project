@@ -719,6 +719,120 @@ eMnEmrgDevsForPlot <- as.data.frame(cbind(eMnEmrgDevs, xAx))
 
 points(eMnEmrgDevsForPlot$xAx, eMnEmrgDevsForPlot$eMnEmrgDevs, pch=16,
        cex=2, col="black") 
+## ----------------------------
+
+
+
+
+## BOOTSTRAP TO GENERATE EXPECTED MIX PERFORMANCE
+reps <- 100
+smpl.emrg <- as.data.frame(matrix(NA, reps, (5*3)))
+colnames(smpl.emrg) <- c("c1.1","c1.2","c1.3","c2.1","c2.2","c2.3","c3.1","c3.2","c3.3",
+                         "c4.1","c4.2","c4.3","c5.1","c5.2","c5.3")
+
+
+unique(dats$Contents)
+
+## Regional mix 1
+#mix_c1: LasAn, 314Jeff, 316Jeff
+emrg_c1.1 <- dats23.PC$Emrg[dats23.PC$Contents=="single_LasAn"]
+emrg_c1.2 <- dats23.PC$Emrg[dats23.PC$Contents=="single_314Jeff"]
+emrg_c1.3 <- dats23.PC$Emrg[dats23.PC$Contents=="single_316Jeff"]
+
+smpl.emrg$c1.1 <- sample(emrg_c1.1[!is.na(emrg_c1.1)], reps, replace=TRUE)
+smpl.emrg$c1.2 <- sample(emrg_c1.2[!is.na(emrg_c1.2)], reps, replace=TRUE)
+smpl.emrg$c1.3 <- sample(emrg_c1.3[!is.na(emrg_c1.3)], reps, replace=TRUE)
+
+emrg_c1.expBS <- smpl.emrg$c1.1/3 + smpl.emrg$c1.2/3 + smpl.emrg$c1.3/3
+hist(emrg_c1.expBS, breaks=100)
+emrg_c1.expBSmn <- mean(emrg_c1.expBS)
+
+emrg_c1.devBS <- EmrgByPlot.PC$Emrg[EmrgByPlot.PC$Contents=="mix_c1"] - emrg_c1.expBSmn
+
+t.test(EmrgByPlot.PC$Emrg[EmrgByPlot.PC$Contents=="mix_c1"], emrg_c1.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 2
+#mix_c2: NM, 294, 316Jeff
+emrg_c2.1 <- dats23.PC$Emrg[dats23.PC$Contents=="single_NM"]
+emrg_c2.2 <- dats23.PC$Emrg[dats23.PC$Contents=="single_294"]
+emrg_c2.3 <- dats23.PC$Emrg[dats23.PC$Contents=="single_316Jeff"]
+
+smpl.emrg$c2.1 <- sample(emrg_c2.1[!is.na(emrg_c2.1)], reps, replace=TRUE)
+smpl.emrg$c2.2 <- sample(emrg_c2.2[!is.na(emrg_c2.2)], reps, replace=TRUE)
+smpl.emrg$c2.3 <- sample(emrg_c2.3[!is.na(emrg_c2.3)], reps, replace=TRUE)
+
+emrg_c2.expBS <- smpl.emrg$c2.1/3 + smpl.emrg$c2.2/3 + smpl.emrg$c2.3/3
+hist(emrg_c2.expBS, breaks=50)
+emrg_c2.expBSmn <- mean(emrg_c2.expBS)
+
+emrg_c2.devBS <- EmrgByPlot.PC$Emrg[EmrgByPlot.PC$Contents=="mix_c2"] - emrg_c2.expBSmn
+
+t.test(EmrgByPlot.PC$Emrg[EmrgByPlot.PC$Contents=="mix_c2"], emrg_c2.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 3
+#mix_c3: UT, 294, 314Jeff
+emrg_c3.1 <- dats23.PC$Emrg[dats23.PC$Contents=="single_UT"]
+emrg_c3.2 <- dats23.PC$Emrg[dats23.PC$Contents=="single_294"]
+emrg_c3.3 <- dats23.PC$Emrg[dats23.PC$Contents=="single_314Jeff"]
+
+smpl.emrg$c3.1 <- sample(emrg_c3.1[!is.na(emrg_c3.1)], reps, replace=TRUE)
+smpl.emrg$c3.2 <- sample(emrg_c3.2[!is.na(emrg_c3.2)], reps, replace=TRUE)
+smpl.emrg$c3.3 <- sample(emrg_c3.3[!is.na(emrg_c3.3)], reps, replace=TRUE)
+
+emrg_c3.expBS <- smpl.emrg$c3.1/3 + smpl.emrg$c3.2/3 + smpl.emrg$c3.3/3
+hist(emrg_c3.expBS, breaks=50)
+emrg_c3.expBSmn <- mean(emrg_c3.expBS)
+
+emrg_c3.devBS <- EmrgByPlot.PC$Emrg[EmrgByPlot.PC$Contents=="mix_c3"] - emrg_c3.expBSmn
+
+t.test(EmrgByPlot.PC$Emrg[EmrgByPlot.PC$Contents=="mix_c3"], emrg_c3.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 4
+#mix_c4: 294, 314Jeff, 316Jeff
+emrg_c4.1 <- dats23.PC$Emrg[dats23.PC$Contents=="single_294"]
+emrg_c4.2 <- dats23.PC$Emrg[dats23.PC$Contents=="single_314Jeff"]
+emrg_c4.3 <- dats23.PC$Emrg[dats23.PC$Contents=="single_316Jeff"]
+
+smpl.emrg$c4.1 <- sample(emrg_c4.1[!is.na(emrg_c4.1)], reps, replace=TRUE)
+smpl.emrg$c4.2 <- sample(emrg_c4.2[!is.na(emrg_c4.2)], reps, replace=TRUE)
+smpl.emrg$c4.3 <- sample(emrg_c4.3[!is.na(emrg_c4.3)], reps, replace=TRUE)
+
+emrg_c4.expBS <- smpl.emrg$c4.1/3 + smpl.emrg$c4.2/3 + smpl.emrg$c4.3/3
+hist(emrg_c4.expBS, breaks=50)
+emrg_c4.expBSmn <- mean(emrg_c4.expBS)
+
+emrg_c4.devBS <- EmrgByPlot.PC$Emrg[EmrgByPlot.PC$Contents=="mix_c4"] - emrg_c4.expBSmn
+
+t.test(EmrgByPlot.PC$Emrg[EmrgByPlot.PC$Contents=="mix_c4"], emrg_c4.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 5
+#mix_c5: LasAn, 294, 316Jeff
+emrg_c5.1 <- dats23.PC$Emrg[dats23.PC$Contents=="single_LasAn"]
+emrg_c5.2 <- dats23.PC$Emrg[dats23.PC$Contents=="single_294"]
+emrg_c5.3 <- dats23.PC$Emrg[dats23.PC$Contents=="single_316Jeff"]
+
+smpl.emrg$c5.1 <- sample(emrg_c5.1[!is.na(emrg_c5.1)], reps, replace=TRUE)
+smpl.emrg$c5.2 <- sample(emrg_c5.2[!is.na(emrg_c5.2)], reps, replace=TRUE)
+smpl.emrg$c5.3 <- sample(emrg_c5.3[!is.na(emrg_c5.3)], reps, replace=TRUE)
+
+emrg_c5.expBS <- smpl.emrg$c5.1/3 + smpl.emrg$c5.2/3 + smpl.emrg$c5.3/3
+hist(emrg_c5.expBS, breaks=50)
+emrg_c5.expBSmn <- mean(emrg_c5.expBS)
+
+emrg_c5.devBS <- EmrgByPlot.PC$Emrg[EmrgByPlot.PC$Contents=="mix_c5"] - emrg_c5.expBSmn
+
+t.test(EmrgByPlot.PC$Emrg[EmrgByPlot.PC$Contents=="mix_c5"], emrg_c5.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
 
 
 ## Calculate 'expected' num emerged for each mix based on additive of components
@@ -986,8 +1100,118 @@ eMnSurvDevsForPlot <- as.data.frame(cbind(eMnSurvDevs, xAx))
 
 points(eMnSurvDevsForPlot$xAx, eMnSurvDevsForPlot$eMnSurvDevs, pch=16,
      cex=2, col="black") 
+## --------------------
 
 
+
+
+## BOOTSTRAP TO GENERATE EXPECTED MIX PERFORMANCE
+reps <- 100
+smpl.surv <- as.data.frame(matrix(NA, reps, (5*3)))
+colnames(smpl.surv) <- c("c1.1","c1.2","c1.3","c2.1","c2.2","c2.3","c3.1","c3.2","c3.3",
+                         "c4.1","c4.2","c4.3","c5.1","c5.2","c5.3")
+
+
+unique(dats$Contents)
+
+## Regional mix 1
+#mix_c1: LasAn, 314Jeff, 316Jeff
+surv_c1.1 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_LasAn"]
+surv_c1.2 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_314Jeff"]
+surv_c1.3 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_316Jeff"]
+
+smpl.surv$c1.1 <- sample(surv_c1.1[!is.na(surv_c1.1)], reps, replace=TRUE)
+smpl.surv$c1.2 <- sample(surv_c1.2[!is.na(surv_c1.2)], reps, replace=TRUE)
+smpl.surv$c1.3 <- sample(surv_c1.3[!is.na(surv_c1.3)], reps, replace=TRUE)
+
+surv_c1.expBS <- smpl.surv$c1.1/3 + smpl.surv$c1.2/3 + smpl.surv$c1.3/3
+hist(surv_c1.expBS, breaks=100)
+surv_c1.expBSmn <- mean(surv_c1.expBS)
+
+surv_c1.devBS <- SurvByPlot.PC$Surv[SurvByPlot.PC$Contents=="mix_c1"] - surv_c1.expBSmn
+
+t.test(SurvByPlot.PC$Surv[SurvByPlot.PC$Contents=="mix_c1"], surv_c1.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 2
+#mix_c2: NM, 294, 316Jeff
+surv_c2.1 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_NM"]
+surv_c2.2 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_294"]
+surv_c2.3 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_316Jeff"]
+
+smpl.surv$c2.1 <- sample(surv_c2.1[!is.na(surv_c2.1)], reps, replace=TRUE)
+smpl.surv$c2.2 <- sample(surv_c2.2[!is.na(surv_c2.2)], reps, replace=TRUE)
+smpl.surv$c2.3 <- sample(surv_c2.3[!is.na(surv_c2.3)], reps, replace=TRUE)
+
+surv_c2.expBS <- smpl.surv$c2.1/3 + smpl.surv$c2.2/3 + smpl.surv$c2.3/3
+hist(surv_c2.expBS, breaks=50)
+surv_c2.expBSmn <- mean(surv_c2.expBS)
+
+surv_c2.devBS <- SurvByPlot.PC$Surv[SurvByPlot.PC$Contents=="mix_c2"] - surv_c2.expBSmn
+
+t.test(SurvByPlot.PC$Surv[SurvByPlot.PC$Contents=="mix_c2"], surv_c2.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 3
+#mix_c3: UT, 294, 314Jeff
+surv_c3.1 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_UT"]
+surv_c3.2 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_294"]
+surv_c3.3 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_314Jeff"]
+
+smpl.surv$c3.1 <- sample(surv_c3.1[!is.na(surv_c3.1)], reps, replace=TRUE)
+smpl.surv$c3.2 <- sample(surv_c3.2[!is.na(surv_c3.2)], reps, replace=TRUE)
+smpl.surv$c3.3 <- sample(surv_c3.3[!is.na(surv_c3.3)], reps, replace=TRUE)
+
+surv_c3.expBS <- smpl.surv$c3.1/3 + smpl.surv$c3.2/3 + smpl.surv$c3.3/3
+hist(surv_c3.expBS, breaks=50)
+surv_c3.expBSmn <- mean(surv_c3.expBS)
+
+surv_c3.devBS <- SurvByPlot.PC$Surv[SurvByPlot.PC$Contents=="mix_c3"] - surv_c3.expBSmn
+
+t.test(SurvByPlot.PC$Surv[SurvByPlot.PC$Contents=="mix_c3"], surv_c3.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 4
+#mix_c4: 294, 314Jeff, 316Jeff
+surv_c4.1 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_294"]
+surv_c4.2 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_314Jeff"]
+surv_c4.3 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_316Jeff"]
+
+smpl.surv$c4.1 <- sample(surv_c4.1[!is.na(surv_c4.1)], reps, replace=TRUE)
+smpl.surv$c4.2 <- sample(surv_c4.2[!is.na(surv_c4.2)], reps, replace=TRUE)
+smpl.surv$c4.3 <- sample(surv_c4.3[!is.na(surv_c4.3)], reps, replace=TRUE)
+
+surv_c4.expBS <- smpl.surv$c4.1/3 + smpl.surv$c4.2/3 + smpl.surv$c4.3/3
+hist(surv_c4.expBS, breaks=50)
+surv_c4.expBSmn <- mean(surv_c4.expBS)
+
+surv_c4.devBS <- SurvByPlot.PC$Surv[SurvByPlot.PC$Contents=="mix_c4"] - surv_c4.expBSmn
+
+t.test(SurvByPlot.PC$Surv[SurvByPlot.PC$Contents=="mix_c4"], surv_c4.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 5
+#mix_c5: LasAn, 294, 316Jeff
+surv_c5.1 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_LasAn"]
+surv_c5.2 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_294"]
+surv_c5.3 <- dats2406.PC$Surv[dats2406.PC$Contents=="single_316Jeff"]
+
+smpl.surv$c5.1 <- sample(surv_c5.1[!is.na(surv_c5.1)], reps, replace=TRUE)
+smpl.surv$c5.2 <- sample(surv_c5.2[!is.na(surv_c5.2)], reps, replace=TRUE)
+smpl.surv$c5.3 <- sample(surv_c5.3[!is.na(surv_c5.3)], reps, replace=TRUE)
+
+surv_c5.expBS <- smpl.surv$c5.1/3 + smpl.surv$c5.2/3 + smpl.surv$c5.3/3
+hist(surv_c5.expBS, breaks=50)
+surv_c5.expBSmn <- mean(surv_c5.expBS)
+
+surv_c5.devBS <- SurvByPlot.PC$Surv[SurvByPlot.PC$Contents=="mix_c5"] - surv_c5.expBSmn
+
+t.test(SurvByPlot.PC$Surv[SurvByPlot.PC$Contents=="mix_c5"], surv_c5.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
 
 
 
@@ -1048,7 +1272,7 @@ plot(eCovrDevsForPlot$xAx, eCovrDevsForPlot$eCovrDevs, pch=16, ylim=c(-45,45),
 abline(h=0)
 
 
-## Plots as means and error 
+## Plot means 
 ## Calculate deviation from expected mean (avg of all plots) of each reg mix
 eMnCovr_c1Dev <- CovrAvgs.PC$Covr_MN[CovrAvgs.PC$Contents=="mix_c1"] - eCovr_c1
 eMnCovr_c2Dev <- CovrAvgs.PC$Covr_MN[CovrAvgs.PC$Contents=="mix_c2"]  - eCovr_c2
@@ -1131,6 +1355,117 @@ eMnCovrDevsForPlotEP <- as.data.frame(cbind(eMnCovrDevs.EP, xAx))
 
 points(eMnCovrDevsForPlotEP$xAx, eMnCovrDevsForPlotEP$eMnCovrDevs.EP, pch=16,
        cex=2, col="black") 
+## -------------------------
+
+
+
+## BOOTSTRAP TO GENERATE EXPECTED MIX PERFORMANCE
+reps <- 100
+smpl.covr <- as.data.frame(matrix(NA, reps, (5*3)))
+colnames(smpl.covr) <- c("c1.1","c1.2","c1.3","c2.1","c2.2","c2.3","c3.1","c3.2","c3.3",
+                          "c4.1","c4.2","c4.3","c5.1","c5.2","c5.3")
+
+
+unique(dats$Contents)
+
+## Regional mix 1
+#mix_c1: LasAn, 314Jeff, 316Jeff
+covr_c1.1 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_LasAn"]
+covr_c1.2 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_314Jeff"]
+covr_c1.3 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_316Jeff"]
+
+smpl.covr$c1.1 <- sample(covr_c1.1[!is.na(covr_c1.1)], reps, replace=TRUE)
+smpl.covr$c1.2 <- sample(covr_c1.2[!is.na(covr_c1.2)], reps, replace=TRUE)
+smpl.covr$c1.3 <- sample(covr_c1.3[!is.na(covr_c1.3)], reps, replace=TRUE)
+
+covr_c1.expBS <- smpl.covr$c1.1/3 + smpl.covr$c1.2/3 + smpl.covr$c1.3/3
+hist(covr_c1.expBS, breaks=100)
+covr_c1.expBSmn <- mean(covr_c1.expBS)
+
+covr_c1.devBS <- CovrByPlot.PC$Covr[CovrByPlot.PC$Contents=="mix_c1"] - covr_c1.expBSmn
+
+t.test(CovrByPlot.PC$Covr[CovrByPlot.PC$Contents=="mix_c1"], covr_c1.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 2
+#mix_c2: NM, 294, 316Jeff
+covr_c2.1 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_NM"]
+covr_c2.2 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_294"]
+covr_c2.3 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_316Jeff"]
+
+smpl.covr$c2.1 <- sample(covr_c2.1[!is.na(covr_c2.1)], reps, replace=TRUE)
+smpl.covr$c2.2 <- sample(covr_c2.2[!is.na(covr_c2.2)], reps, replace=TRUE)
+smpl.covr$c2.3 <- sample(covr_c2.3[!is.na(covr_c2.3)], reps, replace=TRUE)
+
+covr_c2.expBS <- smpl.covr$c2.1/3 + smpl.covr$c2.2/3 + smpl.covr$c2.3/3
+hist(covr_c2.expBS, breaks=50)
+covr_c2.expBSmn <- mean(covr_c2.expBS)
+
+covr_c2.devBS <- CovrByPlot.PC$Covr[CovrByPlot.PC$Contents=="mix_c2"] - covr_c2.expBSmn
+
+t.test(CovrByPlot.PC$Covr[CovrByPlot.PC$Contents=="mix_c2"], covr_c2.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 3
+#mix_c3: UT, 294, 314Jeff
+covr_c3.1 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_UT"]
+covr_c3.2 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_294"]
+covr_c3.3 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_314Jeff"]
+
+smpl.covr$c3.1 <- sample(covr_c3.1[!is.na(covr_c3.1)], reps, replace=TRUE)
+smpl.covr$c3.2 <- sample(covr_c3.2[!is.na(covr_c3.2)], reps, replace=TRUE)
+smpl.covr$c3.3 <- sample(covr_c3.3[!is.na(covr_c3.3)], reps, replace=TRUE)
+
+covr_c3.expBS <- smpl.covr$c3.1/3 + smpl.covr$c3.2/3 + smpl.covr$c3.3/3
+hist(covr_c3.expBS, breaks=50)
+covr_c3.expBSmn <- mean(covr_c3.expBS)
+
+covr_c3.devBS <- CovrByPlot.PC$Covr[CovrByPlot.PC$Contents=="mix_c3"] - covr_c3.expBSmn
+
+t.test(CovrByPlot.PC$Covr[CovrByPlot.PC$Contents=="mix_c3"], covr_c3.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 4
+#mix_c4: 294, 314Jeff, 316Jeff
+covr_c4.1 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_294"]
+covr_c4.2 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_314Jeff"]
+covr_c4.3 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_316Jeff"]
+
+smpl.covr$c4.1 <- sample(covr_c4.1[!is.na(covr_c4.1)], reps, replace=TRUE)
+smpl.covr$c4.2 <- sample(covr_c4.2[!is.na(covr_c4.2)], reps, replace=TRUE)
+smpl.covr$c4.3 <- sample(covr_c4.3[!is.na(covr_c4.3)], reps, replace=TRUE)
+
+covr_c4.expBS <- smpl.covr$c4.1/3 + smpl.covr$c4.2/3 + smpl.covr$c4.3/3
+hist(covr_c4.expBS, breaks=50)
+covr_c4.expBSmn <- mean(covr_c4.expBS)
+
+covr_c4.devBS <- CovrByPlot.PC$Covr[CovrByPlot.PC$Contents=="mix_c4"] - covr_c4.expBSmn
+
+t.test(CovrByPlot.PC$Covr[CovrByPlot.PC$Contents=="mix_c4"], covr_c4.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 5
+#mix_c5: LasAn, 294, 316Jeff
+covr_c5.1 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_LasAn"]
+covr_c5.2 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_294"]
+covr_c5.3 <- dats2406.PC$ARFR.Percent.Cover[dats2406.PC$Contents=="single_316Jeff"]
+
+smpl.covr$c5.1 <- sample(covr_c5.1[!is.na(covr_c5.1)], reps, replace=TRUE)
+smpl.covr$c5.2 <- sample(covr_c5.2[!is.na(covr_c5.2)], reps, replace=TRUE)
+smpl.covr$c5.3 <- sample(covr_c5.3[!is.na(covr_c5.3)], reps, replace=TRUE)
+
+covr_c5.expBS <- smpl.covr$c5.1/3 + smpl.covr$c5.2/3 + smpl.covr$c5.3/3
+hist(covr_c5.expBS, breaks=50)
+covr_c5.expBSmn <- mean(covr_c5.expBS)
+
+covr_c5.devBS <- CovrByPlot.PC$Covr[CovrByPlot.PC$Contents=="mix_c5"] - covr_c5.expBSmn
+
+t.test(CovrByPlot.PC$Covr[CovrByPlot.PC$Contents=="mix_c5"], covr_c5.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
 ## -------------------------------------------------------------------------------
 
 
@@ -1159,15 +1494,14 @@ eRepro_c5 <- (ReproAvgs.PC$Repro_MN[ReproAvgs.PC$Contents=="single_LasAn"] +
                 ReproAvgs.PC$Repro_MN[ReproAvgs.PC$Contents=="single_316Jeff"])/3
 
 ReproByPlot.PC <- dats2409.PC %>% group_by(Contents, Plot.Number) %>% 
-  dplyr::summarise(Repro_MD=median(ARFR.Reproductive.Percent.Cover,na.rm=TRUE),
-                   Repro_MN=mean(ARFR.Reproductive.Percent.Cover,na.rm=TRUE))
+  dplyr::summarise(Repro=mean(ARFR.Reproductive.Percent.Cover,na.rm=TRUE))
 
 ## Calculate deviation from expected for each plot of each close mix
-eRepro_c1Dev <- ReproByPlot.PC$Repro_MN[ReproByPlot.PC$Contents=="mix_c1"] - eRepro_c1
-eRepro_c2Dev <- ReproByPlot.PC$Repro_MN[ReproByPlot.PC$Contents=="mix_c2"] - eRepro_c2
-eRepro_c3Dev <- ReproByPlot.PC$Repro_MN[ReproByPlot.PC$Contents=="mix_c3"] - eRepro_c3
-eRepro_c4Dev <- ReproByPlot.PC$Repro_MN[ReproByPlot.PC$Contents=="mix_c4"] - eRepro_c4
-eRepro_c5Dev <- ReproByPlot.PC$Repro_MN[ReproByPlot.PC$Contents=="mix_c5"] - eRepro_c5
+eRepro_c1Dev <- ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c1"] - eRepro_c1
+eRepro_c2Dev <- ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c2"] - eRepro_c2
+eRepro_c3Dev <- ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c3"] - eRepro_c3
+eRepro_c4Dev <- ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c4"] - eRepro_c4
+eRepro_c5Dev <- ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c5"] - eRepro_c5
 
 ## Combine diff mixes together and add values for x-axis for plotting
 eReproDevs <- c(eRepro_c1Dev, eRepro_c2Dev, eRepro_c3Dev, eRepro_c4Dev, eRepro_c5Dev)
@@ -1265,6 +1599,119 @@ points(eMnReproDevsForPlot$xAx, eMnReproDevsForPlot$eMnReproDevs, pch=16,
 
 #points(eMnReproDevsForPlotEP$xAx, eMnReproDevsForPlotEP$eMnReproDevs.EP, pch=16,
 #       cex=2, col="black") 
+
+
+
+
+## BOOTSTRAP TO GENERATE EXPECTED MIX PERFORMANCE
+reps <- 100
+smpl.repro <- as.data.frame(matrix(NA, reps, (5*3)))
+colnames(smpl.repro) <- c("c1.1","c1.2","c1.3","c2.1","c2.2","c2.3","c3.1","c3.2","c3.3",
+                      "c4.1","c4.2","c4.3","c5.1","c5.2","c5.3")
+
+
+unique(dats$Contents)
+
+## Regional mix 1
+#mix_c1: LasAn, 314Jeff, 316Jeff
+repro_c1.1 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_LasAn"]
+repro_c1.2 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_314Jeff"]
+repro_c1.3 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_316Jeff"]
+
+smpl.repro$c1.1 <- sample(repro_c1.1[!is.na(repro_c1.1)], reps, replace=TRUE)
+smpl.repro$c1.2 <- sample(repro_c1.2[!is.na(repro_c1.2)], reps, replace=TRUE)
+smpl.repro$c1.3 <- sample(repro_c1.3[!is.na(repro_c1.3)], reps, replace=TRUE)
+
+repro_c1.expBS <- smpl.repro$c1.1/3 + smpl.repro$c1.2/3 + smpl.repro$c1.3/3
+hist(repro_c1.expBS, breaks=100)
+repro_c1.expBSmn <- mean(repro_c1.expBS)
+
+repro_c1.devBS <- ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c1"] - repro_c1.expBSmn
+
+t.test(ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c1"], repro_c1.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 2
+#mix_c2: NM, 294, 316Jeff
+repro_c2.1 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_NM"]
+repro_c2.2 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_294"]
+repro_c2.3 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_316Jeff"]
+
+smpl.repro$c2.1 <- sample(repro_c2.1[!is.na(repro_c2.1)], reps, replace=TRUE)
+smpl.repro$c2.2 <- sample(repro_c2.2[!is.na(repro_c2.2)], reps, replace=TRUE)
+smpl.repro$c2.3 <- sample(repro_c2.3[!is.na(repro_c2.3)], reps, replace=TRUE)
+
+repro_c2.expBS <- smpl.repro$c2.1/3 + smpl.repro$c2.2/3 + smpl.repro$c2.3/3
+hist(repro_c2.expBS, breaks=50)
+repro_c2.expBSmn <- mean(repro_c2.expBS)
+
+repro_c2.devBS <- ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c2"] - repro_c2.expBSmn
+
+t.test(ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c2"], repro_c2.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 3
+#mix_c3: UT, 294, 314Jeff
+repro_c3.1 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_UT"]
+repro_c3.2 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_294"]
+repro_c3.3 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_314Jeff"]
+
+smpl.repro$c3.1 <- sample(repro_c3.1[!is.na(repro_c3.1)], reps, replace=TRUE)
+smpl.repro$c3.2 <- sample(repro_c3.2[!is.na(repro_c3.2)], reps, replace=TRUE)
+smpl.repro$c3.3 <- sample(repro_c3.3[!is.na(repro_c3.3)], reps, replace=TRUE)
+
+repro_c3.expBS <- smpl.repro$c3.1/3 + smpl.repro$c3.2/3 + smpl.repro$c3.3/3
+hist(repro_c3.expBS, breaks=50)
+repro_c3.expBSmn <- mean(repro_c3.expBS)
+
+repro_c3.devBS <- ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c3"] - repro_c3.expBSmn
+
+t.test(ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c3"], repro_c3.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 4
+#mix_c4: 294, 314Jeff, 316Jeff
+repro_c4.1 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_294"]
+repro_c4.2 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_314Jeff"]
+repro_c4.3 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_316Jeff"]
+
+smpl.repro$c4.1 <- sample(repro_c4.1[!is.na(repro_c4.1)], reps, replace=TRUE)
+smpl.repro$c4.2 <- sample(repro_c4.2[!is.na(repro_c4.2)], reps, replace=TRUE)
+smpl.repro$c4.3 <- sample(repro_c4.3[!is.na(repro_c4.3)], reps, replace=TRUE)
+
+repro_c4.expBS <- smpl.repro$c4.1/3 + smpl.repro$c4.2/3 + smpl.repro$c4.3/3
+hist(repro_c4.expBS, breaks=50)
+repro_c4.expBSmn <- mean(repro_c4.expBS)
+
+repro_c4.devBS <- ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c4"] - repro_c4.expBSmn
+
+t.test(ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c4"], repro_c4.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
+## Regional mix 5
+#mix_c5: LasAn, 294, 316Jeff
+repro_c5.1 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_LasAn"]
+repro_c5.2 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_294"]
+repro_c5.3 <- dats2409.PC$ARFR.Reproductive.Percent.Cover[dats2409.PC$Contents=="single_316Jeff"]
+
+smpl.repro$c5.1 <- sample(repro_c5.1[!is.na(repro_c5.1)], reps, replace=TRUE)
+smpl.repro$c5.2 <- sample(repro_c5.2[!is.na(repro_c5.2)], reps, replace=TRUE)
+smpl.repro$c5.3 <- sample(repro_c5.3[!is.na(repro_c5.3)], reps, replace=TRUE)
+
+repro_c5.expBS <- smpl.repro$c5.1/3 + smpl.repro$c5.2/3 + smpl.repro$c5.3/3
+hist(repro_c5.expBS, breaks=50)
+repro_c5.expBSmn <- mean(repro_c5.expBS)
+
+repro_c5.devBS <- ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c5"] - repro_c5.expBSmn
+
+t.test(ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c5"], repro_c5.expBS, paired="FALSE", conf.level=0.95,
+       var.equal=TRUE, alternative="two.sided")
+
+
 
 
 
