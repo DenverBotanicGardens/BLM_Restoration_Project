@@ -55,28 +55,16 @@ dats$Treatment <- as.factor(dats$Treatment)
 
 
 ## ADD AND REMOVE FROM DATAFRAME ------------------------------------------------------------------
-unique(dats$Contents)
-unique(dats$Treatment)
-## Remove empty, control, and pilot categories 
-#dats <- dats[dats$Contents != "empty",]
-#dats <- dats[dats$Contents != "controlAndSave",]  #Or should we keep negative control? 
-#dats <- dats[dats$Contents != "Fre12_1200seeds",]
-#dats <- dats[dats$Contents != "Fre12_800seeds",]
-#dats <- dats[dats$Contents != "422Nav_1200seeds",]
-#dats <- dats[dats$Contents != "422Nav_800seeds",]
-#dats <- dats[dats$Contents != "WY71_ClearPlot",]
-#dats <- dats[dats$Contents != "ERNA_Rio",]
-#dats <- dats[dats$Contents != "ERNA_Rou",]
-#dats <- dats[dats$Contents != "ERNA_Gun",]
-
-
-
 ## Add in spatial variable designating position in 10x25 grid
 dats$HalfSplit <- rep(c(rep("H1",12), rep("H2",13)),60)
 #dats$QuadSplit <- rep(c(rep("H1",12), rep("H2",13)),60) ** split into 4 quads ... 
 
 
-
+## Remove empty, control, and pilot categories 
+unique(dats$Contents)
+unique(dats$Treatment)
+#dats <- dats[dats$Contents != "empty",]
+#dats <- dats[dats$Contents != "controlAndSave",]  #Or should we keep negative control? 
 dats <- dats[dats$Treatment != "skip",]
 dats <- dats[dats$Treatment != "pilot",]
 #droplevels function
@@ -119,34 +107,22 @@ dats$Contents <- str_replace(dats$Contents, "mix_d", "mix_b")
 
 
 ## PLOT RAW DATA AS BOX PLOTS ----------------------------------------------------------------------------------
-#cols <- c(rep("darkseagreen4", 10), rep("red4",10), rep("steelblue4",12))
-#par(las=2)
-#boxplot(ARFR.Seedling.Count ~ Site + Contents, data=dats, col=cols, ylim=c(0,80),
-#        at=c(1:2,4:5,7:8,10:11,13:14,16:17,19:20,22:23,25:26,28:29,31:32,34:35,37:38,40:41,43:44,46:47))
-
 unique(dats$Contents)
 unique(dats$SeedMix)
-#dats$MixCol[grepl("Single", dats$SeedMix)] = "steelblue4"    
-#dats$MixCol[grepl("Mix_C", dats$SeedMix)] = "red4"     
-#dats$MixCol[grepl("Mix_B", dats$SeedMix)] = "darkseagreen4"    
+
 
 ## 2023 emergence
 dats23 <- dats[grepl("2023", dats$Date),]
 dats23$Emrg <- dats23$ARFR.Seedling.Count/dats23$NumSeeds
   
-#cols <- c(rep("darkseagreen4", 5), rep("red4",5), rep("steelblue4",6),
-#          rep("darkseagreen4", 5), rep("red4",5), rep("steelblue4",6))
-#boxplot((ARFR.Seedling.Count/NumSeeds) ~ Contents + Site, data=dats23, col=cols, ylim=c(0,0.14),
-#        xlab=NA, ylab="Emergence Rate", xaxt="n", cex.lab=1.5)
-
-boxplot(ARFR.Seedling.Count ~ SeedMix + Site, data=dats23)
+oxplot(ARFR.Seedling.Count ~ SeedMix + Site, data=dats23)
 boxplot(ARFR.Seedling.Count/NumSeeds ~ SeedMix + Site, data=dats23)
 boxplot(ARFR.Seedling.Count/NumSeeds ~ SeedMix, data=dats23, ylim=c(0,0.19))
 boxplot(ARFR.Seedling.Count/NumSeeds ~ Site, data=dats23, ylim=c(0,0.19), ylab="Emergence Rate",
         cex.lab=1.5)
 
 ## Plot emergence rate by site separately
-## ** Plot all data points as well as boxes? 
+## Plot all data points as well as boxes? 
 dats23.PC <- dats23[dats23$Site=="PC",]
 dats23.EP <- dats23[dats23$Site=="EP",]
 
@@ -197,48 +173,12 @@ for (ee in 1:length(unique(dats$Contents))) {
   lines(1:2, c(EmrgAvgs.PC$Emrg_MN[ee],EmrgAvgs.EP$Emrg_MN[ee]), col=EmrgAvgs.PC$MixCol[ee], pch=19, cex=1.5)
   
 }
-
-
-#EmrgAvgs <- left_join(EmrgAvgs, dats, by="Contents") 
-#EmrgAvgs$PopCol <- NA
-#EmrgAvgs$PopCol[grepl("mix_s1", EmrgAvgs$Contents)] = "red4"  
-#EmrgAvgs$PopCol[grepl("mix_s2", EmrgAvgs$Contents)] = "red4"     
-#EmrgAvgs$PopCol[grepl("mix_s3", EmrgAvgs$Contents)] = "red4"        
-#EmrgAvgs$PopCol[grepl("mix_s4", EmrgAvgs$Contents)] = "red4"        
-#EmrgAvgs$PopCol[grepl("mix_s5", EmrgAvgs$Contents)] = "red4"        
-#EmrgAvgs$PopCol[grepl("mix_d1", EmrgAvgs$Contents)] = "darkseagreen4"         
-#EmrgAvgs$PopCol[grepl("mix_d2", EmrgAvgs$Contents)] = "darkseagreen4"         
-#EmrgAvgs$PopCol[grepl("mix_d3", EmrgAvgs$Contents)] = "darkseagreen4"         
-#EmrgAvgs$PopCol[grepl("mix_d4", EmrgAvgs$Contents)] = "darkseagreen4"         
-#EmrgAvgs$PopCol[grepl("mix_d5", EmrgAvgs$Contents)] = "darkseagreen4" 
-#EmrgAvgs$PopCol[grepl("single_UT", EmrgAvgs$Contents)] = "steelblue4" 
-#EmrgAvgs$PopCol[grepl("single_294", EmrgAvgs$Contents)] = "steelblue4" 
-#EmrgAvgs$PopCol[grepl("single_NM", EmrgAvgs$Contents)] = "steelblue4" 
-#EmrgAvgs$PopCol[grepl("single_316Jeff", EmrgAvgs$Contents)] = "steelblue4" 
-#EmrgAvgs$PopCol[grepl("single_314Jeff", EmrgAvgs$Contents)] = "steelblue4" 
-#EmrgAvgs$PopCol[grepl("single_LasAn", EmrgAvgs$Contents)] = "steelblue4" 
-
-#plot(1:16, EmrgAvgs$Emrg_MN, col=EmrgAvgs$PopCol, pch=19, cex=1.25)
-
-
-#EmrgAvgs_PC <- PC %>% group_by(Contents) %>% 
-#  dplyr::summarise(Emrg_MD=median(ARFR.Seedling.Count,na.rm=TRUE),
-#                   Emrg_MN=mean(ARFR.Seedling.Count,na.rm=TRUE),
-#                   Emrg_SE=calcSE(ARFR.Seedling.Count))
-
-#plot(1:16, EmrgAvgs_PC$Emrg_MN, col=EmrgAvgs$PopCol, pch=19, cex=1.25)
-
-#EmrgAvgs_EP <- EP %>% group_by(Contents) %>% 
-#  dplyr::summarise(Emrg_MD=median(ARFR.Seedling.Count,na.rm=TRUE),
-#                   Emrg_MN=mean(ARFR.Seedling.Count,na.rm=TRUE),
-#                   Emrg_SE=calcSE(ARFR.Seedling.Count))
-
-#plot(1:16, EmrgAvgs_EP$Emrg_MN, col=EmrgAvgs$PopCol, pch=19, cex=1.25)
+## -----------------------------------------------------
 
 
 
 
-## 2024 
+## 2024 ------------------------------------------------
 dats24 <- dats[grepl("2024", dats$Date),]
 dats2406 <- dats24[dats24$Date!="9/18/2024 18:00",]
 
@@ -246,6 +186,8 @@ dats2406 <- dats24[dats24$Date!="9/18/2024 18:00",]
 dats2406$ARFR.Percent.Cover[is.na(dats2406$ARFR.Percent.Cover)] <- 0
 
 
+
+## Survival --------------------------------------------
 ## Survival rates (2024 counts / 2023 counts)
 plot(dats23$ARFR.Seedling.Count, dats2406$ARFR.Seedling.Count)
 
@@ -304,15 +246,11 @@ for (ee in 1:length(unique(dats$Contents))) {
   lines(1:2, c(SurvAvgs.PC$Surv_MN[ee],SurvAvgs.EP$Surv_MN[ee]), col=SurvAvgs.PC$MixCol[ee], pch=19, cex=1.5)
   
 }
+## ----------------------------------------------------------  
 
 
 
-## Counts
-#cols <- c(rep("darkseagreen4", 5), rep("red4",5), rep("steelblue4",6),
-#          rep("darkseagreen4", 5), rep("red4",5), rep("steelblue4",6))
-#boxplot((ARFR.Seedling.Count) ~ Contents + Site, data=dats2406, col=cols, ylim=c(0,20),
-#        xlab=NA, ylab="Number of plants per plot", xaxt="n", cex.lab=1.5)
-
+## Counts ----------------
 boxplot(ARFR.Seedling.Count ~ SeedMix + Site, data=dats2406)
 boxplot(ARFR.Seedling.Count ~ SeedMix, data=dats2406, ylim=c(0,26))
 boxplot(ARFR.Seedling.Count ~ Site, data=dats2406, ylim=c(0,26), ylab="Number of plants/plot",
@@ -343,14 +281,6 @@ CountAvgs.PC$MixCol[grepl("single", CountAvgs.PC$Contents)] = "plum4"
 CountAvgs.PC$MixCol[grepl("mix_c", CountAvgs.PC$Contents)] = "grey80"     
 CountAvgs.PC$MixCol[grepl("mix_b", CountAvgs.PC$Contents)] = "grey30"    
 
-CountAvgs.EP <- dats2406.EP %>% group_by(Contents) %>% 
-  dplyr::summarise(Count_MD=median(ARFR.Seedling.Count,na.rm=TRUE),
-                   Count_MN=mean(ARFR.Seedling.Count,na.rm=TRUE),
-                   Count_SE=calcSE(ARFR.Seedling.Count),
-                   Count_SUM=sum(ARFR.Seedling.Count,na.rm=TRUE))
-CountAvgs.EP$MixCol[grepl("single", CountAvgs.EP$Contents)] = "plum4"    
-CountAvgs.EP$MixCol[grepl("mix_c", CountAvgs.EP$Contents)] = "grey80"     
-CountAvgs.EP$MixCol[grepl("mix_b", CountAvgs.EP$Contents)] = "grey30"    
 
 #CountAvgs.PC <- CountAvgs.PC[order(CountAvgs.PC$Count_MD),] #Order by median 
 #par(mar=c(7,5,3,2))
@@ -363,7 +293,8 @@ CountAvgs.EP$MixCol[grepl("mix_b", CountAvgs.EP$Contents)] = "grey30"
 CountAvgs.EP <- dats2406.EP %>% group_by(Contents) %>% 
   dplyr::summarise(Count_MD=median(ARFR.Seedling.Count,na.rm=TRUE),
                    Count_MN=mean(ARFR.Seedling.Count,na.rm=TRUE),
-                   Count_SE=calcSE(ARFR.Seedling.Count))
+                   Count_SE=calcSE(ARFR.Seedling.Count),
+                   Count_SUM=sum(ARFR.Seedling.Count,na.rm=TRUE))
 CountAvgs.EP$MixCol[grepl("single", CountAvgs.EP$Contents)] = "plum4"    
 CountAvgs.EP$MixCol[grepl("mix_c", CountAvgs.EP$Contents)] = "grey80"     
 CountAvgs.EP$MixCol[grepl("mix_b", CountAvgs.EP$Contents)] = "grey30"  
@@ -384,12 +315,13 @@ barplot(CountAvgs.PC$Count_SUM, xlab=NA, ylab="Total number of plants", cex.lab=
 CountAvgs.EP <- CountAvgs.EP[order(CountAvgs.EP$Count_SUM),] #Order by total count
 barplot(CountAvgs.EP$Count_SUM, xlab=NA, ylab="Total number of plants", cex.lab=1.25, las=2, 
         names=CountAvgs.EP$Contents, main="Site 2", cex.main=1.5, col=CountAvgs.EP$MixCol, cex.names=1)
-## ** Get avgs per mix type? ** Maybe not so meaningful but could be worth visualizing **
+## Get avgs per mix type? Maybe not so meaningful but could be worth visualizing?
+## ----------------------------------------------------------  
 
 
 
 
-## Percent vegetative cover
+## Percent vegetative cover -----------------------
 plot(dats2406$ARFR.Seedling.Count, dats2406$ARFR.Percent.Cover) #How correlated are counts and cover?
 
 par(mar=c(7,5,3,2))
@@ -438,12 +370,12 @@ for (ee in 1:length(unique(dats$Contents))) {
   lines(1:2, c(CovrAvgs.PC$Covr_MN[ee],CovrAvgs.EP$Covr_MN[ee]), col=CovrAvgs.PC$MixCol[ee], pch=19, cex=1.5)
   
 }
-  
+## ----------------------------------------------------------  
   
   
 
 
-## Percent reproductive cover
+## Percent reproductive cover -------------------------------
 dats2409 <- dats24[dats24$Date=="9/18/2024 18:00",]
 
 ## Repro should be NA, not zero, if seedling=0
@@ -512,14 +444,14 @@ for (ee in 1:length(unique(dats$Contents))) {
   lines(1:2, c(ReproAvgs.PC$Repro_MN[ee],ReproAvgs.EP$Repro_MN[ee]), col=ReproAvgs.PC$MixCol[ee], pch=19, cex=1.5)
   
 }
+## -----------------------------------------
 
 
 
 
 
 
-
-## Combined Performance
+## Combined Performance --------------------
 ## with Repro
 boxplot(CombPerf ~ Contents, data=dats2409.PC, col=cols, ylim=c(0,4), cex.main=1.5,
         main="Site 1", ylab="Combined performance", xlab=NA, cex.lab=1.5, las=2)
@@ -529,7 +461,6 @@ boxplot(CombPerf ~ Contents, data=dats2409.EP, col=cols, ylim=c(0,0.12), cex.mai
         main="Site 2", ylab="Combined performance", xlab=NA, cex.lab=1.5, las=2) 
 
 
-#CombByMed.PC <- with(dats2409.PC, reorder(Contents, CombPerf, median, na.rm=TRUE))
 
 CombAvgs.PC <- dats2409.PC %>% group_by(Contents) %>% 
   dplyr::summarise(Comb_MD=median(CombPerf,na.rm=TRUE),
@@ -539,6 +470,7 @@ CombAvgs.PC$MixCol[grepl("single", CombAvgs.PC$Contents)] = "plum4"
 CombAvgs.PC$MixCol[grepl("mix_c", CombAvgs.PC$Contents)] = "grey80"     
 CombAvgs.PC$MixCol[grepl("mix_b", CombAvgs.PC$Contents)] = "grey30"    
 
+#CombByMed.PC <- with(dats2409.PC, reorder(Contents, CombPerf, median, na.rm=TRUE))
 #CombAvgs.PC <- CombAvgs.PC[order(CombAvgs.PC$Comb_MD),] #Order by median 
 #boxplot(CombPerf ~ CombByMed.PC, data=dats2409.PC, ylim=c(0,8),
 #        xlab=NA, ylab="Combined Performance", cex.lab=1.25, col=CombAvgs.PC$MixCol,
@@ -581,7 +513,6 @@ boxplot(CombPerfCovr ~ Contents, data=dats2409.EP, col=cols, ylim=c(0,0.3), cex.
         main="Site 2", ylab="Combined performance", xlab=NA, cex.lab=1.5, las=2) 
 
 
-#CombByMed.PC <- with(dats2409.PC, reorder(Contents, CombPerfCovr, median, na.rm=TRUE))
 
 CombAvgs.PC <- dats2409.PC %>% group_by(Contents) %>% 
   dplyr::summarise(Comb_MD=median(CombPerfCovr,na.rm=TRUE),
@@ -591,6 +522,7 @@ CombAvgs.PC$MixCol[grepl("single", CombAvgs.PC$Contents)] = "plum4"
 CombAvgs.PC$MixCol[grepl("mix_c", CombAvgs.PC$Contents)] = "grey80"     
 CombAvgs.PC$MixCol[grepl("mix_b", CombAvgs.PC$Contents)] = "grey30"    
 
+#CombByMed.PC <- with(dats2409.PC, reorder(Contents, CombPerfCovr, median, na.rm=TRUE))
 #CombAvgs.PC <- CombAvgs.PC[order(CombAvgs.PC$Comb_MD),] #Order by median 
 #boxplot(CombPerfCovr ~ CombByMed.PC, data=dats2409.PC, ylim=c(0,8),
 #        xlab=NA, ylab="Combined Performance", cex.lab=1.25, col=CombAvgs.PC$MixCol,
@@ -610,47 +542,10 @@ boxplot(CombPerfCovr ~ Site, data=dats2409, ylim=c(0,6),
 
 
 
-## ** Dive into several mixes to ask if observed is above or below expected based on constituent sources? **
+
 ## -------------------------------------------------------------------------------------------
 ## TRY PLOTTING DEVIATION FROM EXPECTED ------------------------------------------------------
-#Emrg_rates <- dats23 %>% group_by(Site, Contents) %>% reframe(RATE=ARFR.Seedling.Count/NumSeeds)
-
-## Subset by mix/ single type, order lowest to highest emrg rate
-# Site 1 (PC) only 
-#Emrg_mixC1 <- subset(Emrg_rates, Contents=="mix_c1" & Site=="PC")
-#Emrg_mixC1 <- Emrg_mixC1[order(Emrg_mixC1$RATE),]
-#Emrg_mixC2 <- subset(Emrg_rates, Contents=="mix_c2" & Site=="PC")
-#Emrg_mixC2 <- Emrg_mixC2[order(Emrg_mixC2$RATE),]
-#Emrg_mixC3 <- subset(Emrg_rates, Contents=="mix_c3" & Site=="PC")
-#Emrg_mixC3 <- Emrg_mixC3[order(Emrg_mixC3$RATE),]
-#Emrg_mixC4 <- subset(Emrg_rates, Contents=="mix_c4" & Site=="PC")
-#Emrg_mixC4 <- Emrg_mixC4[order(Emrg_mixC4$RATE),]
-#Emrg_mixC5 <- subset(Emrg_rates, Contents=="mix_c5" & Site=="PC")
-#Emrg_mixC5 <- Emrg_mixC5[order(Emrg_mixC5$RATE),]
-
-#Emrg_mixB1 <- subset(Emrg_rates, Contents=="mix_b1" & Site=="PC")
-#Emrg_mixB1 <- Emrg_mixB1[order(Emrg_mixB1$RATE),]
-#Emrg_mixB2 <- subset(Emrg_rates, Contents=="mix_b2" & Site=="PC")
-#Emrg_mixB2 <- Emrg_mixB2[order(Emrg_mixB2$RATE),]
-#Emrg_mixB3 <- subset(Emrg_rates, Contents=="mix_b3" & Site=="PC")
-#Emrg_mixB3 <- Emrg_mixB3[order(Emrg_mixB3$RATE),]
-#Emrg_mixB4 <- subset(Emrg_rates, Contents=="mix_b4" & Site=="PC")
-#Emrg_mixB4 <- Emrg_mixB4[order(Emrg_mixB4$RATE),]
-#Emrg_mixB5 <- subset(Emrg_rates, Contents=="mix_b5" & Site=="PC")
-#Emrg_mixB5 <- Emrg_mixB5[order(Emrg_mixB5$RATE),]
-
-#Emrg_UT <- subset(Emrg_rates, Contents=="single_UT" & Site=="PC")
-#Emrg_UT <- Emrg_UT[order(Emrg_UT$RATE),]
-#Emrg_294 <- subset(Emrg_rates, Contents=="single_294" & Site=="PC")
-#Emrg_294 <- Emrg_294[order(Emrg_294$RATE),]
-#Emrg_NM <- subset(Emrg_rates, Contents=="single_NM" & Site=="PC")
-#Emrg_NM <- Emrg_NM[order(Emrg_NM$RATE),]
-#Emrg_316Jeff <- subset(Emrg_rates, Contents=="single_316Jeff" & Site=="PC")
-#Emrg_316Jeff <- Emrg_316Jeff[order(Emrg_316Jeff$RATE),]
-#Emrg_314Jeff <- subset(Emrg_rates, Contents=="single_314Jeff" & Site=="PC")
-#Emrg_314Jeff <- Emrg_314Jeff[order(Emrg_314Jeff$RATE),]
-#Emrg_LasAn <- subset(Emrg_rates, Contents=="single_LasAn" & Site=="PC")
-#Emrg_LasAn <- Emrg_LasAn[order(Emrg_LasAn$RATE),]
+## Dive into regional mixes to ask if observed is above or below expected based on constituent sources? 
 
 ## List what components are in each mix
 #mix_c1: LasAn, 314Jeff, 316Jeff
@@ -729,7 +624,6 @@ reps <- 100
 smpl.emrg <- as.data.frame(matrix(NA, reps, (5*3)))
 colnames(smpl.emrg) <- c("c1.1","c1.2","c1.3","c2.1","c2.2","c2.3","c3.1","c3.2","c3.3",
                          "c4.1","c4.2","c4.3","c5.1","c5.2","c5.3")
-
 
 unique(dats$Contents)
 
@@ -831,114 +725,13 @@ emrg_c5.devBS <- EmrgByPlot.PC$Emrg[EmrgByPlot.PC$Contents=="mix_c5"] - emrg_c5.
 
 t.test(EmrgByPlot.PC$Emrg[EmrgByPlot.PC$Contents=="mix_c5"], emrg_c5.expBS, paired="FALSE", conf.level=0.95,
        var.equal=TRUE, alternative="two.sided")
-
-
-
-
-## Calculate 'expected' num emerged for each mix based on additive of components
-#e_c1 <- ((mean(Emrg_LasAn$RATE)*(400/3)) + (mean(Emrg_314Jeff$RATE)*(400/3)) 
-#         + (mean(Emrg_316Jeff$RATE)*(400/3)))/400
-#e_c2 <- ((mean(Emrg_NM$RATE)*(400/3)) + (mean(Emrg_294$RATE)*(400/3)) 
-#         + (mean(Emrg_316Jeff$RATE)*(400/3)))/400
-#e_c3 <- ((mean(Emrg_UT$RATE)*(400/3)) + (mean(Emrg_314Jeff$RATE)*(400/3)) 
-#         + (mean(Emrg_294$RATE)*(400/3)))/400
-#e_c4 <- ((mean(Emrg_294$RATE)*(400/3)) + (mean(Emrg_314Jeff$RATE)*(400/3)) 
-#         + (mean(Emrg_316Jeff$RATE)*(400/3)))/400
-#e_c5 <- ((mean(Emrg_LasAn$RATE)*(400/3)) + (mean(Emrg_294$RATE)*(400/3)) 
-#         + (mean(Emrg_316Jeff$RATE)*(400/3)))/400
-
-## Calculate deviation from expected for each plot of each close mix
-#e_c1Dev <- Emrg_mixC1$RATE - e_c1
-#e_c2Dev <- Emrg_mixC2$RATE - e_c2
-#e_c3Dev <- Emrg_mixC3$RATE - e_c3
-#e_c4Dev <- Emrg_mixC4$RATE - e_c4
-#e_c5Dev <- Emrg_mixC5$RATE - e_c5
-
-## Combine diff mixes together and add values for x-axis for plotting
-#e_Devs <- c(e_c1Dev, e_c2Dev, e_c3Dev, e_c4Dev, e_c5Dev)
-#xAx <- c(rep(1,length(e_c1Dev)), rep(2,length(e_c2Dev)), rep(3,length(e_c3Dev)),
-#         rep(4,length(e_c4Dev)), rep(5,length(e_c5Dev)))
-
-#e_DevsForPlot <- as.data.frame(cbind(e_Devs, xAx))
-
-#par(pty="s")
-#plot(e_DevsForPlot$xAx, e_DevsForPlot$e_Devs, pch=16, ylim=c(-0.06,0.06),
-#     cex=0.9, ylab="Deviation from expected\nemergence rate", col="black",
-#     xlab="Regional Mix")
-#abline(h=0)
-
-
-## Plots as means and error 
-#EmrgAvgs.PC
-
-#eEmrg_c1 <- (EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_LasAn"] + 
-#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_314Jeff"] +
-#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_316Jeff"])/3
-#eEmrg_c2 <- (EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_NM"] + 
-#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_294"] +
-#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_316Jeff"])/3
-#eEmrg_c3 <- (EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_UT"] + 
-#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_294"] +
-#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_314Jeff"])/3
-#eEmrg_c4 <- (EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_316Jeff"] + 
-#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_294"] +
-#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_314Jeff"])/3
-#eEmrg_c5 <- (EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_LasAn"] + 
-#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_294"] +
-#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_316Jeff"])/3
-
-## Calculate deviation from expected for each plot of each close/ regional mix
-#eEmrg_c1Dev <- EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="mix_c1"] - eEmrg_c1
-#eEmrg_c2Dev <- EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="mix_c2"]  - eEmrg_c2
-#eEmrg_c3Dev <- EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="mix_c3"]  - eEmrg_c3
-#eEmrg_c4Dev <- EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="mix_c4"]  - eEmrg_c4
-#eEmrg_c5Dev <- EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="mix_c5"]  - eEmrg_c5
-
-## Combine diff mixes together and add values for x-axis for plotting
-#eEmrgDevs <- c(eEmrg_c1Dev, eEmrg_c2Dev, eEmrg_c3Dev, eEmrg_c4Dev, eEmrg_c5Dev)
-#xAx <- c(1:5)
-
-#eEmrgDevsForPlot <- as.data.frame(cbind(eEmrgDevs, xAx))
-
-#plot(eEmrgDevsForPlot$xAx, eEmrgDevsForPlot$eEmrgDevs, pch=16, ylim=c(-10,10),
-#     cex=1.9, ylab="Deviation from expected\nemergence", col="black",
-#     xlab="Regional Mix") 
-#abline(h=0)
-
-
-
+## -------------------------------------------
 
 
 
 
 ## 2024 --------------------------------------
-#sum_data <- dats2406 %>% group_by(Site, Contents) %>% reframe(RATE=ARFR.Seedling.Count/NumSeeds)
 ## June
-
-## Subset by regional mix and single type
-# Site 1 (PC) only 
-#mixC1 <- subset(dats2406, Contents=="mix_c1" & Site=="PC")
-#mixC2 <- subset(dats2406, Contents=="mix_c2" & Site=="PC")
-#mixC2 <- mixC2[order(mixC2$RATE),]
-#mixC3 <- subset(dats2406, Contents=="mix_c3" & Site=="PC")
-#mixC3 <- mixC3[order(mixC3$RATE),]
-#mixC4 <- subset(dats2406, Contents=="mix_c4" & Site=="PC")
-#mixC4 <- mixC4[order(mixC4$RATE),]
-#mixC5 <- subset(dats2406, Contents=="mix_c5" & Site=="PC")
-#mixC5 <- mixC5[order(mixC5$RATE),]
-
-#singUT <- subset(dats2406, Contents=="single_UT" & Site=="PC")
-#singUT <- singUT[order(singUT$RATE),]
-#sing294 <- subset(dats2406, Contents=="single_294" & Site=="PC")
-#sing294 <- sing294[order(sing294$RATE),]
-#singNM <- subset(dats2406, Contents=="single_NM" & Site=="PC")
-#singNM <- singNM[order(singNM$RATE),]
-#sing316Jeff <- subset(dats2406, Contents=="single_316Jeff" & Site=="PC")
-#sing316Jeff <- sing316Jeff[order(sing316Jeff$RATE),]
-#sing314Jeff <- subset(dats2406, Contents=="single_314Jeff" & Site=="PC")
-#sing314Jeff <- sing314Jeff[order(sing314Jeff$RATE),]
-#singLasAn <- subset(dats2406, Contents=="single_LasAn" & Site=="PC")
-#singLasAn <- singLasAn[order(singLasAn$RATE),]
 
 ## List what components are in each mix
 #mix_c1: LasAn, 314Jeff, 316Jeff
@@ -947,19 +740,7 @@ t.test(EmrgByPlot.PC$Emrg[EmrgByPlot.PC$Contents=="mix_c5"], emrg_c5.expBS, pair
 #mix_c4: 294, 314Jeff, 316Jeff
 #mix_c5: LasAn, 294, 316Jeff
 
-
-## Counts 
-#eCount_c1 <- (mean(singLasAn$ARFR.Seedling.Count) + mean(sing314Jeff$ARFR.Seedling.Count) 
-#         + mean(sing316Jeff$ARFR.Seedling.Count))/3
-#eCount_c2 <- (mean(singNM$ARFR.Seedling.Count) + mean(sing294$ARFR.Seedling.Count) 
-#         + mean(sing316Jeff$ARFR.Seedling.Count))/3
-#eCount_c3 <- (mean(singUT$ARFR.Seedling.Count) + mean(sing314Jeff$ARFR.Seedling.Count) 
-#         + mean(sing294$ARFR.Seedling.Count))/3
-#eCount_c4 <- (mean(sing294$ARFR.Seedling.Count) + mean(sing314Jeff$ARFR.Seedling.Count) 
-#         + mean(sing316Jeff$ARFR.Seedling.Count))/3
-#eCount_c5 <- (mean(singLasAn$ARFR.Seedling.Count) + mean(sing294$ARFR.Seedling.Count) 
-#         + mean(sing316Jeff$ARFR.Seedling.Count))/3
-
+## Counts
 CountAvgs.PC
 
 ## Calculate 'expected' count for each mix based on additive of components
@@ -1025,20 +806,7 @@ points(eMnCountDevsForPlot$xAx, eMnCountDevsForPlot$eMnCountDevs, pch=16,
 
 
 
-
 ## Survival
-## Calculate 'expected' survival for each mix based on additive of components
-#eSurv_c1 <- (mean(singLasAn$Surv) + mean(sing314Jeff$Surv) 
-#              + mean(sing316Jeff$Surv))/3
-#eSurv_c2 <- (mean(singNM$Surv) + mean(sing294$Surv) 
-#              + mean(sing316Jeff$Surv))/3
-#eSurv_c3 <- (mean(singUT$Surv, na.rm=TRUE) + mean(sing314Jeff$Surv) 
-#              + mean(sing294$Surv))/3
-#eSurv_c4 <- (mean(sing294$Surv) + mean(sing314Jeff$Surv) 
-#              + mean(sing316Jeff$Surv))/3
-#eSurv_c5 <- (mean(singLasAn$Surv) + mean(sing294$Surv) 
-#              + mean(sing316Jeff$Surv))/3
-
 SurvAvgs.PC
 
 eSurv_c1 <- (SurvAvgs.PC$Surv_MN[SurvAvgs.PC$Contents=="single_LasAn"] + 
@@ -1100,7 +868,7 @@ eMnSurvDevsForPlot <- as.data.frame(cbind(eMnSurvDevs, xAx))
 
 points(eMnSurvDevsForPlot$xAx, eMnSurvDevsForPlot$eMnSurvDevs, pch=16,
      cex=2, col="black") 
-## --------------------
+## ------------------
 
 
 
@@ -1110,7 +878,6 @@ reps <- 100
 smpl.surv <- as.data.frame(matrix(NA, reps, (5*3)))
 colnames(smpl.surv) <- c("c1.1","c1.2","c1.3","c2.1","c2.2","c2.3","c3.1","c3.2","c3.3",
                          "c4.1","c4.2","c4.3","c5.1","c5.2","c5.3")
-
 
 unique(dats$Contents)
 
@@ -1218,18 +985,6 @@ t.test(SurvByPlot.PC$Surv[SurvByPlot.PC$Contents=="mix_c5"], surv_c5.expBS, pair
 
 
 ## Percent Veg Cover
-## Calculate 'expected' cover for each mix based on additive of components
-#eCovr_c1 <- (mean(singLasAn$ARFR.Percent.Cover) + mean(sing314Jeff$ARFR.Percent.Cover) 
-#             + mean(sing316Jeff$ARFR.Percent.Cover,na.rm=TRUE))/3
-#eCovr_c2 <- (mean(singNM$ARFR.Percent.Cover) + mean(sing294$ARFR.Percent.Cover) 
-#             + mean(sing316Jeff$ARFR.Percent.Cover,na.rm=TRUE))/3
-#eCovr_c3 <- (mean(singUT$ARFR.Percent.Cover, na.rm=TRUE) + mean(sing314Jeff$ARFR.Percent.Cover) 
-#             + mean(sing294$ARFR.Percent.Cover))/3
-#eCovr_c4 <- (mean(sing294$ARFR.Percent.Cover) + mean(sing314Jeff$ARFR.Percent.Cover) 
-#             + mean(sing316Jeff$ARFR.Percent.Cover,na.rm=TRUE))/3
-#eCovr_c5 <- (mean(singLasAn$ARFR.Percent.Cover) + mean(sing294$ARFR.Percent.Cover) 
-#             + mean(sing316Jeff$ARFR.Percent.Cover,na.rm=TRUE))/3
-
 CovrAvgs.PC
 
 eCovr_c1 <- (CovrAvgs.PC$Covr_MN[CovrAvgs.PC$Contents=="single_LasAn"] + 
@@ -1288,7 +1043,6 @@ eMnCovrDevsForPlot <- as.data.frame(cbind(eMnCovrDevs, xAx))
 
 points(eMnCovrDevsForPlot$xAx, eMnCovrDevsForPlot$eMnCovrDevs, pch=16,
      cex=2, col="black") 
-
 
 
 
@@ -1355,7 +1109,7 @@ eMnCovrDevsForPlotEP <- as.data.frame(cbind(eMnCovrDevs.EP, xAx))
 
 points(eMnCovrDevsForPlotEP$xAx, eMnCovrDevsForPlotEP$eMnCovrDevs.EP, pch=16,
        cex=2, col="black") 
-## -------------------------
+## ----------------------
 
 
 
@@ -1466,14 +1220,12 @@ covr_c5.devBS <- CovrByPlot.PC$Covr[CovrByPlot.PC$Contents=="mix_c5"] - covr_c5.
 
 t.test(CovrByPlot.PC$Covr[CovrByPlot.PC$Contents=="mix_c5"], covr_c5.expBS, paired="FALSE", conf.level=0.95,
        var.equal=TRUE, alternative="two.sided")
-## -------------------------------------------------------------------------------
+## ------------------------------------------
 
 
 
 
-
-
-## Repro cover
+## Repro cover ------------------------------
 ReproAvgs.PC
 
 ## Calculate 'expected' repro for each regional mix based on additive of components
@@ -1599,7 +1351,7 @@ points(eMnReproDevsForPlot$xAx, eMnReproDevsForPlot$eMnReproDevs, pch=16,
 
 #points(eMnReproDevsForPlotEP$xAx, eMnReproDevsForPlotEP$eMnReproDevs.EP, pch=16,
 #       cex=2, col="black") 
-
+## -------------------------
 
 
 
@@ -1710,8 +1462,7 @@ repro_c5.devBS <- ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c5"] - repr
 
 t.test(ReproByPlot.PC$Repro[ReproByPlot.PC$Contents=="mix_c5"], repro_c5.expBS, paired="FALSE", conf.level=0.95,
        var.equal=TRUE, alternative="two.sided")
-
-
+## -------------------------------------------
 
 
 
@@ -1777,6 +1528,10 @@ eMnCombDevsForPlot <- as.data.frame(cbind(eMnCombDevs, xAx))
 
 points(eMnCombDevsForPlot$xAx, eMnCombDevsForPlot$eMnCombDevs, pch=16,
        cex=2, col="black") 
+
+
+## ADD BOOTSTRAP ***
+
 ## -----------------------------------------------------------------------------------------
 ## -----------------------------------------------------------------------------------------
 
@@ -1785,7 +1540,7 @@ points(eMnCombDevsForPlot$xAx, eMnCombDevsForPlot$eMnCombDevs, pch=16,
 
 
 
-## Look for spatial patterns in performance data
+## LOOK FOR SPATIAL PATTERNS IN THE PERFORMANCE DATA ---------------------------------------
 plot(as.numeric(dats23.PC$Plot.Number), dats23.PC$Emrg)
 plot(as.numeric(dats23.EP$Plot.Number), dats23.EP$Emrg)
 plot(as.numeric(dats23.PC$Plot.Number), dats2406.PC$ARFR.Seedling.Count)
@@ -1804,6 +1559,10 @@ boxplot(Surv ~ HalfSplit, data=dats2406.PC, ylim=c(0,1.6),
         ylab="Survival", cex.lab=1.5, main="Site 1")
 boxplot(Surv ~ HalfSplit, data=dats2406.EP, ylim=c(0,2), 
         ylab="Survival", cex.lab=1.5, main="Site 2")
+modSurv <- lm(Surv ~ HalfSplit, data=dats2406.PC) ##UPDATE MODEL **
+summary(modSurv)
+modSurv.EP <- lm(Surv ~ HalfSplit, data=dats2406.EP) ##UPDATE MODEL **
+summary(modSurv.EP)
 
 boxplot(ARFR.Seedling.Count ~ HalfSplit, data=dats2406.PC, ylim=c(0,20), 
         ylab="Count", cex.lab=1.5, main="Site 1")
@@ -1835,23 +1594,126 @@ summary(modComb.EP)
 
 
 
-## Look at performance across environment quality ***
-## Plot means at each site
-#CombAvgs.EP <- dats2409.EP %>% group_by(Contents) %>% 
-#  dplyr::summarise(Comb_MD=median(CombPerf,na.rm=TRUE),
-#                   Comb_MN=mean(CombPerf,na.rm=TRUE),
-#                   Comb_SE=calcSE(CombPerf))
-#CombAvgs.EP$MixCol[grepl("single", CombAvgs.EP$Contents)] = "plum4"    
-#CombAvgs.EP$MixCol[grepl("mix_c", CombAvgs.EP$Contents)] = "grey80"     
-#CombAvgs.EP$MixCol[grepl("mix_b", CombAvgs.EP$Contents)] = "grey30"  
+## Look at performance across environment quality 
+## Plot means at each site and quality, eg. site 1 half 1, site 1 half 2
 
-#plot(1:2, 0:1, type="n",ylim=c(0,1.3), xaxt="n", ylab="Combined performance", xlab="Site", cex.lab=1.5)
-#for (ee in 1:length(unique(dats$Contents))) { 
-#  points(1:2, c(CombAvgs.PC$Comb_MN[ee],CombAvgs.EP$Comb_MN[ee]), col=CombAvgs.PC$MixCol[ee], pch=19, cex=1.5)
-#  lines(1:2, c(CombAvgs.PC$Comb_MN[ee],CombAvgs.EP$Comb_MN[ee]), col=CombAvgs.PC$MixCol[ee], pch=19, cex=1.5)
- #}
-## ****
+EmrgByEnv.PC <- dats23.PC %>% group_by(Contents, HalfSplit) %>% 
+  dplyr::summarise(Emrg_MN=mean(Emrg,na.rm=TRUE),
+                   Emrg_SE=calcSE(Emrg))
+EmrgByEnv.PC <- EmrgByEnv.PC %>% arrange(Contents, desc(HalfSplit))
+EmrgByEnv.PC$MixCol[grepl("single", EmrgByEnv.PC$Contents)] = "plum4"    
+EmrgByEnv.PC$MixCol[grepl("mix_c", EmrgByEnv.PC$Contents)] = "grey80"     
+EmrgByEnv.PC$MixCol[grepl("mix_b", EmrgByEnv.PC$Contents)] = "grey30"  
+
+
+EmrgByEnv.EP <- dats23.EP %>% group_by(Contents, Site, HalfSplit) %>% 
+  dplyr::summarise(Emrg_MN=mean(Emrg,na.rm=TRUE),
+                   Emrg_SE=calcSE(Emrg))
+
+#selPos <- seq(from=1, to=64, by=4)
+selPos <- seq(from=1, to=32, by=2)
+plot(1:4, 1:4, type="n",ylim=c(0,0.085), xaxt="n", ylab="Emergence", xlab="Environment quality", cex.lab=1.5)
+for (ee in selPos) { 
+  points(1:4, c(EmrgByEnv.EP$Emrg_MN[ee:(ee+1)],EmrgByEnv.PC$Emrg_MN[ee:(ee+1)]), col=EmrgByEnv.PC$MixCol[ee:(ee+1)], 
+         pch=19, cex=1.5)
+  lines(1:4, c(EmrgByEnv.EP$Emrg_MN[ee:(ee+1)],EmrgByEnv.PC$Emrg_MN[ee:(ee+1)]), col=EmrgByEnv.PC$MixCol[ee:(ee+1)], cex=1.5)
+}
+## Add error bars on each mean point ** 
+## --------
+
+
+
+SurvByEnv.PC <- dats2406.PC %>% group_by(Contents, HalfSplit) %>% 
+  dplyr::summarise(Surv_MN=mean(Surv,na.rm=TRUE),
+                   Surv_SE=calcSE(Surv))
+SurvByEnv.PC <- SurvByEnv.PC %>% arrange(Contents, desc(HalfSplit))
+SurvByEnv.PC$MixCol[grepl("single", SurvByEnv.PC$Contents)] = "plum4"    
+SurvByEnv.PC$MixCol[grepl("mix_c", SurvByEnv.PC$Contents)] = "grey80"     
+SurvByEnv.PC$MixCol[grepl("mix_b", SurvByEnv.PC$Contents)] = "grey30"  
+
+SurvByEnv.EP <- dats2406.EP %>% group_by(Contents, Site, HalfSplit) %>% 
+  dplyr::summarise(Surv_MN=mean(Surv,na.rm=TRUE),
+                   Surv_SE=calcSE(Surv))
+
+selPos <- seq(from=1, to=32, by=2)
+plot(1:4, 1:4, type="n",ylim=c(0,0.85), xaxt="n", ylab="Survival", xlab="Environment quality", cex.lab=1.5)
+for (ee in selPos) { 
+  points(1:4, c(SurvByEnv.EP$Surv_MN[ee:(ee+1)],SurvByEnv.PC$Surv_MN[ee:(ee+1)]), col=SurvByEnv.PC$MixCol[ee:(ee+1)], 
+         pch=19, cex=1.5)
+  lines(1:4, c(SurvByEnv.EP$Surv_MN[ee:(ee+1)],SurvByEnv.PC$Surv_MN[ee:(ee+1)]), col=SurvByEnv.PC$MixCol[ee:(ee+1)], cex=1.5)
+}
+## --------
+
+
+
+CovrByEnv.PC <- dats2406.PC %>% group_by(Contents, HalfSplit) %>% 
+  dplyr::summarise(Covr_MN=mean(ARFR.Percent.Cover,na.rm=TRUE),
+                   Covr_SE=calcSE(ARFR.Percent.Cover))
+CovrByEnv.PC <- CovrByEnv.PC %>% arrange(Contents, desc(HalfSplit))
+CovrByEnv.PC$MixCol[grepl("single", CovrByEnv.PC$Contents)] = "plum4"    
+CovrByEnv.PC$MixCol[grepl("mix_c", CovrByEnv.PC$Contents)] = "grey80"     
+CovrByEnv.PC$MixCol[grepl("mix_b", CovrByEnv.PC$Contents)] = "grey30"  
+
+CovrByEnv.EP <- dats2406.EP %>% group_by(Contents, Site, HalfSplit) %>% 
+  dplyr::summarise(Covr_MN=mean(ARFR.Percent.Cover,na.rm=TRUE),
+                   Covr_SE=calcSE(ARFR.Percent.Cover))
+
+selPos <- seq(from=1, to=32, by=2)
+plot(1:4, 1:4, type="n",ylim=c(0,37), xaxt="n", ylab="Vegetative cover", xlab="Environment quality", cex.lab=1.5)
+for (ee in selPos) { 
+  points(1:4, c(CovrByEnv.EP$Covr_MN[ee:(ee+1)],CovrByEnv.PC$Covr_MN[ee:(ee+1)]), col=CovrByEnv.PC$MixCol[ee:(ee+1)], 
+         pch=19, cex=1.5)
+  lines(1:4, c(CovrByEnv.EP$Covr_MN[ee:(ee+1)],CovrByEnv.PC$Covr_MN[ee:(ee+1)]), col=CovrByEnv.PC$MixCol[ee:(ee+1)], cex=1.5)
+}
+## --------
+
+
+
+
+ReproByEnv.PC <- dats2409.PC %>% group_by(Contents, HalfSplit) %>% 
+  dplyr::summarise(Repro_MN=mean(ARFR.Reproductive.Percent.Cover,na.rm=TRUE),
+                   Repro_SE=calcSE(ARFR.Reproductive.Percent.Cover))
+ReproByEnv.PC <- ReproByEnv.PC %>% arrange(Contents, desc(HalfSplit))
+ReproByEnv.PC$MixCol[grepl("single", ReproByEnv.PC$Contents)] = "plum4"    
+ReproByEnv.PC$MixCol[grepl("mix_c", ReproByEnv.PC$Contents)] = "grey80"     
+ReproByEnv.PC$MixCol[grepl("mix_b", ReproByEnv.PC$Contents)] = "grey30"  
+
+ReproByEnv.EP <- dats2409.EP %>% group_by(Contents, Site, HalfSplit) %>% 
+  dplyr::summarise(Repro_MN=mean(ARFR.Reproductive.Percent.Cover,na.rm=TRUE),
+                   Repro_SE=calcSE(ARFR.Reproductive.Percent.Cover))
+
+selPos <- seq(from=1, to=32, by=2)
+plot(1:4, 1:4, type="n",ylim=c(0,55), xaxt="n", ylab="Reproductive cover", xlab="Environment quality", cex.lab=1.5)
+for (ee in selPos) { 
+  points(1:4, c(ReproByEnv.EP$Repro_MN[ee:(ee+1)],ReproByEnv.PC$Repro_MN[ee:(ee+1)]), col=ReproByEnv.PC$MixCol[ee:(ee+1)], 
+         pch=19, cex=1.5)
+  lines(1:4, c(ReproByEnv.EP$Repro_MN[ee:(ee+1)],ReproByEnv.PC$Repro_MN[ee:(ee+1)]), col=ReproByEnv.PC$MixCol[ee:(ee+1)], cex=1.5)
+}
+
+
+
+
+CombByEnv.PC <- dats2409.PC %>% group_by(Contents, HalfSplit) %>% 
+  dplyr::summarise(Comb_MN=mean(CombPerf,na.rm=TRUE),
+                   Comb_SE=calcSE(CombPerf))
+CombByEnv.PC <- CombByEnv.PC %>% arrange(Contents, desc(HalfSplit))
+CombByEnv.PC$MixCol[grepl("single", CombByEnv.PC$Contents)] = "plum4"    
+CombByEnv.PC$MixCol[grepl("mix_c", CombByEnv.PC$Contents)] = "grey80"     
+CombByEnv.PC$MixCol[grepl("mix_b", CombByEnv.PC$Contents)] = "grey30"  
+
+CombByEnv.EP <- dats2409.EP %>% group_by(Contents, Site, HalfSplit) %>% 
+  dplyr::summarise(Comb_MN=mean(CombPerf,na.rm=TRUE),
+                   Comb_SE=calcSE(CombPerf))
+
+selPos <- seq(from=1, to=32, by=2)
+plot(1:4, 1:4, type="n",ylim=c(0,1.8), xaxt="n", ylab="Combined performance", xlab="Environment quality", cex.lab=1.5)
+for (ee in selPos) { 
+  points(1:4, c(CombByEnv.EP$Comb_MN[ee:(ee+1)],CombByEnv.PC$Comb_MN[ee:(ee+1)]), col=CombByEnv.PC$MixCol[ee:(ee+1)], 
+         pch=19, cex=1.5)
+  lines(1:4, c(CombByEnv.EP$Comb_MN[ee:(ee+1)],CombByEnv.PC$Comb_MN[ee:(ee+1)]), col=CombByEnv.PC$MixCol[ee:(ee+1)], cex=1.5)
+}
 ## ---------------------------------------------------------------------
+
 
 
 
@@ -2078,3 +1940,256 @@ mod5 <- glm(cbind(ARFR.Seedling.Count, NumSeeds-ARFR.Seedling.Count) ~ SeedMix,
             data=EP, family=binomial(link="logit"))
 summary(mod5)
 Anova(mod5)
+## -------------------------------------------------
+
+
+
+
+
+
+
+## ----------------------------------------------------------------------------------------------------
+## EXTRA UNUSED CODE ----------------------------------------------------------------------------------
+#dats <- dats[dats$Contents != "Fre12_1200seeds",]
+#dats <- dats[dats$Contents != "Fre12_800seeds",]
+#dats <- dats[dats$Contents != "422Nav_1200seeds",]
+#dats <- dats[dats$Contents != "422Nav_800seeds",]
+#dats <- dats[dats$Contents != "WY71_ClearPlot",]
+#dats <- dats[dats$Contents != "ERNA_Rio",]
+#dats <- dats[dats$Contents != "ERNA_Rou",]
+#dats <- dats[dats$Contents != "ERNA_Gun",]
+
+
+#cols <- c(rep("darkseagreen4", 10), rep("red4",10), rep("steelblue4",12))
+#par(las=2)
+#boxplot(ARFR.Seedling.Count ~ Site + Contents, data=dats, col=cols, ylim=c(0,80),
+#        at=c(1:2,4:5,7:8,10:11,13:14,16:17,19:20,22:23,25:26,28:29,31:32,34:35,37:38,40:41,43:44,46:47))
+
+#cols <- c(rep("darkseagreen4", 5), rep("red4",5), rep("steelblue4",6),
+#          rep("darkseagreen4", 5), rep("red4",5), rep("steelblue4",6))
+#boxplot((ARFR.Seedling.Count/NumSeeds) ~ Contents + Site, data=dats23, col=cols, ylim=c(0,0.14),
+#        xlab=NA, ylab="Emergence Rate", xaxt="n", cex.lab=1.5)
+
+
+#EmrgAvgs <- left_join(EmrgAvgs, dats, by="Contents") 
+#EmrgAvgs$PopCol <- NA
+#EmrgAvgs$PopCol[grepl("mix_s1", EmrgAvgs$Contents)] = "red4"  
+#EmrgAvgs$PopCol[grepl("mix_s2", EmrgAvgs$Contents)] = "red4"     
+#EmrgAvgs$PopCol[grepl("mix_s3", EmrgAvgs$Contents)] = "red4"        
+#EmrgAvgs$PopCol[grepl("mix_s4", EmrgAvgs$Contents)] = "red4"        
+#EmrgAvgs$PopCol[grepl("mix_s5", EmrgAvgs$Contents)] = "red4"        
+#EmrgAvgs$PopCol[grepl("mix_d1", EmrgAvgs$Contents)] = "darkseagreen4"         
+#EmrgAvgs$PopCol[grepl("mix_d2", EmrgAvgs$Contents)] = "darkseagreen4"         
+#EmrgAvgs$PopCol[grepl("mix_d3", EmrgAvgs$Contents)] = "darkseagreen4"         
+#EmrgAvgs$PopCol[grepl("mix_d4", EmrgAvgs$Contents)] = "darkseagreen4"         
+#EmrgAvgs$PopCol[grepl("mix_d5", EmrgAvgs$Contents)] = "darkseagreen4" 
+#EmrgAvgs$PopCol[grepl("single_UT", EmrgAvgs$Contents)] = "steelblue4" 
+#EmrgAvgs$PopCol[grepl("single_294", EmrgAvgs$Contents)] = "steelblue4" 
+#EmrgAvgs$PopCol[grepl("single_NM", EmrgAvgs$Contents)] = "steelblue4" 
+#EmrgAvgs$PopCol[grepl("single_316Jeff", EmrgAvgs$Contents)] = "steelblue4" 
+#EmrgAvgs$PopCol[grepl("single_314Jeff", EmrgAvgs$Contents)] = "steelblue4" 
+#EmrgAvgs$PopCol[grepl("single_LasAn", EmrgAvgs$Contents)] = "steelblue4" 
+
+#plot(1:16, EmrgAvgs$Emrg_MN, col=EmrgAvgs$PopCol, pch=19, cex=1.25)
+
+
+#EmrgAvgs_PC <- PC %>% group_by(Contents) %>% 
+#  dplyr::summarise(Emrg_MD=median(ARFR.Seedling.Count,na.rm=TRUE),
+#                   Emrg_MN=mean(ARFR.Seedling.Count,na.rm=TRUE),
+#                   Emrg_SE=calcSE(ARFR.Seedling.Count))
+
+#plot(1:16, EmrgAvgs_PC$Emrg_MN, col=EmrgAvgs$PopCol, pch=19, cex=1.25)
+
+#EmrgAvgs_EP <- EP %>% group_by(Contents) %>% 
+#  dplyr::summarise(Emrg_MD=median(ARFR.Seedling.Count,na.rm=TRUE),
+#                   Emrg_MN=mean(ARFR.Seedling.Count,na.rm=TRUE),
+#                   Emrg_SE=calcSE(ARFR.Seedling.Count))
+
+#plot(1:16, EmrgAvgs_EP$Emrg_MN, col=EmrgAvgs$PopCol, pch=19, cex=1.25)
+
+
+#cols <- c(rep("darkseagreen4", 5), rep("red4",5), rep("steelblue4",6),
+#          rep("darkseagreen4", 5), rep("red4",5), rep("steelblue4",6))
+#boxplot((ARFR.Seedling.Count) ~ Contents + Site, data=dats2406, col=cols, ylim=c(0,20),
+#        xlab=NA, ylab="Number of plants per plot", xaxt="n", cex.lab=1.5)
+
+
+#Emrg_rates <- dats23 %>% group_by(Site, Contents) %>% reframe(RATE=ARFR.Seedling.Count/NumSeeds)
+
+## Subset by mix/ single type, order lowest to highest emrg rate
+# Site 1 (PC) only 
+#Emrg_mixC1 <- subset(Emrg_rates, Contents=="mix_c1" & Site=="PC")
+#Emrg_mixC1 <- Emrg_mixC1[order(Emrg_mixC1$RATE),]
+#Emrg_mixC2 <- subset(Emrg_rates, Contents=="mix_c2" & Site=="PC")
+#Emrg_mixC2 <- Emrg_mixC2[order(Emrg_mixC2$RATE),]
+#Emrg_mixC3 <- subset(Emrg_rates, Contents=="mix_c3" & Site=="PC")
+#Emrg_mixC3 <- Emrg_mixC3[order(Emrg_mixC3$RATE),]
+#Emrg_mixC4 <- subset(Emrg_rates, Contents=="mix_c4" & Site=="PC")
+#Emrg_mixC4 <- Emrg_mixC4[order(Emrg_mixC4$RATE),]
+#Emrg_mixC5 <- subset(Emrg_rates, Contents=="mix_c5" & Site=="PC")
+#Emrg_mixC5 <- Emrg_mixC5[order(Emrg_mixC5$RATE),]
+
+#Emrg_mixB1 <- subset(Emrg_rates, Contents=="mix_b1" & Site=="PC")
+#Emrg_mixB1 <- Emrg_mixB1[order(Emrg_mixB1$RATE),]
+#Emrg_mixB2 <- subset(Emrg_rates, Contents=="mix_b2" & Site=="PC")
+#Emrg_mixB2 <- Emrg_mixB2[order(Emrg_mixB2$RATE),]
+#Emrg_mixB3 <- subset(Emrg_rates, Contents=="mix_b3" & Site=="PC")
+#Emrg_mixB3 <- Emrg_mixB3[order(Emrg_mixB3$RATE),]
+#Emrg_mixB4 <- subset(Emrg_rates, Contents=="mix_b4" & Site=="PC")
+#Emrg_mixB4 <- Emrg_mixB4[order(Emrg_mixB4$RATE),]
+#Emrg_mixB5 <- subset(Emrg_rates, Contents=="mix_b5" & Site=="PC")
+#Emrg_mixB5 <- Emrg_mixB5[order(Emrg_mixB5$RATE),]
+
+#Emrg_UT <- subset(Emrg_rates, Contents=="single_UT" & Site=="PC")
+#Emrg_UT <- Emrg_UT[order(Emrg_UT$RATE),]
+#Emrg_294 <- subset(Emrg_rates, Contents=="single_294" & Site=="PC")
+#Emrg_294 <- Emrg_294[order(Emrg_294$RATE),]
+#Emrg_NM <- subset(Emrg_rates, Contents=="single_NM" & Site=="PC")
+#Emrg_NM <- Emrg_NM[order(Emrg_NM$RATE),]
+#Emrg_316Jeff <- subset(Emrg_rates, Contents=="single_316Jeff" & Site=="PC")
+#Emrg_316Jeff <- Emrg_316Jeff[order(Emrg_316Jeff$RATE),]
+#Emrg_314Jeff <- subset(Emrg_rates, Contents=="single_314Jeff" & Site=="PC")
+#Emrg_314Jeff <- Emrg_314Jeff[order(Emrg_314Jeff$RATE),]
+#Emrg_LasAn <- subset(Emrg_rates, Contents=="single_LasAn" & Site=="PC")
+#Emrg_LasAn <- Emrg_LasAn[order(Emrg_LasAn$RATE),]
+
+
+
+## Calculate 'expected' num emerged for each mix based on additive of components
+#e_c1 <- ((mean(Emrg_LasAn$RATE)*(400/3)) + (mean(Emrg_314Jeff$RATE)*(400/3)) 
+#         + (mean(Emrg_316Jeff$RATE)*(400/3)))/400
+#e_c2 <- ((mean(Emrg_NM$RATE)*(400/3)) + (mean(Emrg_294$RATE)*(400/3)) 
+#         + (mean(Emrg_316Jeff$RATE)*(400/3)))/400
+#e_c3 <- ((mean(Emrg_UT$RATE)*(400/3)) + (mean(Emrg_314Jeff$RATE)*(400/3)) 
+#         + (mean(Emrg_294$RATE)*(400/3)))/400
+#e_c4 <- ((mean(Emrg_294$RATE)*(400/3)) + (mean(Emrg_314Jeff$RATE)*(400/3)) 
+#         + (mean(Emrg_316Jeff$RATE)*(400/3)))/400
+#e_c5 <- ((mean(Emrg_LasAn$RATE)*(400/3)) + (mean(Emrg_294$RATE)*(400/3)) 
+#         + (mean(Emrg_316Jeff$RATE)*(400/3)))/400
+
+## Calculate deviation from expected for each plot of each close mix
+#e_c1Dev <- Emrg_mixC1$RATE - e_c1
+#e_c2Dev <- Emrg_mixC2$RATE - e_c2
+#e_c3Dev <- Emrg_mixC3$RATE - e_c3
+#e_c4Dev <- Emrg_mixC4$RATE - e_c4
+#e_c5Dev <- Emrg_mixC5$RATE - e_c5
+
+## Combine diff mixes together and add values for x-axis for plotting
+#e_Devs <- c(e_c1Dev, e_c2Dev, e_c3Dev, e_c4Dev, e_c5Dev)
+#xAx <- c(rep(1,length(e_c1Dev)), rep(2,length(e_c2Dev)), rep(3,length(e_c3Dev)),
+#         rep(4,length(e_c4Dev)), rep(5,length(e_c5Dev)))
+
+#e_DevsForPlot <- as.data.frame(cbind(e_Devs, xAx))
+
+#par(pty="s")
+#plot(e_DevsForPlot$xAx, e_DevsForPlot$e_Devs, pch=16, ylim=c(-0.06,0.06),
+#     cex=0.9, ylab="Deviation from expected\nemergence rate", col="black",
+#     xlab="Regional Mix")
+#abline(h=0)
+
+
+## Plots as means and error 
+#EmrgAvgs.PC
+
+#eEmrg_c1 <- (EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_LasAn"] + 
+#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_314Jeff"] +
+#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_316Jeff"])/3
+#eEmrg_c2 <- (EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_NM"] + 
+#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_294"] +
+#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_316Jeff"])/3
+#eEmrg_c3 <- (EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_UT"] + 
+#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_294"] +
+#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_314Jeff"])/3
+#eEmrg_c4 <- (EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_316Jeff"] + 
+#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_294"] +
+#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_314Jeff"])/3
+#eEmrg_c5 <- (EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_LasAn"] + 
+#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_294"] +
+#                EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="single_316Jeff"])/3
+
+## Calculate deviation from expected for each plot of each close/ regional mix
+#eEmrg_c1Dev <- EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="mix_c1"] - eEmrg_c1
+#eEmrg_c2Dev <- EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="mix_c2"]  - eEmrg_c2
+#eEmrg_c3Dev <- EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="mix_c3"]  - eEmrg_c3
+#eEmrg_c4Dev <- EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="mix_c4"]  - eEmrg_c4
+#eEmrg_c5Dev <- EmrgAvgs.PC$Emrg_MN[EmrgAvgs.PC$Contents=="mix_c5"]  - eEmrg_c5
+
+## Combine diff mixes together and add values for x-axis for plotting
+#eEmrgDevs <- c(eEmrg_c1Dev, eEmrg_c2Dev, eEmrg_c3Dev, eEmrg_c4Dev, eEmrg_c5Dev)
+#xAx <- c(1:5)
+
+#eEmrgDevsForPlot <- as.data.frame(cbind(eEmrgDevs, xAx))
+
+#plot(eEmrgDevsForPlot$xAx, eEmrgDevsForPlot$eEmrgDevs, pch=16, ylim=c(-10,10),
+#     cex=1.9, ylab="Deviation from expected\nemergence", col="black",
+#     xlab="Regional Mix") 
+#abline(h=0)
+
+
+
+#sum_data <- dats2406 %>% group_by(Site, Contents) %>% reframe(RATE=ARFR.Seedling.Count/NumSeeds)
+
+## Subset by regional mix and single type
+# Site 1 (PC) only 
+#mixC1 <- subset(dats2406, Contents=="mix_c1" & Site=="PC")
+#mixC2 <- subset(dats2406, Contents=="mix_c2" & Site=="PC")
+#mixC2 <- mixC2[order(mixC2$RATE),]
+#mixC3 <- subset(dats2406, Contents=="mix_c3" & Site=="PC")
+#mixC3 <- mixC3[order(mixC3$RATE),]
+#mixC4 <- subset(dats2406, Contents=="mix_c4" & Site=="PC")
+#mixC4 <- mixC4[order(mixC4$RATE),]
+#mixC5 <- subset(dats2406, Contents=="mix_c5" & Site=="PC")
+#mixC5 <- mixC5[order(mixC5$RATE),]
+
+#singUT <- subset(dats2406, Contents=="single_UT" & Site=="PC")
+#singUT <- singUT[order(singUT$RATE),]
+#sing294 <- subset(dats2406, Contents=="single_294" & Site=="PC")
+#sing294 <- sing294[order(sing294$RATE),]
+#singNM <- subset(dats2406, Contents=="single_NM" & Site=="PC")
+#singNM <- singNM[order(singNM$RATE),]
+#sing316Jeff <- subset(dats2406, Contents=="single_316Jeff" & Site=="PC")
+#sing316Jeff <- sing316Jeff[order(sing316Jeff$RATE),]
+#sing314Jeff <- subset(dats2406, Contents=="single_314Jeff" & Site=="PC")
+#sing314Jeff <- sing314Jeff[order(sing314Jeff$RATE),]
+#singLasAn <- subset(dats2406, Contents=="single_LasAn" & Site=="PC")
+#singLasAn <- singLasAn[order(singLasAn$RATE),]
+
+
+## Counts 
+#eCount_c1 <- (mean(singLasAn$ARFR.Seedling.Count) + mean(sing314Jeff$ARFR.Seedling.Count) 
+#         + mean(sing316Jeff$ARFR.Seedling.Count))/3
+#eCount_c2 <- (mean(singNM$ARFR.Seedling.Count) + mean(sing294$ARFR.Seedling.Count) 
+#         + mean(sing316Jeff$ARFR.Seedling.Count))/3
+#eCount_c3 <- (mean(singUT$ARFR.Seedling.Count) + mean(sing314Jeff$ARFR.Seedling.Count) 
+#         + mean(sing294$ARFR.Seedling.Count))/3
+#eCount_c4 <- (mean(sing294$ARFR.Seedling.Count) + mean(sing314Jeff$ARFR.Seedling.Count) 
+#         + mean(sing316Jeff$ARFR.Seedling.Count))/3
+#eCount_c5 <- (mean(singLasAn$ARFR.Seedling.Count) + mean(sing294$ARFR.Seedling.Count) 
+#         + mean(sing316Jeff$ARFR.Seedling.Count))/3
+
+
+## Calculate 'expected' survival for each mix based on additive of components
+#eSurv_c1 <- (mean(singLasAn$Surv) + mean(sing314Jeff$Surv) 
+#              + mean(sing316Jeff$Surv))/3
+#eSurv_c2 <- (mean(singNM$Surv) + mean(sing294$Surv) 
+#              + mean(sing316Jeff$Surv))/3
+#eSurv_c3 <- (mean(singUT$Surv, na.rm=TRUE) + mean(sing314Jeff$Surv) 
+#              + mean(sing294$Surv))/3
+#eSurv_c4 <- (mean(sing294$Surv) + mean(sing314Jeff$Surv) 
+#              + mean(sing316Jeff$Surv))/3
+#eSurv_c5 <- (mean(singLasAn$Surv) + mean(sing294$Surv) 
+#              + mean(sing316Jeff$Surv))/3
+
+
+## Calculate 'expected' cover for each mix based on additive of components
+#eCovr_c1 <- (mean(singLasAn$ARFR.Percent.Cover) + mean(sing314Jeff$ARFR.Percent.Cover) 
+#             + mean(sing316Jeff$ARFR.Percent.Cover,na.rm=TRUE))/3
+#eCovr_c2 <- (mean(singNM$ARFR.Percent.Cover) + mean(sing294$ARFR.Percent.Cover) 
+#             + mean(sing316Jeff$ARFR.Percent.Cover,na.rm=TRUE))/3
+#eCovr_c3 <- (mean(singUT$ARFR.Percent.Cover, na.rm=TRUE) + mean(sing314Jeff$ARFR.Percent.Cover) 
+#             + mean(sing294$ARFR.Percent.Cover))/3
+#eCovr_c4 <- (mean(sing294$ARFR.Percent.Cover) + mean(sing314Jeff$ARFR.Percent.Cover) 
+#             + mean(sing316Jeff$ARFR.Percent.Cover,na.rm=TRUE))/3
+#eCovr_c5 <- (mean(singLasAn$ARFR.Percent.Cover) + mean(sing294$ARFR.Percent.Cover) 
+#             + mean(sing316Jeff$ARFR.Percent.Cover,na.rm=TRUE))/3
+
