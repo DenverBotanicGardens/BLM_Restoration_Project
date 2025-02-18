@@ -115,7 +115,7 @@ unique(dats$SeedMix)
 dats23 <- dats[grepl("2023", dats$Date),]
 dats23$Emrg <- dats23$ARFR.Seedling.Count/dats23$NumSeeds
   
-oxplot(ARFR.Seedling.Count ~ SeedMix + Site, data=dats23)
+boxplot(ARFR.Seedling.Count ~ SeedMix + Site, data=dats23)
 boxplot(ARFR.Seedling.Count/NumSeeds ~ SeedMix + Site, data=dats23)
 boxplot(ARFR.Seedling.Count/NumSeeds ~ SeedMix, data=dats23, ylim=c(0,0.19))
 boxplot(ARFR.Seedling.Count/NumSeeds ~ Site, data=dats23, ylim=c(0,0.19), ylab="Emergence Rate",
@@ -352,6 +352,9 @@ boxplot(ARFR.Percent.Cover ~ SeedMix, data=dats2406.PC, ylim=c(0,60), col=c("gre
         ylab="Percent A. frigida cover")
 boxplot(ARFR.Percent.Cover ~ SeedMix, data=dats2406.EP, ylim=c(0,10), col=c("grey40", "grey80", "plum4"), main="Site 2",
         ylab="Percent A. frigida cover")
+boxplot(ARFR.Percent.Cover ~ SeedMix, data=dats2406, ylim=c(0,60), col=c("grey40", "grey80", "plum4"), main="Both sites",
+        ylab="Percent A. frigida cover")
+
 
  
  
@@ -483,6 +486,8 @@ boxplot(CombPerf ~ SeedMix, data=dats2409.EP, ylim=c(0,0.22),
         ylab="Combined performance", col=c("grey40", "grey80", "plum4"), main="Site 2")
 boxplot(CombPerf ~ Site, data=dats2409, ylim=c(0,6), 
         ylab="Combined performance", cex.lab=1.5)
+boxplot(CombPerf ~ SeedMix, data=dats2409, ylim=c(0,3), main="Both sites", 
+        ylab="Combined performance", cex.lab=1.5, col=c("grey40", "grey80", "plum4"))
 
 
 
@@ -501,6 +506,12 @@ for (ee in 1:length(unique(dats$Contents))) {
   lines(1:2, c(CombAvgs.PC$Comb_MN[ee],CombAvgs.EP$Comb_MN[ee]), col=CombAvgs.PC$MixCol[ee], pch=19, cex=1.5)
   
 }
+
+
+
+## ** MAKE COL WITH MIX TYPE AND BEST AT EACH SITE **
+## ** OR SUBSET DATA TO INCLUDE ONLY MIXES AND BEST SINGLE AT EACH SITE **
+## ** THEN PLOT EACH MIX CATEGORY AND BEST SINGLE AT EACH SITE, AND BEST SIGNLE AVGED ACROSS SITES **
 
 
 
