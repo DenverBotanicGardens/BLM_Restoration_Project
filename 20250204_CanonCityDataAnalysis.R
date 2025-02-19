@@ -355,6 +355,12 @@ boxplot(ARFR.Percent.Cover ~ SeedMix, data=dats2406.EP, ylim=c(0,10), col=c("gre
 boxplot(ARFR.Percent.Cover ~ SeedMix, data=dats2406, ylim=c(0,60), col=c("grey40", "grey80", "plum4"), main="Both sites",
         ylab="Percent A. frigida cover")
 
+modCovr.PC <- lm(ARFR.Percent.Cover ~ SeedMix, data=dats2406.PC)
+summary(modCovr.PC)
+modCovr.EP <- lm(ARFR.Percent.Cover ~ SeedMix, data=dats2406.EP)
+summary(modCovr.EP)
+modCovr <- lm(ARFR.Percent.Cover ~ SeedMix, data=dats2406)
+summary(modCovr)
 
  
  
