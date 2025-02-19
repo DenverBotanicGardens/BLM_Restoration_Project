@@ -512,6 +512,43 @@ for (ee in 1:length(unique(dats$Contents))) {
 ## ** MAKE COL WITH MIX TYPE AND BEST AT EACH SITE **
 ## ** OR SUBSET DATA TO INCLUDE ONLY MIXES AND BEST SINGLE AT EACH SITE **
 ## ** THEN PLOT EACH MIX CATEGORY AND BEST SINGLE AT EACH SITE, AND BEST SIGNLE AVGED ACROSS SITES **
+Comb_subset <- filter(dats2409, Contents=="mix_c1" | Contents=="mix_c2" | Contents=="mix_c3" | Contents=="mix_c4" | Contents=="mix_c5" |
+                                Contents=="mix_b1" | Contents=="mix_b2" | Contents=="mix_b3" | Contents=="mix_b4" | Contents=="mix_b5" |
+                                Contents=="single_314Jeff" | Contents=="single_294" )
+Comb_subset.PC <- filter(dats2409.PC, Contents=="mix_c1" | Contents=="mix_c2" | Contents=="mix_c3" | Contents=="mix_c4" | Contents=="mix_c5" |
+                        Contents=="mix_b1" | Contents=="mix_b2" | Contents=="mix_b3" | Contents=="mix_b4" | Contents=="mix_b5" |
+                        Contents=="single_314Jeff" | Contents=="single_294" )
+Comb_subset.EP <- filter(dats2409.EP, Contents=="mix_c1" | Contents=="mix_c2" | Contents=="mix_c3" | Contents=="mix_c4" | Contents=="mix_c5" |
+                        Contents=="mix_b1" | Contents=="mix_b2" | Contents=="mix_b3" | Contents=="mix_b4" | Contents=="mix_b5" |
+                        Contents=="single_314Jeff" | Contents=="single_294" )
+
+
+Comb_subset$Type[grepl("mix_b", Comb_subset$Contents)] <- "Mix_B"  #Broad mixes
+Comb_subset$Type[grepl("mix_c", Comb_subset$Contents)] <- "Mix_C"  #Close mixes
+Comb_subset$Type[grepl("single_314Jeff", Comb_subset$Contents)] <- "Single_314Jeff" 
+Comb_subset$Type[grepl("single_294", Comb_subset$Contents)] <- "Single_294"  
+
+Comb_subset.PC$Type[grepl("mix_b", Comb_subset.PC$Contents)] <- "Mix_B"  #Broad mixes
+Comb_subset.PC$Type[grepl("mix_c", Comb_subset.PC$Contents)] <- "Mix_C"  #Close mixes
+Comb_subset.PC$Type[grepl("single_314Jeff", Comb_subset.PC$Contents)] <- "Single_314Jeff" 
+Comb_subset.PC$Type[grepl("single_294", Comb_subset.PC$Contents)] <- "Single_294"  
+
+Comb_subset.EP$Type[grepl("mix_b", Comb_subset.EP$Contents)] <- "Mix_B"  #Broad mixes
+Comb_subset.EP$Type[grepl("mix_c", Comb_subset.EP$Contents)] <- "Mix_C"  #Close mixes
+Comb_subset.EP$Type[grepl("single_314Jeff", Comb_subset.EP$Contents)] <- "Single_314Jeff" 
+Comb_subset.EP$Type[grepl("single_294", Comb_subset.EP$Contents)] <- "Single_294"  
+
+
+
+boxplot(CombPerf ~ Type, data=Comb_subset, ylim=c(0,3), main="Both sites", 
+        ylab="Combined performance", cex.lab=1.5, col=c("grey40", "grey80", "plum4", "plum4"))
+boxplot(CombPerf ~ Type, data=Comb_subset.PC, ylim=c(0,4), main="Site 1", 
+        ylab="Combined performance", cex.lab=1.5, col=c("grey40", "grey80", "plum4", "plum4"))
+boxplot(CombPerf ~ Type, data=Comb_subset.EP, ylim=c(0,0.13), main="Site 2", 
+        ylab="Combined performance", cex.lab=1.5, col=c("grey40", "grey80", "plum4", "plum4"))
+## ------------
+
+
 
 
 
