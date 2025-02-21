@@ -121,11 +121,18 @@ boxplot(ARFR.Seedling.Count/NumSeeds ~ SeedMix, data=dats23, ylim=c(0,0.19))
 boxplot(ARFR.Seedling.Count/NumSeeds ~ Site, data=dats23, ylim=c(0,0.19), ylab="Emergence Rate",
         cex.lab=1.5)
 
+Emrg_subset <- filter(dats23, SeedMix!="Single")
+boxplot(Emrg ~ SeedMix, data=Emrg_subset, ylim=c(0,0.14), col=c("grey40", "grey80"), main="Both sites", 
+        ylab="Emergence Rate", xlab=NA)
+
+
 ## Plot emergence rate by site separately
 ## Plot all data points as well as boxes? 
 dats23.PC <- dats23[dats23$Site=="PC",]
 dats23.EP <- dats23[dats23$Site=="EP",]
 
+boxplot(Emrg ~ SeedMix, data=dats23, ylim=c(0,0.16), col=c("grey40", "grey80", "plum4"), main="Both sites", 
+        ylab="Emergence Rate", xlab=NA)
 boxplot(Emrg ~ SeedMix, data=dats23.PC, ylim=c(0,0.16), col=c("grey40", "grey80", "plum4"), main="Site 1")
 boxplot(Emrg ~ SeedMix, data=dats23.EP, ylim=c(0,0.1), col=c("grey40", "grey80", "plum4"), main="Site 2")
 
@@ -195,6 +202,12 @@ plot(dats23$ARFR.Seedling.Count, dats2406$ARFR.Seedling.Count)
 dats23temp <- dats23
 dats23temp$ARFR.Seedling.Count[dats23temp$ARFR.Seedling.Count==0] <- NA
 dats2406$Surv <- dats2406$ARFR.Seedling.Count/dats23temp$ARFR.Seedling.Count
+
+
+Surv_subset <- filter(dats2406, SeedMix!="Single")
+boxplot(Surv ~ SeedMix, data=Surv_subset, ylim=c(0,1.2), col=c("grey40", "grey80"), main="Both sites", 
+        ylab="Survival Rate", xlab=NA)
+
 
 ## Plot survival by site separately
 dats2406.PC <- dats2406[dats2406$Site=="PC",]
@@ -330,6 +343,9 @@ boxplot(ARFR.Percent.Cover ~ Contents, data=dats2406.PC, col=cols, ylim=c(0,56),
 boxplot(ARFR.Percent.Cover ~ Contents, data=dats2406.EP, col=cols, ylim=c(0,20), cex.main=1.5,
         main="Site 2", ylab="Percent A. frigida cover/plot", xlab=NA, cex.lab=1.5, las=2) 
 
+boxplot(ARFR.Percent.Cover ~ SeedMix, data=Surv_subset, ylim=c(0,55), col=c("grey40", "grey80"), main="Both sites", 
+        ylab="Percent Cover", xlab=NA)
+
 
 CovrAvgs.PC <- dats2406.PC %>% group_by(Contents) %>% 
   dplyr::summarise(Covr_MD=median(ARFR.Percent.Cover,na.rm=TRUE),
@@ -391,6 +407,10 @@ dats2409 <- dats24[dats24$Date=="9/18/2024 18:00",]
 dats2409$ARFR.Reproductive.Percent.Cover[dats2409$ARFR.Seedling.Count==0] <- NA
 
 plot(dats2406$ARFR.Percent.Cover,dats2409$ARFR.Reproductive.Percent.Cover) #How correlated are veg and repro cover?
+
+Repro_subset <- filter(dats2409, SeedMix!="Single")
+boxplot(ARFR.Reproductive.Percent.Cover ~ SeedMix, data=Repro_subset, ylim=c(0,80), col=c("grey40", "grey80"), 
+        main="Both sites", ylab="Reproductive Cover", xlab=NA)
 
 
 ## Make combined performance measure
