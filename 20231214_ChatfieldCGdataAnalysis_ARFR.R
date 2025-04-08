@@ -12,7 +12,7 @@ rm(list=ls())
 #library(Hmisc)
 library(dplyr)
 library(stringr)
-library(tidyr)
+#library(tidyr)
 library(lme4)
 library(plotrix)
 library(EnvStats)
@@ -44,6 +44,8 @@ ARFR24 <- read.csv(file="Chatfield/2024_data/20241219_ChatfieldData2024_ARFR.csv
 
 ARFR.SdZn <- read.csv(file="AGoebl/Seeds/20231212_ARFR_LatLong_hexcodes.csv", sep=",", header=TRUE, dec=".")
 ARFR.biovar <- readRDS("AGoebl/Seeds/20230814_ARFR_BiovarsAvg1980_2021")
+
+## ** modify and then load ARFR 2024 field data, from survey123 **
 ## ----------------------------------------------------------------------------------------------
 
 
@@ -70,37 +72,69 @@ ARFR22.cl$Length_cm_20220527[!is.na(ARFR22.cl$Length_cm_20220527) & ARFR22.cl$Re
 
 #If not replaced, but died before planting, don't use subsequent surv data
 #ARFR22.cl[!is.na(ARFR22.cl$DateMortalityObservedPreTransplant),] #All plts that died before planting were replaced
-## ** Are other checks/ edits needed to address replacements? **
+
+## Add other checks/ edits to address replacements if needed 
 
 
 ## Checks 
 #Were some plts dead that were selected to be harvested? Current datasheet only has "Harvest" marked for plts there were alive
 ARFR22.coll <- ARFR22.cl[!is.na(ARFR22.cl$Harvest_20221014) | !is.na(ARFR22.cl$Harvest_20221110),]
-ARFR22.coll[is.na(ARFR22.coll$AGB_MinusBag),] #Two harvested plts do not have final AGB: 1107 and 1274. **Look in lab
+ARFR22.coll[is.na(ARFR22.coll$AGB_MinusBag),] #Two harvested plts do not have final AGB: 1107 (alive?) and 1274 (dead?)
 ARFR22.MissinfBM <- ARFR22.coll[is.na(ARFR22.coll$InfBM_Wobag_g),]
-ARFR22.MissinfBM$ID[ARFR22.MissinfBM$Phenology_20220922==3] #Looks for these plts and get inf weights
+ARFR22.MissinfBM$ID[ARFR22.MissinfBM$Phenology_20220922==3] #All except 1107 includedf in 2024 datasheet
 
-## ** Add checks to 2024 data where repro BM re-weighed **
+#Checks to 2024 re-weighing of 2022 repro BM data
+colnames(ARFR24)
+ARFR.coll <- ARFR24[!is.na(ARFR24$Harvested_AGB),]
+ARFR.infBM <- ARFR24[!is.na(ARFR24$InfBM2022_Wobag_g),]
+ARFR.infBMnewH <- ARFR24[!is.na(ARFR24$InfBM2022smpls_HEADS_2024weigh),]
+#Check samples w info in 2022 inf weight column that lack data in 2024 chaff/head columns
+ARFR.infCheck <- ARFR24[!is.na(ARFR24$InfBM2022_Wobag_g) & is.na(ARFR24$InfBM2022smpls_HEADS_2024weigh),]
+#Most have small weights in 2022 column, so maybe tissue not saved. However, ID 524 and 908 are larger. Should these be re-weighed?
+# Check all these IDs for flowering: 524, 885, 908, 1853, 1918, 1950
+ARFR22.cl$Phenology_20220922[ARFR22.cl$ID==524] #Yes, keep this inf BM data
+ARFR22.cl$Phenology_20220922[ARFR22.cl$ID==885] #Yes, keep this inf BM data
+ARFR22.cl$Phenology_20220922[ARFR22.cl$ID==908] #Yes, keep this inf BM data
+ARFR22.cl$Phenology_20220922[ARFR22.cl$ID==1853] #No, don't include inf BM data
+ARFR22.cl$Phenology_20220909[ARFR22.cl$ID==1853] 
+ARFR22.cl$Phenology_20220922[ARFR22.cl$ID==1918] #No, don't include inf BM data
+ARFR22.cl$Phenology_20220909[ARFR22.cl$ID==1918] 
+ARFR22.cl$Phenology_20220922[ARFR22.cl$ID==1950] #No, don't include inf BM data
+ARFR22.cl$Phenology_20220909[ARFR22.cl$ID==1950] 
+
+length(ARFR24$InfBM2022_Wobag_g[!is.na(ARFR24$InfBM2022_Wobag_g)])
+ARFR24$InfBM2022smpls_HEADS_2024weigh[!is.na(ARFR24$InfBM2022smpls_HEADS_2024weigh)]
+ARFR24$InfBM2022smpls_CHAFF_2024weigh[!is.na(ARFR24$InfBM2022smpls_CHAFF_2024weigh)]
+length(ARFR24$InfBM2022smpls_HEADS_2024weigh[!is.na(ARFR24$InfBM2022smpls_HEADS_2024weigh)])
+length(ARFR24$InfBM2022smpls_CHAFF_2024weigh[!is.na(ARFR24$InfBM2022smpls_CHAFF_2024weigh)]) #~10 samples had chaff combined w flwr heads for weighing
+hist(ARFR24$InfBM2022smpls_HEADS_2024weigh)
+hist(ARFR24$InfBM2022smpls_CHAFF_2024weigh)
+str(ARFR24$InfBM2022smpls_HEADS_2024weigh)
+str(ARFR24$InfBM2022smpls_CHAFF_2024weigh)
 
 
 ## Check that surv is only 1, 0 and maybe NA
 ARFR22.cl[ARFR22.cl$Survival_20220622 < 0 | ARFR22.cl$Survival_20220622 > 1,]
-ARFR23[(ARFR23$Survival_20230927 < 0 | ARFR23$Survival_20230927 > 1) & !is.na(ARFR23$Survival_20230927),] #Don't use 2023 surv data w/o 2024 data to corroberate 
+ARFR23[(ARFR23$Survival_20230927 < 0 | ARFR23$Survival_20230927 > 1) & !is.na(ARFR23$Survival_20230927),] #Don't use 2023 surv data w/o 2024 data to corroborate 
 ARFR23[(ARFR23$Survival_20230615 < 0 | ARFR23$Survival_20230615 > 1) & !is.na(ARFR23$Survival_20230615),]
 ## ** Add checks to 2024 surv **
 
-## Check that pheno, surv, numInf are only integers
+
+## Check that pheno, surv are only integers
 ARFR22.cl[ARFR22.cl$Survival_20220622 - floor(ARFR22.cl$Survival_20220622) != 0,]
 ARFR22.cl[ARFR22.cl$Survival_20220922 - floor(ARFR22.cl$Survival_20220922) != 0,]
 ARFR22.cl[ARFR22.cl$Phenology_20220715 - floor(ARFR22.cl$Phenology_20220715) != 0 & !is.na(ARFR22.cl$Phenology_20220715),]
+ARFR23[ARFR23$Survival_20230615 - floor(ARFR23$Survival_20230615) != 0,]
+ARFR23[ARFR23$Survival_20230927 - floor(ARFR23$Survival_20230927) != 0 & !is.na(ARFR23$Survival_20230927),]
 
-## Check that length is only numeric
+
+## Check that length and other relevant traits are only numeric
 ARFR22.cl[!is.numeric(ARFR22.cl$Length_cm_20220527),]
 ARFR22.cl[!is.numeric(ARFR22.cl$Length_cm_20220622),]
 ARFR22.cl[!is.numeric(ARFR22.cl$Length_cm_20220726),]
 ARFR23[!is.numeric(ARFR23$Height_20230927),]
 ARFR24[!is.numeric(ARFR24$SLA_mm2permg),]
-ARFR24[!is.numeric(ARFR24$InfBM2022smples_HEADS_2024weigh),]
+ARFR24[!is.numeric(ARFR24$InfBM2022smples_HEADS_2024weigh) & !is.na(ARFR24$InfBM2022smples_HEADS_2024weigh),]
 ARFR24[!is.numeric(ARFR24$InfBM2022smpls_CHAFF_2024weigh),]
 
 
@@ -108,6 +142,9 @@ ARFR24[!is.numeric(ARFR24$InfBM2022smpls_CHAFF_2024weigh),]
 ARFR22.cl$Length_cm_20220527[ARFR22.cl$OrigPltSurvival_20220527==0 & !is.na(ARFR22.cl$Length_cm_20220527)]
 ARFR22.cl$Length_cm_20220622[ARFR22.cl$Survival_20220622==0 & !is.na(ARFR22.cl$Length_cm_20220622)]
 ARFR22.cl$Length_cm_20220726[ARFR22.cl$Survival_20220726==0 & !is.na(ARFR22.cl$Length_cm_20220726)]
+ARFR22.cl$Length_cm_20220726[ARFR22.cl$Survival_20220726==0 & !is.na(ARFR22.cl$Length_cm_20220726)]
+ARFR23$Height_20230927[ARFR23$Survival_20230927==0 & !is.na(ARFR23$Height_20230927)]
+
 
 #If plt alive and >0 was not entered in height col, enter NA (not 0)
 ARFR22.cl$Length_cm_20220527[ARFR22.cl$OrigPltSurvival_20220527==1 & !is.na(ARFR22.cl$Length_cm_20220527) & ARFR22.cl$Length_cm_20220527==0]
@@ -115,48 +152,40 @@ ARFR22.cl$Length_cm_20220622[ARFR22.cl$Survival_20220622==1 & !is.na(ARFR22.cl$L
 ARFR22.cl$Length_cm_20220622[ARFR22.cl$Survival_20220622==1 & !is.na(ARFR22.cl$Length_cm_20220622) & ARFR22.cl$Length_cm_20220622==0] <- NA
 ARFR22.cl[ARFR22.cl$Survival_20220622==1 & !is.na(ARFR22.cl$Length_cm_20220622) & ARFR22.cl$Length_cm_20220622==0,]
 ARFR22.cl$Length_cm_20220726[ARFR22.cl$Survival_20220726==1 & !is.na(ARFR22.cl$Length_cm_20220726) & ARFR22.cl$Length_cm_20220726==0]
-ARFR23$Height_20220927[ARFR23$Survival_20220927==1 & !is.na(ARFR23$Length_cm_20220927) & ARFR23$Height_20220927==0]
+ARFR23$Height_20230927[ARFR23$Survival_20230927==1 & !is.na(ARFR23$Height_20230927) & ARFR23$Height_20230927==0]
 
 
-## *** Need to work on this ****
-#Check that once zero in surv on 6/22 or later, stays zero (if becomes 1 later, could be data entry error)
-#Or to start, just look at all rows with inconsistent survival data. Then either mark as Remove or correct error if obvious
+#Check that once surv=0, future surv stays zero (if becomes 1 later, could be data entry error)
+#To start, could look at all rows with inconsistent survival data. Then either mark as Remove or correct error if obvious
 ## CONSOLIDATE SURVIVAL DATA
 ARFR22.surv <- ARFR22.cl %>% dplyr::select(c(starts_with("Survival_")))
-#for (rr in 1:nrow(ARFR.Surv)) {
-#  for (cc in 1:(ncol(ARFR.Surv)-1)) {
-#    if(ARFR.Surv[rr,cc]==0 & ARFR.Surv[rr,cc+1]==1) {
-#     ARFR.Surv$Check[rr] <- "Y"
-#    }
-#  }
-#}
-#ARFR.Surv %>% filter_all(any_vars(.==0))
-#ARFR.cl %>% filter_all(starts_with("Survival_")==0)
+ARFR23.surv <- ARFR23 %>% dplyr::select(c(starts_with("Survival_")))
 
-## ** Combine into one mutate statement with just one check col ** 
-ARFR22.surv <- ARFR22.surv %>% mutate(Check = ifelse(Survival_20220715 - Survival_20220622 <= 0, "", "Remove?"))
-ARFR22.surv[ARFR22.surv$Check=="Remove?",]
+#Check for survival data inconsistencies
+ARFR22.surv <- ARFR22.surv %>% mutate(Check1 = ifelse(Survival_20220715 - Survival_20220622 <= 0, "", "Remove?"),
+                                      Check2 = ifelse(Survival_20220721 - Survival_20220715 <= 0, "", "Remove?"),
+                                      Check3 = ifelse(Survival_20220726 - Survival_20220721 <= 0, "", "Remove?"),
+                                      Check4 = ifelse(Survival_20220804 - Survival_20220726 <= 0, "", "Remove?"),
+                                      Check5 = ifelse(Survival_20220817 - Survival_20220804 <= 0, "", "Remove?"),
+                                      Check6 = ifelse(Survival_20220830 - Survival_20220817 <= 0, "", "Remove?"),
+                                      Check7 = ifelse(Survival_20220909 - Survival_20220830 <= 0, "", "Remove?"),
+                                      Check8 = ifelse(Survival_20220922 - Survival_20220909 <= 0, "", "Remove?"))
+ARFR22.surv[ARFR22.surv$Check1=="Remove?",]
+## ** Combine check columns into 1 and add that to main datasheet **
 
-ARFR22.surv <- ARFR22.surv %>% mutate(Check2 = ifelse(Survival_20220721 - Survival_20220715 <= 0, "", "Remove?"))
-ARFR22.surv[ARFR22.surv$Check2=="Remove?",]
-
-ARFR22.surv <- ARFR22.surv %>% mutate(Check3 = ifelse(Survival_20220726 - Survival_20220721 <= 0, "", "Remove?"))
-ARFR22.surv[ARFR22.surv$Check3=="Remove?",]
-
-ARFR22.surv <- ARFR22.surv %>% mutate(Check4 = ifelse(Survival_20220804 - Survival_20220726 <= 0, "", "Remove?"))
-ARFR22.surv[ARFR22.surv$Check2=="Remove?",]
-
-ARFR22.surv <- ARFR22.surv %>% mutate(Check5 = ifelse(Survival_20220817 - Survival_20220804 <= 0, "", "Remove?"))
-ARFR22.surv[ARFR22.surv$Check5=="Remove?",]
-
-ARFR22.surv <- ARFR22.surv %>% mutate(Check6 = ifelse(Survival_20220830 - Survival_20220817 <= 0, "", "Remove?"))
-ARFR22.surv[ARFR22.surv$Check6=="Remove?",]
-
-ARFR22.surv <- ARFR22.surv %>% mutate(Check7 = ifelse(Survival_20220909 - Survival_20220830 <= 0, "", "Remove?"))
-ARFR22.surv[ARFR22.surv$Check7=="Remove?",]
-
-ARFR22.surv <- ARFR22.surv %>% mutate(Check8 = ifelse(Survival_20220922 - Survival_20220909 <= 0, "", "Remove?"))
-ARFR22.surv[ARFR22.surv$Check8=="Remove?",]
+ARFR23.surv <- ARFR23.surv %>% mutate(Check1 = ifelse(Survival_20230620 - Survival_20230615 <= 0, "", "Remove?"),
+                                      Check2 = ifelse(Survival_20230629 - Survival_20230620 <= 0, "", "Remove?"),
+                                      Check3 = ifelse(Survival_20230705 - Survival_20230629 <= 0, "", "Remove?"),
+                                      Check4 = ifelse(Survival_20230728 - Survival_20230705 <= 0, "", "Remove?"),
+                                      Check5 = ifelse(Survival_20230801 - Survival_20230728 <= 0, "", "Remove?"),
+                                      Check6 = ifelse(Survival_20230927 - Survival_20230801 <= 0, "", "Remove?"))
+ARFR23.surv[ARFR23.surv$Check1=="Remove?",]
+ARFR23.surv[ARFR23.surv$Check2=="Remove?",]
+ARFR23.surv[ARFR23.surv$Check3=="Remove?",]
+ARFR23.surv[ARFR23.surv$Check4=="Remove?",]
+ARFR23.surv[ARFR23.surv$Check5=="Remove?",]
+ARFR23.surv[ARFR23.surv$Check6=="Remove?",]
+## Address NAs in surv data from 927, could remove this survey, or just treat NAs appropriately **
 ## ----------------------------------------------------------------------------------------------
 
 
@@ -188,13 +217,23 @@ colnames(ARFR.biovar) <- c("Pop","bio1","bio2","bio3","bio4","bio5","bio6","bio7
                            "bio17","bio18","bio19","Source")
 
 ## Add colour columns that corresponds to pop or seed zone
-#SdZn.list <- unique(ARFR.SdZn$SdZone) #If coloring by seed zone, change to match BOGR
-#ARFR.SdZn$SdZnCol[grepl("5 - 10 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "powderblue"        #semi-humid, cold
-#ARFR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "darkseagreen"     #semi-humid, cool
-#ARFR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "darkseagreen4"    #semi-humid, warm
-#ARFR.SdZn$SdZnCol[grepl("5 - 10 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "darkgoldenrod1"   #semi-arid, cold
-#ARFR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "orange3"         #semi-arid, cool
-#ARFR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "tomato2"         #semi-arid, warm
+#SdZn.list <- unique(ARFR.SdZn$SdZone) #If coloring by seed zone, make distinct from lat/ unique pop colors**
+ARFR.SdZn$SdZnCol[grepl("5 - 10 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "powderblue"        #semi-humid, cold
+ARFR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "darkseagreen"     #semi-humid, cool
+ARFR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "darkseagreen4"    #semi-humid, warm
+ARFR.SdZn$SdZnCol[grepl("5 - 10 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "darkgoldenrod1"   #semi-arid, cold
+ARFR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "orange3"         #semi-arid, cool
+ARFR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "tomato2"         #semi-arid, warm
+
+## Add seed zone name abbreviation column
+#ARFR.SdZn$SdZnAbbrev[grepl("5 - 10 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "semi-humid, cold"
+#ARFR.SdZn$SdZnAbbrev[grepl("10 - 15 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "semi-humid, cool"
+#ARFR.SdZn$SdZnAbbrev[grepl("15 - 20 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "semi-humid, warm"
+#ARFR.SdZn$SdZnAbbrev[grepl("5 - 10 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "semi-arid, cold"
+#ARFR.SdZn$SdZnAbbrev[grepl("10 - 15 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "semi-arid, cool"
+#ARFR.SdZn$SdZnAbbrev[grepl("15 - 20 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "semi-arid, warm"
+
+
 
 ## Color by latitude (based on Alyson's map and SNP PCA colors)
 pop.list <- unique(ARFR.SdZn$Source)
@@ -246,40 +285,30 @@ ARFR24 <- left_join(ARFR24, ARFR.biovar, by="Source")
 #ARFR22.cl$GrwthRate_Absolute <- ARFR22.cl$Length_cm_20220726-ARFR22.cl$Length_cm_20220622
 ARFR22.cl$GrwthRate_Relative <- (ARFR22.cl$Length_cm_20220726-ARFR22.cl$Length_cm_20220622)/ARFR22.cl$Length_cm_20220622
 
-## ** Look at early vs late growth if can use pre-replacement early height measurement 20220527 ** 
+## Could look at early vs late growth if can use pre-replacement early height measurement 20220527
 ## ---------------------------------------------------------------
 
 
 
-## LOOK AT REPRO BM DATA 
-## Add any mods? 
-ARFR22.cl$InfBM_Wobag_g
-ARFR22.cl$InfBM_Wobag_g[!is.na(ARFR22.cl$InfBM_Wobag_g)] #Number of plts with repro data
-length(ARFR22.cl$InfBM_Wobag_g[!is.na(ARFR22.cl$InfBM_Wobag_g)])
-length(ARFR22.cl$InfBM_Wbag[!is.na(ARFR22.cl$InfBM_Wbag)])
-hist(ARFR22.cl$InfBM_Wobag_g)
-str(ARFR22.cl$InfBM_Wobag_g)
+## COMBINE AND ADD REPRO BM DATA ---------------------------------
+#ARFR22.cl$InfBM_Wobag_g
+#ARFR22.cl$InfBM_Wobag_g[!is.na(ARFR22.cl$InfBM_Wobag_g)] #Number of plts with repro data
+#length(ARFR22.cl$InfBM_Wobag_g[!is.na(ARFR22.cl$InfBM_Wobag_g)])
+#length(ARFR22.cl$InfBM_Wbag[!is.na(ARFR22.cl$InfBM_Wbag)])
+#hist(ARFR22.cl$InfBM_Wobag_g)
+#str(ARFR22.cl$InfBM_Wobag_g)
 
-length(ARFR24$InfBM2022_Wobag_g[!is.na(ARFR24$InfBM2022_Wobag_g)])
-ARFR24$InfBM2022smpls_HEADS_2024weigh[!is.na(ARFR24$InfBM2022smpls_HEADS_2024weigh)]
-ARFR24$InfBM2022smpls_CHAFF_2024weigh[!is.na(ARFR24$InfBM2022smpls_CHAFF_2024weigh)]
-length(ARFR24$InfBM2022smpls_HEADS_2024weigh[!is.na(ARFR24$InfBM2022smpls_HEADS_2024weigh)])
-length(ARFR24$InfBM2022smpls_CHAFF_2024weigh[!is.na(ARFR24$InfBM2022smpls_CHAFF_2024weigh)]) #~10 samples had chaff combined w flwr heads for weighing
-hist(ARFR24$InfBM2022smpls_HEADS_2024weigh)
-hist(ARFR24$InfBM2022smpls_CHAFF_2024weigh)
-str(ARFR24$InfBM2022smpls_HEADS_2024weigh)
-str(ARFR24$InfBM2022smpls_CHAFF_2024weigh)
-
-
-## Combine flwr head and chaff/seed weights
+## Combine flwr head and chaff/seed weights + any missed smpls from initial 2022 weights
 ARFR24$InfBM2022smpls_CHAFF_2024weigh[!is.na(ARFR24$InfBM2022smpls_HEADS_2024weigh) & is.na(ARFR24$InfBM2022smpls_CHAFF_2024weigh)] <- 0
-ARFR24$InfBM2022smpls_2024reweigh <- ARFR24$InfBM2022smpls_HEADS_2024weigh + ARFR24$InfBM2022smpls_CHAFF_2024weigh
-length(ARFR24$InfBM2022smpls_2024reweigh[!is.na(ARFR24$InfBM2022smpls_2024reweigh)])
+length(ARFR24$InfBM2022smpls_CHAFF_2024weigh[!is.na(ARFR24$InfBM2022smpls_CHAFF_2024weigh)]) 
+ARFR24$InfBM2022_2024updated <- ARFR24$InfBM2022smpls_HEADS_2024weigh + ARFR24$InfBM2022smpls_CHAFF_2024weigh
+length(ARFR24$InfBM2022_2024updated[!is.na(ARFR24$InfBM2022_2024updated)])
+## ** add several indivs from 2022 col **
 ## ---------------------------------------------------------------
 
 
 
-## COULD ADD AGB VARIABLES AS WELL? *
+## COULD ADD AGB VARIABLES AS WELL? 
 ## For now, I think height is better since more data and correlated to AGB
 length(ARFR22.cl$AGB_MinusBag[!is.na(ARFR22.cl$AGB_MinusBag)])
 length(ARFR24$AGB2022_MinusBag[!is.na(ARFR24$AGB2022_MinusBag)])
@@ -293,7 +322,7 @@ nrow(ARFR23[!is.na(ARFR23$Height_20230927>0),])
 
 
 ## ** When looking at Surv, used exclude Suv col in 2023 to clean entries **
-
+## Use tablet survey data from 2024 **
 
 
 ## COMBINE RELEVANT 2022, 2023, 2024 DATA
@@ -306,7 +335,9 @@ ARFR.cl$Source <- as.factor(ARFR.cl$Source)
 ## ---------------------------------------------------------------
 
 
-## ** Do something similar for ARFR? **
+
+
+## Do something similar for ARFR if needed ----------------------------------------------------------
 ## MAKE FILE WITH JUST COLUMNS/ PHENOTYPES OF INTEREST FOR ANALYSIS WITH GENOTYPE DATA --------------
 #ERNA.clSel <- ERNA.cl %>% dplyr::select(c("Source","ID","SentForSequencing_20230803","Length_cm_20220608",
 #                                          "Length_cm_20220719","Length_cm_20220915","DaysToFlwr","SLA_mm2permg",
@@ -452,4 +483,24 @@ legend("center", unique(ARFR.meds$Source[order(ARFR.meds$PopOrder, decreasing=TR
        col=unique(ARFR.meds$PopCol[order(ARFR.meds$PopOrder, decreasing=TRUE)]), cex=1.5, pch=19)
 ## ---------------------------------------------------
 
+
+
+
+
+## Trait PCA ----------------------------------------
+#ARFR.traits <- ARFR.cl %>% dplyr::select(c("Length_cm_20220726","Survival_20220922","Phenology_20220922",
+#                                           "AGB_MinusBag","InfBM_Wbag"))
+#covMat.traits <- cov(ARFR.traits, use="pairwise.complete.obs")
+#pca.results <- prcomp(covMat.traits)
+#cols <- viridis(5)
+#plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, col=cols, cex=1.2)
+#legend("topleft", colnames(ARFR.traits), col=cols, cex=0.75, pch=19)
+## ---------------------------------------------------
+
+
+
+
+
+
+## Plots source pops on a map and color by seed zone or other characteristics (e.g. PCA scores). 
 

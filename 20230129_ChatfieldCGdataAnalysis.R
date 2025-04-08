@@ -1619,3 +1619,35 @@ heatmap.2(BOGR.ht.pw.pvals, dendrogram="none", cexRow=0.7, cexCol=0.7)
 #fviz_pca_biplot(BOGR.pcaBiovar, col.ind=BOGR.biovar$SdZnColful, col.var="black", repel=TRUE,
 #                geom="point")
 #BOGR.cvH$TraitCol <- "blue3"
+
+
+## *** Need to work on this **** (move unused to ChatfieldCGdataAnalysis.R)
+#Or to start, just look at all rows with inconsistent survival data. Then either mark as Remove or correct error if obvious
+## CONSOLIDATE SURVIVAL DATA
+#ARFR22.surv <- ARFR22.cl %>% dplyr::select(c(starts_with("Survival_")))
+#for (rr in 1:nrow(ARFR.Surv)) {
+#  for (cc in 1:(ncol(ARFR.Surv)-1)) {
+#    if(ARFR.Surv[rr,cc]==0 & ARFR.Surv[rr,cc+1]==1) {
+#     ARFR.Surv$Check[rr] <- "Y"
+#    }
+#  }
+#}
+#ARFR.Surv %>% filter_all(any_vars(.==0))
+#ARFR.cl %>% filter_all(starts_with("Survival_")==0)
+
+#ARFR22.surv <- ARFR22.surv %>% mutate(Check = ifelse(Survival_20220715 - Survival_20220622 <= 0, "", "Remove?"))
+#ARFR22.surv[ARFR22.surv$Check=="Remove?",]
+#ARFR22.surv <- ARFR22.surv %>% mutate(Check2 = ifelse(Survival_20220721 - Survival_20220715 <= 0, "", "Remove?"))
+#ARFR22.surv[ARFR22.surv$Check2=="Remove?",]
+#ARFR22.surv <- ARFR22.surv %>% mutate(Check3 = ifelse(Survival_20220726 - Survival_20220721 <= 0, "", "Remove?"))
+#ARFR22.surv[ARFR22.surv$Check3=="Remove?",]
+#ARFR22.surv <- ARFR22.surv %>% mutate(Check4 = ifelse(Survival_20220804 - Survival_20220726 <= 0, "", "Remove?"))
+#ARFR22.surv[ARFR22.surv$Check2=="Remove?",]
+#ARFR22.surv <- ARFR22.surv %>% mutate(Check5 = ifelse(Survival_20220817 - Survival_20220804 <= 0, "", "Remove?"))
+#ARFR22.surv[ARFR22.surv$Check5=="Remove?",]
+#ARFR22.surv <- ARFR22.surv %>% mutate(Check6 = ifelse(Survival_20220830 - Survival_20220817 <= 0, "", "Remove?"))
+#ARFR22.surv[ARFR22.surv$Check6=="Remove?",]
+#ARFR22.surv <- ARFR22.surv %>% mutate(Check7 = ifelse(Survival_20220909 - Survival_20220830 <= 0, "", "Remove?"))
+#ARFR22.surv[ARFR22.surv$Check7=="Remove?",]
+#ARFR22.surv <- ARFR22.surv %>% mutate(Check8 = ifelse(Survival_20220922 - Survival_20220909 <= 0, "", "Remove?"))
+#ARFR22.surv[ARFR22.surv$Check8=="Remove?",]
