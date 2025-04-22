@@ -81,7 +81,7 @@ ARFR22.cl$Length_cm_20220527[!is.na(ARFR22.cl$Length_cm_20220527) & ARFR22.cl$Re
 ARFR22.coll <- ARFR22.cl[!is.na(ARFR22.cl$Harvest_20221014) | !is.na(ARFR22.cl$Harvest_20221110),]
 ARFR22.coll[is.na(ARFR22.coll$AGB_MinusBag),] #Two harvested plts do not have final AGB: 1107 (alive?) and 1274 (dead?)
 ARFR22.MissinfBM <- ARFR22.coll[is.na(ARFR22.coll$InfBM_Wobag_g),]
-ARFR22.MissinfBM$ID[ARFR22.MissinfBM$Phenology_20220922==3] #All except 1107 includedf in 2024 datasheet
+ARFR22.MissinfBM$ID[ARFR22.MissinfBM$Phenology_20220922==3] #All except 1107 included in 2024 datasheet
 
 #Checks to 2024 re-weighing of 2022 repro BM data
 colnames(ARFR24)
@@ -185,7 +185,7 @@ ARFR23.surv[ARFR23.surv$Check3=="Remove?",]
 ARFR23.surv[ARFR23.surv$Check4=="Remove?",]
 ARFR23.surv[ARFR23.surv$Check5=="Remove?",]
 ARFR23.surv[ARFR23.surv$Check6=="Remove?",]
-## Address NAs in surv data from 927, could remove this survey, or just treat NAs appropriately **
+## Address NAs in surv data from 9/27, could remove this survey, or just treat NAs appropriately **
 ## ----------------------------------------------------------------------------------------------
 
 
