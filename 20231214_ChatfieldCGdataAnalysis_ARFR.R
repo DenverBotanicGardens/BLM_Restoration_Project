@@ -16,7 +16,7 @@ library(stringr)
 library(lme4)
 library(plotrix)
 library(EnvStats)
-library(car)
+#library(car)
 library(effects)
 library(reshape2)
 library(gplots)
@@ -24,6 +24,8 @@ library(tidyverse)
 library(AICcmodavg)
 #library(corrplot)
 library(PerformanceAnalytics)
+library(vcfR)
+#library(SNPRelate)
 calcSE <- function(x){sd(x, na.rm=TRUE)/sqrt(length(x))}
 ## ------------------------------------------------------------------------------------------------
 
@@ -41,11 +43,15 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 ARFR22 <- read.csv(file="Chatfield/2022_data/20230616_ChatfieldData2022_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
 ARFR23 <- read.csv(file="Chatfield/2023_data/20240301_ChatfieldData2023_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
 ARFR24 <- read.csv(file="Chatfield/2024_data/20241219_ChatfieldData2024_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
+ARFR24.surv <- read.csv(file="Chatfield/2024_data/CommonGarden/ARFR/20250321_ChatfieldCGsurveyData2024_ARFR_amgUpdates.csv", sep=",", header=TRUE, dec=".", na.strings="")
 
 ARFR.SdZn <- read.csv(file="AGoebl/Seeds/20231212_ARFR_LatLong_hexcodes.csv", sep=",", header=TRUE, dec=".")
 ARFR.biovar <- readRDS("AGoebl/Seeds/20230814_ARFR_BiovarsAvg1980_2021")
 
-## ** modify and then load ARFR 2024 field data, from survey123 **
+## ** load ARFR 2024 field data, from survey123 **
+
+## Load ARFR filtered vcf table 
+vcf_filt <- read.vcfR(file="DNA_Seq/AlysonEmery/AGartemisia_v5.recode.vcf")
 ## ----------------------------------------------------------------------------------------------
 
 
@@ -199,17 +205,17 @@ ARFR.SdZn$Source <- str_replace(ARFR.SdZn$SOURCE_CODE, "4-SOS", "")
 ARFR.biovar$Source <- str_replace(ARFR.biovar$Pop, "4-SOS", "")
 
 ## Add Population name abbreviation column. Within state should be ordered by increasing lat
-ARFR.SdZn$PopAbbrev[grepl("ARFR-AZ930-423-NAVAJO-18", ARFR.SdZn$Source)] = "A.AZ.1"   
-ARFR.SdZn$PopAbbrev[grepl("ARFR-AZ930-422-NAVAJO-18", ARFR.SdZn$Source)] = "A.AZ.2"    
-ARFR.SdZn$PopAbbrev[grepl("ARFR-NM930N-66-11", ARFR.SdZn$Source)] = "A.NM.1"   
-ARFR.SdZn$PopAbbrev[grepl("ARFR-WY930-44-LASANIMAS-13", ARFR.SdZn$Source)] = "A.CO.1"       
-ARFR.SdZn$PopAbbrev[grepl("ARFR-CO932-314-JEFFERSON-12", ARFR.SdZn$Source)] = "A.CO.2"  
-ARFR.SdZn$PopAbbrev[grepl("ARFR-CO932-316-JEFFERSON-12", ARFR.SdZn$Source)] = "A.CO.3"   
-ARFR.SdZn$PopAbbrev[grepl("ARFR-UT080-109-UINTAH-12", ARFR.SdZn$Source)] = "A.UT.1"    
-ARFR.SdZn$PopAbbrev[grepl("ARFR-CO932-294-11", ARFR.SdZn$Source)] = "A.CO.4"   
-ARFR.SdZn$PopAbbrev[grepl("ARFR-WY040-71-10", ARFR.SdZn$Source)] = "A.WY.1"       
-ARFR.SdZn$PopAbbrev[grepl("ARFR-WY050-151-FREMONT-16", ARFR.SdZn$Source)] = "A.WY.2" 
-ARFR.SdZn$PopAbbrev[grepl("ARFR-WY050-49-FREMONT-12", ARFR.SdZn$Source)] = "A.WY.3"  
+ARFR.SdZn$PopAbbrev[grepl("ARFR-AZ930-423-NAVAJO-18", ARFR.SdZn$Source)] = "AZ.1" #"A.AZ.1"   
+ARFR.SdZn$PopAbbrev[grepl("ARFR-AZ930-422-NAVAJO-18", ARFR.SdZn$Source)] = "AZ.2" #"A.AZ.2"    
+ARFR.SdZn$PopAbbrev[grepl("ARFR-NM930N-66-11", ARFR.SdZn$Source)] = "NM.1" #"A.NM.1"   
+ARFR.SdZn$PopAbbrev[grepl("ARFR-WY930-44-LASANIMAS-13", ARFR.SdZn$Source)] = "CO.1" #"A.CO.1"       
+ARFR.SdZn$PopAbbrev[grepl("ARFR-CO932-314-JEFFERSON-12", ARFR.SdZn$Source)] = "CO.2" #"A.CO.2"  
+ARFR.SdZn$PopAbbrev[grepl("ARFR-CO932-316-JEFFERSON-12", ARFR.SdZn$Source)] = "CO.3" #"A.CO.3"   
+ARFR.SdZn$PopAbbrev[grepl("ARFR-UT080-109-UINTAH-12", ARFR.SdZn$Source)] = "UT.1" #"A.UT.1"    
+ARFR.SdZn$PopAbbrev[grepl("ARFR-CO932-294-11", ARFR.SdZn$Source)] = "CO.4" #"A.CO.4"   
+ARFR.SdZn$PopAbbrev[grepl("ARFR-WY040-71-10", ARFR.SdZn$Source)] = "WY.1" #"A.WY.1"       
+ARFR.SdZn$PopAbbrev[grepl("ARFR-WY050-151-FREMONT-16", ARFR.SdZn$Source)] = "WY.2" #"A.WY.2" 
+ARFR.SdZn$PopAbbrev[grepl("ARFR-WY050-49-FREMONT-12", ARFR.SdZn$Source)] = "WY.3" #"A.WY.3"  
 
 ## Edit column names for biovariables
 colnames(ARFR.biovar) <- c("Pop","bio1","bio2","bio3","bio4","bio5","bio6","bio7","bio8",
@@ -502,5 +508,117 @@ legend("center", unique(ARFR.meds$Source[order(ARFR.meds$PopOrder, decreasing=TR
 
 
 
+
+### VCR table and PCA  --------------------------------------------------------------------------
+## Get list of sample names from filtered vcf table 
+genotype_mxFilt <- vcfR::extract.gt(vcf_filt, as.numeric=TRUE)
+indvNames <- as.data.frame(colnames(genotype_mxFilt))
+colnames(indvNames) <- "Sample"
+
+#make column with ID using string replace or something
+indvNames$Temp <- str_replace(indvNames$Sample, "ARFR_", "")
+indvNames$ID <- as.integer(str_replace(indvNames$Temp, "_sorted", ""))
+#join by ID to get source (pop ID)
+indvNames <- left_join(indvNames, ARFR24, by="ID")
+
+
+
+## TRY PRCOMP PCA FUNCTION 
+## Extract, then convert genotypes to allele counts (function suggested by chatGPT)
+#gts <- extract.gt(vcf_filt)
+#convert_gt_to_allele_counts <- function(gt_matrix) {
+#  apply(gt_matrix, 2, function(col) {
+#    sapply(col, function(gt) {
+#      #if (is.na(gt) || gt == "." || gt == "./.") return(NA)
+#      alleles <- unlist(strsplit(gt, "[|/]"))
+#      sum(as.numeric(alleles))
+#    })
+#  })
+#}
+
+#allele_counts <- convert_gt_to_allele_counts(gts)
+
+## Calculate covariance matrix (from old PCA GSD code)
+#gts <- t(gts) #Note: gts is 012 mx
+#covMat<- cov(gts, use="pairwise.complete.obs")
+#covMat<- cov(allele_counts, use="pairwise.complete.obs")
+
+## Run PCA
+#pca.results = prcomp(covMat) 
+#plot(x=pca.results$x[,1],y=pca.results$x[,2],pch=19) #, col=indvNames$ColPop)
+#plot(x=pca.results$x[,2],y=pca.results$x[,3],pch=19, col=indvNames$ColPop)
+#plot(x=pca.results$x[,3],y=pca.results$x[,4],pch=19, col=indvNames$ColPop)
+
+## Doesn't look right .... 
+
+## Scree plot
+#pca.results$sdev[1]**2/sum(pca.results$sdev**2)
+#barplot(pca.results$sdev[1:10]**2/sum(pca.results$sdev**2))
+
+
+
+
+
+## TRY PCADAPT
+library(pcadapt)
+path_to_vcf <- "DNA_Seq/AlysonEmery/AGartemisia_v5.recode.vcf"
+
+vcf_tbl <- read.pcadapt(path_to_vcf, type="vcf")                            #Read in data from vcf table
+x <- pcadapt(vcf_tbl, K=5)                                                  #Run PCAdapt 
+
+plot(x, option="screeplot")
+plot(x, option="scores", pop=indvNames$Source)
+
+
+
+## Extract PCA scores  
+## All samples
+xScores <- x$scores    
+dfScores <- as.data.frame(xScores[,1:4])                    #Isolate scores for all or select PCs
+colnames(dfScores) <- c("PC1score","PC2score","PC3score","PC4score")
+dfScores$Sample <- indvNames$Sample               
+dfScores$Source <- indvNames$Source                          #Add a column with pop ID
+popNames <- unique(indvNames$PopID)
+
+
+## Calculate mean PC1 values for each population
+PC1.mean <- dfScores %>% group_by(Source) %>% summarise(PC1mean = mean(PC1score), n=n())
+
+## ** Look into what 'NA' is can clean up ****
+PC1.mean <- PC1.mean[1:11,]
+
+## Create color gradient and assign colors based on numeric continuous PC1 mean values
+
+colorAccording2(
+  x,
+  gradTy = "logGray",
+  nStartOmit = NULL,
+  nEndOmit = "sep",
+  revCol = FALSE,
+  alpha = 1,
+  silent = FALSE,
+  debug = FALSE,
+  callFrom = NULL
+)
+
+plot(1:11,PC1.mean$PC1mean,pch=16,cex=2,col=colorAccording2(PC1.mean$PC1mean))
+plot(PC1.mean$PC1mean, col=colorAccording2(PC1.mean$PC1mean), pch=19, cex=1.5)
+
+PC1.mean$HexCode <- colorAccording2(PC1.mean$PC1mean)
+col <- c("#00FF2EFF", "#00FFB9FF", "#FF008BFF", "#5D00FFFF", "#002EFFFF", "#FF0000FF", "#00B9FFFF")
+# Create the color ramp function (from AI)
+#color_function <- colorRampPalette(c("blue", "red"))
+# Generate colors for the data
+#PC1.mean$color <- color_function(PC1.mean$PC1mean)
+
+## --------------------------------------------------------------------------------------------
 ## Plots source pops on a map and color by seed zone or other characteristics (e.g. PCA scores). 
+
+
+
+
+
+
+
+
 
