@@ -48,7 +48,6 @@ ARFR24.surv <- read.csv(file="Chatfield/2024_data/CommonGarden/ARFR/20250321_Cha
 ARFR.SdZn <- read.csv(file="AGoebl/Seeds/20231212_ARFR_LatLong_hexcodes.csv", sep=",", header=TRUE, dec=".")
 ARFR.biovar <- readRDS("AGoebl/Seeds/20230814_ARFR_BiovarsAvg1980_2021")
 
-## ** load ARFR 2024 field data, from survey123 **
 
 ## Load ARFR filtered vcf table 
 vcf_filt <- read.vcfR(file="DNA_Seq/AlysonEmery/AGartemisia_v5.recode.vcf")
@@ -515,7 +514,7 @@ genotype_mxFilt <- vcfR::extract.gt(vcf_filt, as.numeric=TRUE)
 indvNames <- as.data.frame(colnames(genotype_mxFilt))
 colnames(indvNames) <- "Sample"
 
-#make column with ID using string replace or something
+#make column with ID using string replace 
 indvNames$Temp <- str_replace(indvNames$Sample, "ARFR_", "")
 indvNames$ID <- as.integer(str_replace(indvNames$Temp, "_sorted", ""))
 #join by ID to get source (pop ID)
@@ -523,43 +522,8 @@ indvNames <- left_join(indvNames, ARFR24, by="ID")
 
 
 
-## TRY PRCOMP PCA FUNCTION 
-## Extract, then convert genotypes to allele counts (function suggested by chatGPT)
-#gts <- extract.gt(vcf_filt)
-#convert_gt_to_allele_counts <- function(gt_matrix) {
-#  apply(gt_matrix, 2, function(col) {
-#    sapply(col, function(gt) {
-#      #if (is.na(gt) || gt == "." || gt == "./.") return(NA)
-#      alleles <- unlist(strsplit(gt, "[|/]"))
-#      sum(as.numeric(alleles))
-#    })
-#  })
-#}
 
-#allele_counts <- convert_gt_to_allele_counts(gts)
-
-## Calculate covariance matrix (from old PCA GSD code)
-#gts <- t(gts) #Note: gts is 012 mx
-#covMat<- cov(gts, use="pairwise.complete.obs")
-#covMat<- cov(allele_counts, use="pairwise.complete.obs")
-
-## Run PCA
-#pca.results = prcomp(covMat) 
-#plot(x=pca.results$x[,1],y=pca.results$x[,2],pch=19) #, col=indvNames$ColPop)
-#plot(x=pca.results$x[,2],y=pca.results$x[,3],pch=19, col=indvNames$ColPop)
-#plot(x=pca.results$x[,3],y=pca.results$x[,4],pch=19, col=indvNames$ColPop)
-
-## Doesn't look right .... 
-
-## Scree plot
-#pca.results$sdev[1]**2/sum(pca.results$sdev**2)
-#barplot(pca.results$sdev[1:10]**2/sum(pca.results$sdev**2))
-
-
-
-
-
-## TRY PCADAPT
+## PCADAPT
 library(pcadapt)
 path_to_vcf <- "DNA_Seq/AlysonEmery/AGartemisia_v5.recode.vcf"
 
@@ -587,25 +551,55 @@ PC1.mean <- dfScores %>% group_by(Source) %>% summarise(PC1mean = mean(PC1score)
 ## ** Look into what 'NA' is can clean up ****
 PC1.mean <- PC1.mean[1:11,]
 
+
+
+
 ## Create color gradient and assign colors based on numeric continuous PC1 mean values
 
-colorAccording2(
-  x,
-  gradTy = "logGray",
-  nStartOmit = NULL,
-  nEndOmit = "sep",
-  revCol = FALSE,
-  alpha = 1,
-  silent = FALSE,
-  debug = FALSE,
-  callFrom = NULL
-)
+# From ChatGPT
+# Define a color gradient (e.g., from blue to red)
+sdZnCols <- c("#EEB422", "#EEB422", "#B4EEB4", "#8FBC8F", "#B4EEB4", "#8FBC8F", "#B4EEB4", "#8FBC8F", 
+             "#C1FFC1", "#FFEC8B", "#ffff8b")
 
-plot(1:11,PC1.mean$PC1mean,pch=16,cex=2,col=colorAccording2(PC1.mean$PC1mean))
-plot(PC1.mean$PC1mean, col=colorAccording2(PC1.mean$PC1mean), pch=19, cex=1.5)
+#gradient_fn <- colorRamp(c("blue", "yellow"))
+#gradient_fn <- colorRamp(c("#EEB422",   "#C1FFC1", "#ffff8b"))
+#gradient_fn <- colorRamp(c("#EEB422",   "#C1FFC1"))
+gradient_fn <- colorRamp(c("purple3",   "pink"))
 
-PC1.mean$HexCode <- colorAccording2(PC1.mean$PC1mean)
-col <- c("#00FF2EFF", "#00FFB9FF", "#FF008BFF", "#5D00FFFF", "#002EFFFF", "#FF0000FF", "#00B9FFFF")
+# Normalize your values to [0,1] scale
+vals_norm <- (PC1.mean$PC1mean - min(PC1.mean$PC1mean)) / (max(PC1.mean$PC1mean) - min(PC1.mean$PC1mean))
+
+# Get RGB colors (as integers 0–255)
+rgb_matrix <- gradient_fn(vals_norm)
+
+# Convert to hex color strings
+colors <- rgb(rgb_matrix[,1], rgb_matrix[,2], rgb_matrix[,3], maxColorValue = 255)
+
+# Plot using colors
+plot(PC1.mean$PC1mean, rep(1, length(PC1.mean$PC1mean)), col=colors, pch=16, cex=2)
+
+PC1.mean$color <- colors
+
+
+
+## Not sure if this full works as intended... 
+#colorAccording2(
+#  x,
+#  gradTy = "logGray",
+#  nStartOmit = NULL,
+#  nEndOmit = "sep",
+#  revCol = FALSE,
+#  alpha = 1,
+#  silent = FALSE,
+#  debug = FALSE,
+#  callFrom = NULL
+#)
+
+#plot(1:11,PC1.mean$PC1mean,pch=16,cex=2,col=colorAccording2(PC1.mean$PC1mean))
+#plot(PC1.mean$PC1mean, col=colorAccording2(PC1.mean$PC1mean), pch=19, cex=1.5)
+
+#PC1.mean$HexCode <- colorAccording2(PC1.mean$PC1mean)
+#col <- c("#00FF2EFF", "#00FFB9FF", "#FF008BFF", "#5D00FFFF", "#002EFFFF", "#FF0000FF", "#00B9FFFF")
 # Create the color ramp function (from AI)
 #color_function <- colorRampPalette(c("blue", "red"))
 # Generate colors for the data
