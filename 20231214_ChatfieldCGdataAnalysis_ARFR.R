@@ -10,19 +10,19 @@ rm(list=ls())
 
 ## LOAD PACKAGES AND FUNCTIONS --------------------------------------------------------------------
 #library(Hmisc)
+#library(tidyr)
+#library(car)
+#library(corrplot)
 library(dplyr)
 library(stringr)
-#library(tidyr)
 library(lme4)
 library(plotrix)
 library(EnvStats)
-#library(car)
 library(effects)
 library(reshape2)
 library(gplots)
 library(tidyverse)
 library(AICcmodavg)
-#library(corrplot)
 library(PerformanceAnalytics)
 library(vcfR)
 library(pcadapt)
@@ -416,7 +416,7 @@ ARFR.meds <- ARFR.cl %>% group_by(Source) %>%
              dplyr::summarise(Height22_MD=median(Length_cm_20220726,na.rm=TRUE), AGB22_MD=median(AGB2022_MinusBag,na.rm=TRUE),
              ReproBMrw_MD=median(InfBM2022_2024updated,na.rm=TRUE), Height23_MD=median(Height_20230927,na.rm=TRUE),
              Surv24_MD=median(Survival, na.rm=TRUE), Surv24_MN=mean(Survival, na.rm=TRUE), Surv24_Sum=sum(Survival, na.rm=TRUE),
-             Surv24_Count=n())#,
+             Surv24_Count=n(), LeafArea_MD=median(LeafSurfaceArea_cm2, na.rm=TRUE), LeafMass_MD=median(DryLeafMass_g, na.rm=TRUE))#,
              #GrowthRe_MD=median(GrwthRate_Relative,na.rm=TRUE), ReproBM22_MD=median(InfBM2022_Wobag_g,na.rm=TRUE),
              #GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE), GrowthAb_MD=median(GrwthRate_Absolute,na.rm=TRUE))
 ARFR.meds <- left_join(ARFR.meds, ARFR.SdZn, by="Source")
@@ -424,6 +424,8 @@ ARFR.meds <- left_join(ARFR.meds, ARFR.SdZn, by="Source")
 ## Get individual counts per population in 2022 post transplant death
 ARFR.popCount <- ARFR22.cl %>% group_by(Source) %>% dplyr::summarise(PopCount=n())
 Surv.pop <- ARFR.meds$Surv24_Sum/ARFR.popCount$PopCount
+## ** this total for surv estimates needs to be updated **
+## from list of survival in 2024, remove lines with NAs, then use counts per pop as totals? **
 
 
 ## Boxplots of raw data 
@@ -454,9 +456,6 @@ boxplot(Length_cm_20220726 ~ ARFR.latByMed, data=ARFR.cl,
 #        xlab=NA, ylab="Plant absolute growth", cex.lab=1, cex.axis=0.9, names=ARFR.meds$PopAbbrev,
 #        cex.main=1.5, col=ARFR.meds$PopCol)
 
-#boxplot(GrwthRate_Specific ~ ARFR.htByMed, data=ARFR.cl, las=2,
-#        xlab=NA, ylab="Plant specific growth", cex.lab=1, cex.axis=0.9, names=ARFR.meds$PopAbbrev,
-#        cex.main=1.5, col=ARFR.meds$PopCol)
 #ARFR.SdZn <- ARFR.SdZn[order(ARFR.SdZn$GR_SP),]
 #boxplot(GrwthRate_Specific ~ ARFR.grsByMed, data=ARFR.cl,
 #        xlab="Population", ylab="Plant specific growth", cex.lab=1.5, names=ARFR.SdZn$PopAbbrev,
@@ -483,12 +482,8 @@ boxplot(InfBM2022_2024updated ~ ARFR.latByMed, data=ARFR.cl, las=2,
 #        xlab=NA, ylab="Reproductive biomass", cex.lab=1.25, names=ARFR.meds$PopAbbrev,
 #        cex.axis=0.79, main="Artemisia frigida", cex.main=1.5, col=ARFR.meds$PopCol)
 
-#boxplot(InfBM_Wobag_g ~ ARFR.infByMed, data=ARFR.cl, las=2,
-#        xlab=NA, ylab="Reproductive biomass", cex.lab=1.25, names=ARFR.meds$PopAbbrev,
-#        cex.axis=0.79, main="Artemisia frigida", cex.main=1.5, col=ARFR.meds$PopCol)
 
-
-## size 2023
+## Size 2023
 #ARFR.meds <- ARFR.meds[order(ARFR.meds$Height23_MD),] #Order by median 2023 sz
 boxplot(Height_20230927 ~ ARFR.latByMed, data=ARFR.cl,
         ylab="Height (cm)", xlab=NA, cex.lab=1.25, horizontal=FALSE,
@@ -501,6 +496,14 @@ boxplot(SLA_mm2permg ~ ARFR.latByMed, data=ARFR.cl, las=2,
         ylab="Specific leaf area (mm2/mg)", xlab=NA, cex.lab=1.25, cex.axis=0.99, 
         names=ARFR.meds$PopAbbrev, horizontal=FALSE, ylim=c(0,40),
         cex.main=1.5, col=ARFR.meds$PopCol, main="SPECIFIC LEAF AREA 2024")
+boxplot(LeafSurfaceArea_cm2 ~ ARFR.latByMed, data=ARFR.cl, las=2,
+        ylab="leaf area (cm2)", xlab=NA, cex.lab=1.25, cex.axis=0.99, 
+        names=ARFR.meds$PopAbbrev, horizontal=FALSE, ylim=c(0,2.3),
+        cex.main=1.5, col=ARFR.meds$PopCol, main="LEAF AREA 2024")
+boxplot(DryLeafMass_g ~ ARFR.latByMed, data=ARFR.cl, las=2,
+        ylab="leaf mass (g)", xlab=NA, cex.lab=1.25, cex.axis=0.99, 
+        names=ARFR.meds$PopAbbrev, horizontal=FALSE, ylim=c(0,0.02),
+        cex.main=1.5, col=ARFR.meds$PopCol, main="LEAF MASS 2024")
 
 
 ## Survival 2024
@@ -520,13 +523,65 @@ legend("center", unique(ARFR.meds$Source[order(ARFR.meds$PopOrder, decreasing=TR
 
 
 ## Trait PCA ----------------------------------------
-#ARFR.traits <- ARFR.cl %>% dplyr::select(c("Length_cm_20220726","Survival_20220922","Phenology_20220922",
-#                                           "AGB_MinusBag","InfBM_Wbag"))
-#covMat.traits <- cov(ARFR.traits, use="pairwise.complete.obs")
-#pca.results <- prcomp(covMat.traits)
-#cols <- viridis(5)
-#plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, col=cols, cex=1.2)
+ARFR.traits <- ARFR.cl %>% dplyr::select(c("Surv_2022","Survival","Length_cm_20220726", "Height_20230927", "SLA_mm2permg",
+                                           "AGB2022_MinusBag","InfBM2022_2024updated", "DryLeafMass_g", "LeafSurfaceArea_cm2")) 
+                                            #Add growth rate(s)?
+
+ARFR.traits <- ARFR.traits[!is.na(ARFR.traits$Length_cm_20220726) & ARFR.traits$Surv_2022==1,] #Remove indivs that died early & have no data
+#ARFR.traits <- ARFR.traits[,2:8] #Remove survival
+ARFR.traitsT <- t(ARFR.traits)
+
+## Get sample list with pop ID and colors
+ARFR.indivPop <- ARFR.cl %>% dplyr::select(c("Source", "ID", "Hex.Code"))
+ARFR.indivPop$ID <- as.factor(ARFR.indivPop$ID)
+indivs.traitPCA <- as.factor(colnames(ARFR.traitsT))
+indivs.traitPCA <- as.data.frame(indivs.traitPCA)
+colnames(indivs.traitPCA) <- "ID"
+indivs.traitPCA <- left_join(indivs.traitPCA, ARFR.indivPop, by="ID")
+
+## If some individuals have NAs in all columns, probably no data for any traits for these samples
+#covMat.traitsNoNA <- covMat.traits %>% dplyr::drop_na(covMat.traits)
+#filter(covMat.traits, rowSums(is.na(covMat.traits)) != ncol(covMat.traits))
+#covMat.traits[complete.cases(as.data.frame(covMat.traits)),] #(na.omit(covMat.traits))
+
+## Make covariance matrix and run pca
+covMat.traits <- cov(ARFR.traitsT, use="pairwise.complete.obs")
+pca.results <- prcomp(covMat.traits)
+
+
+par(mfrow=c(1,1))
+#cols <- viridis(9)
+plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, cex=1.2, col=indivs.traitPCA$Hex.Code, main="Trait PCA")
+plot(x=pca.results$x[,2], y=pca.results$x[,3],pch=19, cex=1.2, col=indivs.traitPCA$Hex.Code)
 #legend("topleft", colnames(ARFR.traits), col=cols, cex=0.75, pch=19)
+## ** Look into why weird lines 
+## ** Look into loadings (which traits contribute most to PC1)
+
+## Calculate PC1 mean values for each source population
+trait.PCscores <- as.data.frame(cbind(pca.results$x[,1], as.character(indivs.traitPCA$Source)))
+colnames(trait.PCscores) <- c("PC1", "Source")
+trait.PCscores$PC1 <- as.numeric(trait.PCscores$PC1)
+traitPC1.mean <- trait.PCscores %>% group_by(Source) %>% summarise(PC1mean = mean(PC1), n=n())
+
+
+## Create color gradient and assign colors based on numeric continuous PC1 mean values
+# From ChatGPT
+# Define a color gradient (e.g., from blue to red)
+gradient_fn <- colorRamp(c("greenyellow",   "deeppink"))
+
+# Normalize your values to [0,1] scale
+vals_norm <- (traitPC1.mean$PC1mean - min(traitPC1.mean$PC1mean)) / (max(traitPC1.mean$PC1mean) - min(traitPC1.mean$PC1mean))
+
+# Get RGB colors (as integers 0–255)
+rgb_matrix <- gradient_fn(vals_norm)
+
+# Convert to hex color strings
+colors.traitPC <- rgb(rgb_matrix[,1], rgb_matrix[,2], rgb_matrix[,3], maxColorValue = 255)
+
+# Plot using colors
+plot(traitPC1.mean$PC1mean, rep(1, length(traitPC1.mean$PC1mean)), col=colors.traitPC, pch=16, cex=2)
+
+traitPC1.mean$color <- colors.traitPC
 ## ---------------------------------------------------
 
 
@@ -582,16 +637,14 @@ PC1.mean <- PC1.mean[1:11,]
 
 
 ## Create color gradient and assign colors based on numeric continuous PC1 mean values
-
 # From ChatGPT
 # Define a color gradient (e.g., from blue to red)
-sdZnCols <- c("#EEB422", "#EEB422", "#B4EEB4", "#8FBC8F", "#B4EEB4", "#8FBC8F", "#B4EEB4", "#8FBC8F", 
-             "#C1FFC1", "#FFEC8B", "#ffff8b")
+#sdZnColsOld <- c("#EEB422", "#EEB422", "#B4EEB4", "#8FBC8F", "#B4EEB4", "#8FBC8F", "#B4EEB4", "#8FBC8F", 
+#             "#C1FFC1", "#FFEC8B", "#ffff8b")
 
-#gradient_fn <- colorRamp(c("blue", "yellow"))
 #gradient_fn <- colorRamp(c("#EEB422",   "#C1FFC1", "#ffff8b"))
 #gradient_fn <- colorRamp(c("#EEB422",   "#C1FFC1"))
-gradient_fn <- colorRamp(c("purple3",   "pink"))
+gradient_fn <- colorRamp(c("greenyellow",   "deeppink"))
 
 # Normalize your values to [0,1] scale
 vals_norm <- (PC1.mean$PC1mean - min(PC1.mean$PC1mean)) / (max(PC1.mean$PC1mean) - min(PC1.mean$PC1mean))
@@ -607,8 +660,6 @@ plot(PC1.mean$PC1mean, rep(1, length(PC1.mean$PC1mean)), col=colors, pch=16, cex
 
 PC1.mean$color <- colors
 
-
-
 ## Not sure if this full works as intended... 
 #colorAccording2(
 #  x,
@@ -621,19 +672,25 @@ PC1.mean$color <- colors
 #  debug = FALSE,
 #  callFrom = NULL
 #)
-
 #plot(1:11,PC1.mean$PC1mean,pch=16,cex=2,col=colorAccording2(PC1.mean$PC1mean))
 #plot(PC1.mean$PC1mean, col=colorAccording2(PC1.mean$PC1mean), pch=19, cex=1.5)
-
 #PC1.mean$HexCode <- colorAccording2(PC1.mean$PC1mean)
 #col <- c("#00FF2EFF", "#00FFB9FF", "#FF008BFF", "#5D00FFFF", "#002EFFFF", "#FF0000FF", "#00B9FFFF")
 # Create the color ramp function (from AI)
 #color_function <- colorRampPalette(c("blue", "red"))
 # Generate colors for the data
 #PC1.mean$color <- color_function(PC1.mean$PC1mean)
+## -------------------------------------------------------------------------------------------
 
-## --------------------------------------------------------------------------------------------
-## Plots source pops on a map and color by seed zone or other characteristics (e.g. PCA scores). 
+
+
+
+
+
+
+
+## Plot source pops on a map and color by seed zone or other characteristics (e.g. PCA scores). 
+## Try in ArcGIS online
 
 
 
