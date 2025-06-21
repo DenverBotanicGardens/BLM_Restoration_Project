@@ -416,16 +416,22 @@ ARFR.meds <- ARFR.cl %>% group_by(Source) %>%
              dplyr::summarise(Height22_MD=median(Length_cm_20220726,na.rm=TRUE), AGB22_MD=median(AGB2022_MinusBag,na.rm=TRUE),
              ReproBMrw_MD=median(InfBM2022_2024updated,na.rm=TRUE), Height23_MD=median(Height_20230927,na.rm=TRUE),
              Surv24_MD=median(Survival, na.rm=TRUE), Surv24_MN=mean(Survival, na.rm=TRUE), Surv24_Sum=sum(Survival, na.rm=TRUE),
-             Surv24_Count=n(), LeafArea_MD=median(LeafSurfaceArea_cm2, na.rm=TRUE), LeafMass_MD=median(DryLeafMass_g, na.rm=TRUE))#,
+             LeafArea_MD=median(LeafSurfaceArea_cm2, na.rm=TRUE), LeafMass_MD=median(DryLeafMass_g, na.rm=TRUE))#,
              #GrowthRe_MD=median(GrwthRate_Relative,na.rm=TRUE), ReproBM22_MD=median(InfBM2022_Wobag_g,na.rm=TRUE),
-             #GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE), GrowthAb_MD=median(GrwthRate_Absolute,na.rm=TRUE))
+             #GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE), GrowthAb_MD=median(GrwthRate_Absolute,na.rm=TRUE),Surv24_Count=n())
 ARFR.meds <- left_join(ARFR.meds, ARFR.SdZn, by="Source")
 
 ## Get individual counts per population in 2022 post transplant death
 ARFR.popCount <- ARFR22.cl %>% group_by(Source) %>% dplyr::summarise(PopCount=n())
-Surv.pop <- ARFR.meds$Surv24_Sum/ARFR.popCount$PopCount
+#Surv.pop <- ARFR.meds$Surv24_Sum/ARFR.popCount$PopCount
 ## ** this total for surv estimates needs to be updated **
-## from list of survival in 2024, remove lines with NAs, then use counts per pop as totals? **
+## from list of early survival in 2022, remove lines with NAs, then use counts per pop as totals? **
+## ** also remove lines with NAs from 2024 survival? 
+test <- left_join(ARFR22.cl, ARFR24.surv, by="ID")
+test2 <- test[!is.na(test$Survival),]
+test3 <- test2 %>% group_by(Source) %>% dplyr::summarise(Surv24_Count=n())
+ARFR.meds <- left_join(ARFR.meds, test3, by="Source")
+surv.pop <- ARFR.meds$Surv24_Sum/ARFR.meds$Surv24_Count.y
 
 
 ## Boxplots of raw data 
