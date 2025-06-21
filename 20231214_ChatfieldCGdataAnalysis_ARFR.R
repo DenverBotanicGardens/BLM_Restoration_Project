@@ -431,7 +431,7 @@ test <- left_join(ARFR22.cl, ARFR24.surv, by="ID")
 test2 <- test[!is.na(test$Survival),]
 test3 <- test2 %>% group_by(Source) %>% dplyr::summarise(Surv24_Count=n())
 ARFR.meds <- left_join(ARFR.meds, test3, by="Source")
-surv.pop <- ARFR.meds$Surv24_Sum/ARFR.meds$Surv24_Count.y
+surv.pop <- ARFR.meds$Surv24_Sum/ARFR.meds$Surv24_Count
 
 
 ## Boxplots of raw data 
@@ -513,7 +513,7 @@ boxplot(DryLeafMass_g ~ ARFR.latByMed, data=ARFR.cl, las=2,
 
 
 ## Survival 2024
-barplot(Surv.pop, col=ARFR.meds$PopCol, ylim=c(0,1), cex.axis=0.99, names.arg=ARFR.meds$PopAbbrev,
+barplot(surv.pop, col=ARFR.meds$PopCol, ylim=c(0,1), cex.axis=0.99, names.arg=ARFR.meds$PopAbbrev,
         las=2, ylab="Survival rate", main="SURVIVAL 2022-2024", cex.main=1.5)
 
 ## Try stacked bar plot with survival rate by year ** 
