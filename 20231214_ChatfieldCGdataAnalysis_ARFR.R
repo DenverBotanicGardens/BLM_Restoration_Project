@@ -522,6 +522,9 @@ barplot(surv.pop, col=ARFR.meds$PopCol, ylim=c(0,1), cex.axis=0.99, names.arg=AR
 plot.new()
 legend("center", unique(ARFR.meds$Source[order(ARFR.meds$PopOrder, decreasing=TRUE)]), 
        col=unique(ARFR.meds$PopCol[order(ARFR.meds$PopOrder, decreasing=TRUE)]), cex=1.25, pch=19)
+
+
+## ** generate legend figure with seed zone colors used in map and seed zone abbrevs ** 
 ## ---------------------------------------------------
 
 
@@ -588,6 +591,8 @@ colors.traitPC <- rgb(rgb_matrix[,1], rgb_matrix[,2], rgb_matrix[,3], maxColorVa
 plot(traitPC1.mean$PC1mean, rep(1, length(traitPC1.mean$PC1mean)), col=colors.traitPC, pch=16, cex=2)
 
 traitPC1.mean$color <- colors.traitPC
+
+## ** make legend of color gradient ** Make different from genomic PC gradient ** 
 ## ---------------------------------------------------
 
 
@@ -665,6 +670,8 @@ colors <- rgb(rgb_matrix[,1], rgb_matrix[,2], rgb_matrix[,3], maxColorValue = 25
 plot(PC1.mean$PC1mean, rep(1, length(PC1.mean$PC1mean)), col=colors, pch=16, cex=2)
 
 PC1.mean$color <- colors
+
+## ** make legend of color gradient **
 
 ## Not sure if this full works as intended... 
 #colorAccording2(
