@@ -21,7 +21,7 @@ library(EnvStats)
 library(effects)
 library(reshape2)
 library(gplots)
-library(tidyverse)
+#library(tidyverse)
 library(AICcmodavg)
 library(PerformanceAnalytics)
 library(vcfR)
@@ -230,21 +230,20 @@ colnames(ARFR.biovar) <- c("Pop","bio1","bio2","bio3","bio4","bio5","bio6","bio7
 
 ## Add colour columns that corresponds to pop or seed zone
 #SdZn.list <- unique(ARFR.SdZn$SdZone) #If coloring by seed zone, make distinct from lat/ unique pop colors**
-ARFR.SdZn$SdZnCol[grepl("5 - 10 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "powderblue"        #semi-humid, cold # #B0E0E6
-ARFR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "darkseagreen"     #semi-humid, cool # #8fbc8f
-ARFR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "darkseagreen4"    #semi-humid, warm # #698b69
-ARFR.SdZn$SdZnCol[grepl("5 - 10 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "darkgoldenrod1"   #semi-arid, cold  # #ffb90f
-ARFR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "orange3"         #semi-arid, cool #  #cd8500
-ARFR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "tomato2"         #semi-arid, warm #  #ee5c42
+ARFR.SdZn$SdZnCol[grepl("5 - 10 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "#a5c2f1"    #semi-humid, cold #"powderblue"
+ARFR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "#66e566"   #semi-humid, cool # #8fbc8f "darkseagreen"
+ARFR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "#698b69"   #semi-humid, warm "darkseagreen4" 
+ARFR.SdZn$SdZnCol[grepl("5 - 10 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "#ffb90f"   #semi-arid, cold  #darkgoldenrod1
+ARFR.SdZn$SdZnCol[grepl("10 - 15 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "#cd8500"         #semi-arid, cool  #orange3
+ARFR.SdZn$SdZnCol[grepl("15 - 20 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "#ee5c42"         #semi-arid, warm  #tomato2
 
 ## Add seed zone name abbreviation column
-#ARFR.SdZn$SdZnAbbrev[grepl("5 - 10 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "semi-humid, cold"
-#ARFR.SdZn$SdZnAbbrev[grepl("10 - 15 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "semi-humid, cool"
-#ARFR.SdZn$SdZnAbbrev[grepl("15 - 20 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "semi-humid, warm"
-#ARFR.SdZn$SdZnAbbrev[grepl("5 - 10 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "semi-arid, cold"
-#ARFR.SdZn$SdZnAbbrev[grepl("10 - 15 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "semi-arid, cool"
-#ARFR.SdZn$SdZnAbbrev[grepl("15 - 20 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "semi-arid, warm"
-
+ARFR.SdZn$SdZnAbbrev[grepl("5 - 10 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "semi-humid, cold"
+ARFR.SdZn$SdZnAbbrev[grepl("10 - 15 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "semi-humid, cool"
+ARFR.SdZn$SdZnAbbrev[grepl("15 - 20 Deg. F. / 3 - 6", ARFR.SdZn$SdZone)] = "semi-humid, warm" #**This is common garden s.z.- confirm!
+ARFR.SdZn$SdZnAbbrev[grepl("5 - 10 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "semi-arid, cold"
+ARFR.SdZn$SdZnAbbrev[grepl("10 - 15 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "semi-arid, cool"
+ARFR.SdZn$SdZnAbbrev[grepl("15 - 20 Deg. F. / 6 - 12", ARFR.SdZn$SdZone)] = "semi-arid, warm"
 
 
 ## Color by latitude (based on Alyson's map and SNP PCA colors)
@@ -261,9 +260,8 @@ ARFR.SdZn$PopCol[grepl("ARFR-WY040-71-10", ARFR.SdZn$Source)] = "#66C2A5"
 ARFR.SdZn$PopCol[grepl("ARFR-WY050-151-FREMONT-16", ARFR.SdZn$Source)] = "#3288BD"   
 ARFR.SdZn$PopCol[grepl("ARFR-WY050-49-FREMONT-12", ARFR.SdZn$Source)] = "#5E4FA2"
 
-## Add seed zone name abbreviation column (look at BOGR script)..?
 
-## Add column with seed zone or pop 'order' (look at BOGR script)..?
+## Add column with seed zone or pop 'order' 
 ARFR.SdZn$PopOrder[grepl("ARFR-AZ930-423-NAVAJO-18", ARFR.SdZn$Source)] = "A"        
 ARFR.SdZn$PopOrder[grepl("ARFR-AZ930-422-NAVAJO-18", ARFR.SdZn$Source)] = "B"   
 ARFR.SdZn$PopOrder[grepl("ARFR-NM930N-66-11", ARFR.SdZn$Source)] = "C"    
@@ -422,15 +420,12 @@ ARFR.meds <- ARFR.cl %>% group_by(Source) %>%
 ARFR.meds <- left_join(ARFR.meds, ARFR.SdZn, by="Source")
 
 ## Get individual counts per population in 2022 post transplant death
-ARFR.popCount <- ARFR22.cl %>% group_by(Source) %>% dplyr::summarise(PopCount=n())
-#Surv.pop <- ARFR.meds$Surv24_Sum/ARFR.popCount$PopCount
-## ** this total for surv estimates needs to be updated **
-## from list of early survival in 2022, remove lines with NAs, then use counts per pop as totals? **
-## ** also remove lines with NAs from 2024 survival? 
-test <- left_join(ARFR22.cl, ARFR24.surv, by="ID")
-test2 <- test[!is.na(test$Survival),]
-test3 <- test2 %>% group_by(Source) %>% dplyr::summarise(Surv24_Count=n())
-ARFR.meds <- left_join(ARFR.meds, test3, by="Source")
+#ARFR.popCount <- ARFR22.cl %>% group_by(Source) %>% dplyr::summarise(PopCount=n())
+## And remove lines with NAs from 2024 survival
+tempSurv <- left_join(ARFR22.cl, ARFR24.surv, by="ID")
+tempSurv.rmNA <- tempSurv[!is.na(tempSurv$Survival),]
+surv.rmNA <- tempSurv.rmNA %>% group_by(Source) %>% dplyr::summarise(Surv24_Count=n())
+ARFR.meds <- left_join(ARFR.meds, surv.rmNA, by="Source")
 surv.pop <- ARFR.meds$Surv24_Sum/ARFR.meds$Surv24_Count
 
 
@@ -524,7 +519,9 @@ legend("center", unique(ARFR.meds$Source[order(ARFR.meds$PopOrder, decreasing=TR
        col=unique(ARFR.meds$PopCol[order(ARFR.meds$PopOrder, decreasing=TRUE)]), cex=1.25, pch=19)
 
 
-## ** generate legend figure with seed zone colors used in map and seed zone abbrevs ** 
+## Generate legend figure with seed zone colors used in map and seed zone abbrevs 
+legend("center", unique(ARFR.meds$SdZnAbbrev[order(ARFR.meds$PopOrder, decreasing=TRUE)]), 
+       col=unique(ARFR.meds$SdZnCol[order(ARFR.meds$PopOrder, decreasing=TRUE)]), cex=2, pch=19)
 ## ---------------------------------------------------
 
 
@@ -541,7 +538,7 @@ ARFR.traits <- ARFR.traits[!is.na(ARFR.traits$Length_cm_20220726) & ARFR.traits$
 ARFR.traitsT <- t(ARFR.traits)
 
 ## Get sample list with pop ID and colors
-ARFR.indivPop <- ARFR.cl %>% dplyr::select(c("Source", "ID", "Hex.Code"))
+ARFR.indivPop <- ARFR.cl %>% dplyr::select(c("Source", "ID", "HexCode_Indv"))
 ARFR.indivPop$ID <- as.factor(ARFR.indivPop$ID)
 indivs.traitPCA <- as.factor(colnames(ARFR.traitsT))
 indivs.traitPCA <- as.data.frame(indivs.traitPCA)
@@ -560,8 +557,8 @@ pca.results <- prcomp(covMat.traits)
 
 par(mfrow=c(1,1))
 #cols <- viridis(9)
-plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, cex=1.2, col=indivs.traitPCA$Hex.Code, main="Trait PCA")
-plot(x=pca.results$x[,2], y=pca.results$x[,3],pch=19, cex=1.2, col=indivs.traitPCA$Hex.Code)
+plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv, main="Trait PCA", ylim=c(-15000,0))
+plot(x=pca.results$x[,2], y=pca.results$x[,3],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv)
 #legend("topleft", colnames(ARFR.traits), col=cols, cex=0.75, pch=19)
 ## ** Look into why weird lines 
 ## ** Look into loadings (which traits contribute most to PC1)
@@ -592,7 +589,17 @@ plot(traitPC1.mean$PC1mean, rep(1, length(traitPC1.mean$PC1mean)), col=colors.tr
 
 traitPC1.mean$color <- colors.traitPC
 
-## ** make legend of color gradient ** Make different from genomic PC gradient ** 
+
+## Plot range of color gradient as a legend
+traitPCrange <- seq(from=min(traitPC1.mean$PC1mean), to=max(traitPC1.mean$PC1mean), by=1000)
+vals_normRange <- (traitPCrange - min(traitPCrange)) / (max(traitPCrange) - min(traitPCrange))
+rgb_matrixRange <- gradient_fn(vals_normRange)
+colors.traitPCrange <- rgb(rgb_matrixRange[,1], rgb_matrixRange[,2], rgb_matrixRange[,3], maxColorValue = 255)
+plot(traitPCrange, rep(0.25, length(traitPCrange)), col=colors.traitPCrange, pch=15, cex=4)
+
+
+## ** ** Make different from genomic PC gradient ** 
+
 ## ---------------------------------------------------
 
 
@@ -617,7 +624,6 @@ indvNames <- left_join(indvNames, ARFR24, by="ID")
 
 
 ## PCADAPT
-library(pcadapt)
 path_to_vcf <- "DNA_Seq/AlysonEmery/AGartemisia_v5.recode.vcf"
 
 vcf_tbl <- read.pcadapt(path_to_vcf, type="vcf")                            #Read in data from vcf table
@@ -670,6 +676,14 @@ colors <- rgb(rgb_matrix[,1], rgb_matrix[,2], rgb_matrix[,3], maxColorValue = 25
 plot(PC1.mean$PC1mean, rep(1, length(PC1.mean$PC1mean)), col=colors, pch=16, cex=2)
 
 PC1.mean$color <- colors
+
+## Plot range of color gradient as a legend
+genPCrange <- seq(from=min(PC1.mean$PC1mean), to=max(PC1.mean$PC1mean), by=0.01)
+vals_normGenRange <- (genPCrange - min(genPCrange)) / (max(genPCrange) - min(genPCrange))
+rgb_matrixGenRange <- gradient_fn(vals_normGenRange)
+colors.genPCrange <- rgb(rgb_matrixGenRange[,1], rgb_matrixGenRange[,2], rgb_matrixGenRange[,3], maxColorValue = 255)
+plot(genPCrange, rep(0.5, length(genPCrange)), col=colors.genPCrange, pch=15, cex=4)
+
 
 ## ** make legend of color gradient **
 
