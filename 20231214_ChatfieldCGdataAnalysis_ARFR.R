@@ -52,6 +52,9 @@ ARFR.biovar <- readRDS("AGoebl/Seeds/20230814_ARFR_BiovarsAvg1980_2021")
 
 ## Load ARFR filtered vcf table 
 vcf_filt <- read.vcfR(file="DNA_Seq/AlysonEmery/AGartemisia_v5.recode.vcf")
+
+## Load PCA values from Alyson's analysis
+pca_vals <- read.csv(file="DNA_Seq/AlysonEmery/20251006_pcaTableFromAlyson_ARFR.csv", sep=",", header=TRUE, dec=".")
 ## ----------------------------------------------------------------------------------------------
 
 
@@ -132,30 +135,33 @@ ARFR24.surv$Survival[ARFR24.surv$Notes=="H"] <- NA
 
 
 ## Check that pheno, surv are only integers
-ARFR22.cl[ARFR22.cl$Survival_20220622 - floor(ARFR22.cl$Survival_20220622) != 0,]
-ARFR22.cl[ARFR22.cl$Survival_20220922 - floor(ARFR22.cl$Survival_20220922) != 0,]
-ARFR22.cl[ARFR22.cl$Phenology_20220715 - floor(ARFR22.cl$Phenology_20220715) != 0 & !is.na(ARFR22.cl$Phenology_20220715),]
-ARFR23[ARFR23$Survival_20230615 - floor(ARFR23$Survival_20230615) != 0,]
-ARFR23[ARFR23$Survival_20230927 - floor(ARFR23$Survival_20230927) != 0 & !is.na(ARFR23$Survival_20230927),]
-ARFR24.surv[ARFR24.surv$Survival - floor(ARFR24.surv$Survival) != 0 & !is.na(ARFR24.surv$Survival),]
+## All good, comment out
+#ARFR22.cl[ARFR22.cl$Survival_20220622 - floor(ARFR22.cl$Survival_20220622) != 0,]
+#ARFR22.cl[ARFR22.cl$Survival_20220922 - floor(ARFR22.cl$Survival_20220922) != 0,]
+#ARFR22.cl[ARFR22.cl$Phenology_20220715 - floor(ARFR22.cl$Phenology_20220715) != 0 & !is.na(ARFR22.cl$Phenology_20220715),]
+#ARFR23[ARFR23$Survival_20230615 - floor(ARFR23$Survival_20230615) != 0,]
+#ARFR23[ARFR23$Survival_20230927 - floor(ARFR23$Survival_20230927) != 0 & !is.na(ARFR23$Survival_20230927),]
+#ARFR24.surv[ARFR24.surv$Survival - floor(ARFR24.surv$Survival) != 0 & !is.na(ARFR24.surv$Survival),]
 
 
 ## Check that length and other relevant traits are only numeric
-ARFR22.cl[!is.numeric(ARFR22.cl$Length_cm_20220527),]
-ARFR22.cl[!is.numeric(ARFR22.cl$Length_cm_20220622),]
-ARFR22.cl[!is.numeric(ARFR22.cl$Length_cm_20220726),]
-ARFR23[!is.numeric(ARFR23$Height_20230927),]
-ARFR24[!is.numeric(ARFR24$SLA_mm2permg),]
-ARFR24[!is.numeric(ARFR24$InfBM2022smples_HEADS_2024weigh) & !is.na(ARFR24$InfBM2022smples_HEADS_2024weigh),]
-ARFR24[!is.numeric(ARFR24$InfBM2022smpls_CHAFF_2024weigh),]
+## All good, comment out
+#ARFR22.cl[!is.numeric(ARFR22.cl$Length_cm_20220527),]
+#ARFR22.cl[!is.numeric(ARFR22.cl$Length_cm_20220622),]
+#ARFR22.cl[!is.numeric(ARFR22.cl$Length_cm_20220726),]
+#ARFR23[!is.numeric(ARFR23$Height_20230927),]
+#ARFR24[!is.numeric(ARFR24$SLA_mm2permg),]
+#ARFR24[!is.numeric(ARFR24$InfBM2022smples_HEADS_2024weigh) & !is.na(ARFR24$InfBM2022smples_HEADS_2024weigh),]
+#ARFR24[!is.numeric(ARFR24$InfBM2022smpls_CHAFF_2024weigh),]
 
 
 ## Check that if surv=0 for a given date, there are no height values for that date
-ARFR22.cl$Length_cm_20220527[ARFR22.cl$OrigPltSurvival_20220527==0 & !is.na(ARFR22.cl$Length_cm_20220527)]
-ARFR22.cl$Length_cm_20220622[ARFR22.cl$Survival_20220622==0 & !is.na(ARFR22.cl$Length_cm_20220622)]
-ARFR22.cl$Length_cm_20220726[ARFR22.cl$Survival_20220726==0 & !is.na(ARFR22.cl$Length_cm_20220726)]
-ARFR22.cl$Length_cm_20220726[ARFR22.cl$Survival_20220726==0 & !is.na(ARFR22.cl$Length_cm_20220726)]
-ARFR23$Height_20230927[ARFR23$Survival_20230927==0 & !is.na(ARFR23$Height_20230927)]
+## All good, comment out
+#ARFR22.cl$Length_cm_20220527[ARFR22.cl$OrigPltSurvival_20220527==0 & !is.na(ARFR22.cl$Length_cm_20220527)]
+#ARFR22.cl$Length_cm_20220622[ARFR22.cl$Survival_20220622==0 & !is.na(ARFR22.cl$Length_cm_20220622)]
+#ARFR22.cl$Length_cm_20220726[ARFR22.cl$Survival_20220726==0 & !is.na(ARFR22.cl$Length_cm_20220726)]
+#ARFR22.cl$Length_cm_20220726[ARFR22.cl$Survival_20220726==0 & !is.na(ARFR22.cl$Length_cm_20220726)]
+#ARFR23$Height_20230927[ARFR23$Survival_20230927==0 & !is.na(ARFR23$Height_20230927)]
 
 
 #If plt alive and >0 was not entered in height col, enter NA (not 0)
