@@ -47,7 +47,7 @@ ARFR24 <- read.csv(file="Chatfield/2024_data/20241219_ChatfieldData2024_ARFR.csv
 ARFR24.surv <- read.csv(file="Chatfield/2024_data/CommonGarden/ARFR/20250321_ChatfieldCGsurveyData2024_ARFR_amgUpdates.csv", sep=",", header=TRUE, dec=".", na.strings="")
 
 ARFR.SdZn <- read.csv(file="AGoebl/Seeds/20231212_ARFR_LatLong_hexcodes.csv", sep=",", header=TRUE, dec=".")
-ARFR.biovar <- readRDS("AGoebl/Seeds/20230814_ARFR_BiovarsAvg1980_2021")
+#ARFR.biovar <- readRDS("AGoebl/Seeds/20230814_ARFR_BiovarsAvg1980_2021")
 
 
 ## Load ARFR filtered vcf table 
@@ -61,10 +61,10 @@ pca_vals <- read.csv(file="DNA_Seq/AlysonEmery/20251006_pcaTableFromAlyson_ARFR.
 
 
 ## ARFR - DATA CLEAN UP ---------------------------------------------
-str(ARFR22)
-str(ARFR23)
-str(ARFR24)
-str(ARFR24.surv)
+#str(ARFR22)
+#str(ARFR23)
+#str(ARFR24)
+#str(ARFR24.surv)
 
 ARFR22$Source <- as.factor(ARFR22$Source)
 ARFR23$Source <- as.factor(ARFR23$Source)
@@ -88,7 +88,7 @@ ARFR22$Length_cm_20220527[!is.na(ARFR22$Length_cm_20220527) & ARFR22$Replaced_Yo
 #ARFR22.cl[!is.na(ARFR22.cl$DateMortalityObservedPreTransplant),] #All plts that died before planting were replaced
 
 ## Change surv to NA if plant harvested, not 0 in 2024 data
-unique(ARFR24.surv$Notes)
+#unique(ARFR24.surv$Notes)
 ARFR24.surv$Survival[ARFR24.surv$Notes=="H" & !is.na(ARFR24.surv$Notes)] <- NA
 
 ## Exclude data in 2023 and 2024 from harvested plants
@@ -317,7 +317,10 @@ ARFR24 <- left_join(ARFR24, ARFR.SdZn, by="Source")
 ARFR23 <- cbind(ARFR23, ARFR22$ExcludeBcNotReplaced, ARFR24$ExcludeBcHarvest)
 ARFR24 <- cbind(ARFR24, ARFR22$ExcludeBcNotReplaced, ARFR23$ExcludeSurvDueToInconsistData)
 
-## ** SAVE CLEAN DATA FOR EACH YEAR ** 
+## SAVE CLEAN DATA FOR EACH YEAR 
+write.csv(ARFR22, "Chatfield/20251031_ChatfieldDataClean2022_ARFR.csv", row.names=FALSE)
+write.csv(ARFR23, "Chatfield/20251031_ChatfieldDataClean2023_ARFR.csv", row.names=FALSE)
+write.csv(ARFR24, "Chatfield/20251031_ChatfieldDataClean2024_ARFR.csv", row.names=FALSE)
 ## ----------------------------------------------------------------------
 
 
@@ -382,7 +385,7 @@ ARFR.cl$Source <- as.factor(ARFR.cl$Source)
 
 ## ** Do surv check in combined datasheet? **
 
-write.csv(ARFR.cl, "Chatfield/20251031_ChatfieldPhenotypes_ARFR.csv", row.names=FALSE)
+#write.csv(ARFR.cl, "Chatfield/20251031_ChatfieldPhenotypes_ARFR.csv", row.names=FALSE)
 ## --------------------------------------------------------------------------------------------------
 
 
