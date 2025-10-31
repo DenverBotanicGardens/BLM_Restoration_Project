@@ -71,35 +71,57 @@ ARFR23$Source <- as.factor(ARFR23$Source)
 ARFR24$Source <- as.factor(ARFR24$Source)
 
 ##If OrigPltSurv_20220527 = 0 & plt not replaced (N), ignore data for this plt, i.e. future surv should be NA, not 0
-ARFR22.cl <- ARFR22[ARFR22$OrigPltSurvival_20220527==1 | (ARFR22$OrigPltSurvival_20220527==0 & ARFR22$Replaced_YorN_20220531=="Y"),]
+#ARFR22.cl <- ARFR22[ARFR22$OrigPltSurvival_20220527==1 | (ARFR22$OrigPltSurvival_20220527==0 & ARFR22$Replaced_YorN_20220531=="Y"),]
+ARFR22$ExcludeBcNotReplaced <- NA
+ARFR22$ExcludeBcNotReplaced[ARFR22$OrigPltSurvival_20220527==0 & ARFR22$Replaced_YorN_20220531=="N"] <- "Y"
+
 
 #Note: Don't use OrigPltSurv_20220527 data in days to mort or other field analyses,
 #this surv may not correspond to plt names in Source/Pop col (may correspond to orig planted or assigned)
 
 #Some plts that weren't dead & had sz measure on 5/27 were replaced. In this case, don't use length_0527.
 #If length_0527 is not NA and Replaced = Y, then ignore length_527 as it doesn't correspond to plt names in source col
-ARFR22.cl$Length_cm_20220527[!is.na(ARFR22.cl$Length_cm_20220527) & ARFR22.cl$Replaced_YorN_20220531=="Y"] <- NA
+#ARFR22.cl$Length_cm_20220527[!is.na(ARFR22.cl$Length_cm_20220527) & ARFR22.cl$Replaced_YorN_20220531=="Y"] <- NA
+ARFR22$Length_cm_20220527[!is.na(ARFR22$Length_cm_20220527) & ARFR22$Replaced_YorN_20220531=="Y"] <- NA
 
 #If not replaced, but died before planting, don't use subsequent surv data
 #ARFR22.cl[!is.na(ARFR22.cl$DateMortalityObservedPreTransplant),] #All plts that died before planting were replaced
 
-## Add other checks/ edits to address replacements if needed 
+## Change surv to NA if plant harvested, not 0 in 2024 data
+unique(ARFR24.surv$Notes)
+ARFR24.surv$Survival[ARFR24.surv$Notes=="H" & !is.na(ARFR24.surv$Notes)] <- NA
+
+## Exclude data in 2023 and 2024 from harvested plants
+ARFR24$ExcludeBcHarvest <- NA
+ARFR24$ExcludeBcHarvest[!is.na(ARFR24$Harvested_AGB)] <- "Y"
+
+
+#If plt alive and >0 was not entered in height col, enter NA (not 0)
+#ARFR22.cl$Length_cm_20220527[ARFR22.cl$OrigPltSurvival_20220527==1 & !is.na(ARFR22.cl$Length_cm_20220527) & ARFR22.cl$Length_cm_20220527==0]
+#ARFR22.cl$Length_cm_20220622[ARFR22.cl$Survival_20220622==1 & !is.na(ARFR22.cl$Length_cm_20220622) & ARFR22.cl$Length_cm_20220622==0]
+#ARFR22.cl$Length_cm_20220622[ARFR22.cl$Survival_20220622==1 & !is.na(ARFR22.cl$Length_cm_20220622) & ARFR22.cl$Length_cm_20220622==0] <- NA
+ARFR22$Length_cm_20220622[ARFR22$Survival_20220622==1 & !is.na(ARFR22$Length_cm_20220622) & ARFR22$Length_cm_20220622==0] <- NA
+#ARFR22.cl[ARFR22.cl$Survival_20220622==1 & !is.na(ARFR22.cl$Length_cm_20220622) & ARFR22.cl$Length_cm_20220622==0,]
+#ARFR22.cl$Length_cm_20220726[ARFR22.cl$Survival_20220726==1 & !is.na(ARFR22.cl$Length_cm_20220726) & ARFR22.cl$Length_cm_20220726==0]
+#ARFR23$Height_20230927[ARFR23$Survival_20230927==1 & !is.na(ARFR23$Height_20230927) & ARFR23$Height_20230927==0]
+
 
 
 ## Checks 
 #Were some plts dead that were selected to be harvested? Current datasheet only has "Harvest" marked for plts there were alive
-ARFR22.coll <- ARFR22.cl[!is.na(ARFR22.cl$Harvest_20221014) | !is.na(ARFR22.cl$Harvest_20221110),]
-ARFR22.coll[is.na(ARFR22.coll$AGB_MinusBag),] #Two harvested plts do not have final AGB: 1107 (alive?) and 1274 (dead?)
-ARFR22.MissinfBM <- ARFR22.coll[is.na(ARFR22.coll$InfBM_Wobag_g),]
+#ARFR22.coll <- ARFR22.cl[!is.na(ARFR22.cl$Harvest_20221014) | !is.na(ARFR22.cl$Harvest_20221110),]
+#ARFR22.coll[is.na(ARFR22.coll$AGB_MinusBag),] #Two harvested plts do not have final AGB: 1107 (alive?) and 1274 (dead?)
+#ARFR22.MissinfBM <- ARFR22.coll[is.na(ARFR22.coll$InfBM_Wobag_g),]
 #ARFR22.MissinfBM$ID[ARFR22.MissinfBM$Phenology_20220922==3] #All except 1107 included in 2024 datasheet
+## Assume 1107 not actually harvested, despite being selected for harvest. 
 
 #Checks to 2024 re-weighing of 2022 repro BM data
-colnames(ARFR24)
-ARFR.coll <- ARFR24[!is.na(ARFR24$Harvested_AGB),]
-ARFR.infBM <- ARFR24[!is.na(ARFR24$InfBM2022_Wobag_g),]
-ARFR.infBMnewH <- ARFR24[!is.na(ARFR24$InfBM2022smpls_HEADS_2024weigh),]
+#colnames(ARFR24)
+#ARFR.coll <- ARFR24[!is.na(ARFR24$Harvested_AGB),]
+#ARFR.infBM <- ARFR24[!is.na(ARFR24$InfBM2022_Wobag_g),]
+#ARFR.infBMnewH <- ARFR24[!is.na(ARFR24$InfBM2022smpls_HEADS_2024weigh),]
 #Check samples w info in 2022 inf weight column that lack data in 2024 chaff/head columns
-ARFR.infCheck <- ARFR24[!is.na(ARFR24$InfBM2022_Wobag_g) & is.na(ARFR24$InfBM2022smpls_HEADS_2024weigh),]
+#ARFR.infCheck <- ARFR24[!is.na(ARFR24$InfBM2022_Wobag_g) & is.na(ARFR24$InfBM2022smpls_HEADS_2024weigh),]
 #Most have small weights in 2022 column, so maybe tissue not saved. However, ID 524 and 908 are larger. Should these be re-weighed?
 # Check all these IDs for flowering: 524, 885, 908, 1853, 1918, 1950
 #ARFR22.cl$Phenology_20220922[ARFR22.cl$ID==524] #Yes, keep this inf BM data
@@ -111,16 +133,18 @@ ARFR.infCheck <- ARFR24[!is.na(ARFR24$InfBM2022_Wobag_g) & is.na(ARFR24$InfBM202
 #ARFR22.cl$Phenology_20220909[ARFR22.cl$ID==1918] 
 #ARFR22.cl$Phenology_20220922[ARFR22.cl$ID==1950] #No, don't include inf BM data
 #ARFR22.cl$Phenology_20220909[ARFR22.cl$ID==1950] 
+## Corrections to address this are added below in InfBM section  
+
 
 #length(ARFR24$InfBM2022_Wobag_g[!is.na(ARFR24$InfBM2022_Wobag_g)])
 #ARFR24$InfBM2022smpls_HEADS_2024weigh[!is.na(ARFR24$InfBM2022smpls_HEADS_2024weigh)]
 #ARFR24$InfBM2022smpls_CHAFF_2024weigh[!is.na(ARFR24$InfBM2022smpls_CHAFF_2024weigh)]
 #length(ARFR24$InfBM2022smpls_HEADS_2024weigh[!is.na(ARFR24$InfBM2022smpls_HEADS_2024weigh)])
 #length(ARFR24$InfBM2022smpls_CHAFF_2024weigh[!is.na(ARFR24$InfBM2022smpls_CHAFF_2024weigh)]) #~10 samples had chaff combined w flwr heads for weighing
-hist(ARFR24$InfBM2022smpls_HEADS_2024weigh)
-hist(ARFR24$InfBM2022smpls_CHAFF_2024weigh)
-str(ARFR24$InfBM2022smpls_HEADS_2024weigh)
-str(ARFR24$InfBM2022smpls_CHAFF_2024weigh)
+#hist(ARFR24$InfBM2022smpls_HEADS_2024weigh)
+#hist(ARFR24$InfBM2022smpls_CHAFF_2024weigh)
+#str(ARFR24$InfBM2022smpls_HEADS_2024weigh)
+#str(ARFR24$InfBM2022smpls_CHAFF_2024weigh)
 
 
 ## Check that surv is only 1, 0 and maybe NA
@@ -129,13 +153,6 @@ str(ARFR24$InfBM2022smpls_CHAFF_2024weigh)
 #ARFR23[(ARFR23$Survival_20230927 < 0 | ARFR23$Survival_20230927 > 1) & !is.na(ARFR23$Survival_20230927),] #Don't use 2023 surv data w/o 2024 data to corroborate 
 #ARFR23[(ARFR23$Survival_20230615 < 0 | ARFR23$Survival_20230615 > 1) & !is.na(ARFR23$Survival_20230615),]
 #ARFR24.surv[(ARFR24.surv$Survival < 0 | ARFR24.surv$Survival > 1) & !is.na(ARFR24.surv$Survival),]
-
-## Change surv to NA if plant harvested, not 0 in 2024 data
-unique(ARFR24.surv$Notes)
-ARFR24.surv$Survival[ARFR24.surv$Notes=="H" & !is.na(ARFR24.surv$Notes)] <- NA
-## Also look in ARFR24 for indivs with Harvested_AGB to find additional IDs that were harvested and should be changed to NA **
-## Change surv (and other data) to NA in 2023 data as well **
-## **
 
 
 ## Check that pheno, surv are only integers
@@ -168,30 +185,22 @@ ARFR24.surv$Survival[ARFR24.surv$Notes=="H" & !is.na(ARFR24.surv$Notes)] <- NA
 #ARFR23$Height_20230927[ARFR23$Survival_20230927==0 & !is.na(ARFR23$Height_20230927)]
 
 
-#If plt alive and >0 was not entered in height col, enter NA (not 0)
-#ARFR22.cl$Length_cm_20220527[ARFR22.cl$OrigPltSurvival_20220527==1 & !is.na(ARFR22.cl$Length_cm_20220527) & ARFR22.cl$Length_cm_20220527==0]
-#ARFR22.cl$Length_cm_20220622[ARFR22.cl$Survival_20220622==1 & !is.na(ARFR22.cl$Length_cm_20220622) & ARFR22.cl$Length_cm_20220622==0]
-ARFR22.cl$Length_cm_20220622[ARFR22.cl$Survival_20220622==1 & !is.na(ARFR22.cl$Length_cm_20220622) & ARFR22.cl$Length_cm_20220622==0] <- NA
-#ARFR22.cl[ARFR22.cl$Survival_20220622==1 & !is.na(ARFR22.cl$Length_cm_20220622) & ARFR22.cl$Length_cm_20220622==0,]
-#ARFR22.cl$Length_cm_20220726[ARFR22.cl$Survival_20220726==1 & !is.na(ARFR22.cl$Length_cm_20220726) & ARFR22.cl$Length_cm_20220726==0]
-#ARFR23$Height_20230927[ARFR23$Survival_20230927==1 & !is.na(ARFR23$Height_20230927) & ARFR23$Height_20230927==0]
-
-
 #Check that once surv=0, future surv stays zero (if becomes 1 later, could be data entry error)
 #To start, could look at all rows with inconsistent survival data. Then either mark as Remove or correct error if obvious
 ## CONSOLIDATE SURVIVAL DATA
-ARFR22.surv <- ARFR22.cl %>% dplyr::select(c(starts_with("Survival_")))
-ARFR23.surv <- ARFR23 %>% dplyr::select(c(starts_with("Survival_")))
+#ARFR22.surv <- ARFR22 %>% dplyr::select(c(starts_with("Survival_")))
+#ARFR23.surv <- ARFR23 %>% dplyr::select(c(starts_with("Survival_"), "ExcludeSurvDueToInconsistData"))
+#RFR23.surv <- ARFR23.surv[ARFR23.surv$ExcludeSurvDueToInconsistData!="Y",]
 
 #Check for survival data inconsistencies
-ARFR22.surv <- ARFR22.surv %>% mutate(Check1 = ifelse(Survival_20220715 - Survival_20220622 <= 0, "", "Remove?"),
-                                      Check2 = ifelse(Survival_20220721 - Survival_20220715 <= 0, "", "Remove?"),
-                                      Check3 = ifelse(Survival_20220726 - Survival_20220721 <= 0, "", "Remove?"),
-                                      Check4 = ifelse(Survival_20220804 - Survival_20220726 <= 0, "", "Remove?"),
-                                      Check5 = ifelse(Survival_20220817 - Survival_20220804 <= 0, "", "Remove?"),
-                                      Check6 = ifelse(Survival_20220830 - Survival_20220817 <= 0, "", "Remove?"),
-                                      Check7 = ifelse(Survival_20220909 - Survival_20220830 <= 0, "", "Remove?"),
-                                      Check8 = ifelse(Survival_20220922 - Survival_20220909 <= 0, "", "Remove?"))
+#ARFR22.surv <- ARFR22.surv %>% mutate(Check1 = ifelse(Survival_20220715 - Survival_20220622 <= 0, "", "Remove?"),
+#                                      Check2 = ifelse(Survival_20220721 - Survival_20220715 <= 0, "", "Remove?"),
+#                                      Check3 = ifelse(Survival_20220726 - Survival_20220721 <= 0, "", "Remove?"),
+#                                      Check4 = ifelse(Survival_20220804 - Survival_20220726 <= 0, "", "Remove?"),
+#                                      Check5 = ifelse(Survival_20220817 - Survival_20220804 <= 0, "", "Remove?"),
+#                                      Check6 = ifelse(Survival_20220830 - Survival_20220817 <= 0, "", "Remove?"),
+#                                      Check7 = ifelse(Survival_20220909 - Survival_20220830 <= 0, "", "Remove?"),
+#                                      Check8 = ifelse(Survival_20220922 - Survival_20220909 <= 0, "", "Remove?"))
 #ARFR22.surv[ARFR22.surv$Check1=="Remove?",]
 #ARFR22.surv[ARFR22.surv$Check2=="Remove?",]
 #ARFR22.surv[ARFR22.surv$Check3=="Remove?",]
@@ -202,18 +211,19 @@ ARFR22.surv <- ARFR22.surv %>% mutate(Check1 = ifelse(Survival_20220715 - Surviv
 #ARFR22.surv[ARFR22.surv$Check8=="Remove?",]
 ## All 2022 have been fixed 
 
-ARFR23.surv <- ARFR23.surv %>% mutate(Check1 = ifelse(Survival_20230620 - Survival_20230615 <= 0, "", "Remove?"),
-                                      Check2 = ifelse(Survival_20230629 - Survival_20230620 <= 0, "", "Remove?"),
-                                      Check3 = ifelse(Survival_20230705 - Survival_20230629 <= 0, "", "Remove?"),
-                                      Check4 = ifelse(Survival_20230728 - Survival_20230705 <= 0, "", "Remove?"),
-                                      Check5 = ifelse(Survival_20230801 - Survival_20230728 <= 0, "", "Remove?"),
-                                      Check6 = ifelse(Survival_20230927 - Survival_20230801 <= 0, "", "Remove?"))
-ARFR23.surv[ARFR23.surv$Check1=="Remove?",]
-ARFR23.surv[ARFR23.surv$Check2=="Remove?",]
-ARFR23.surv[ARFR23.surv$Check3=="Remove?",]
-ARFR23.surv[ARFR23.surv$Check4=="Remove?",]
-ARFR23.surv[ARFR23.surv$Check5=="Remove?",]
-ARFR23.surv[ARFR23.surv$Check6=="Remove?" & !is.na(ARFR23.surv$Check6),]
+#ARFR23.surv <- ARFR23.surv %>% mutate(Check1 = ifelse(Survival_20230620 - Survival_20230615 <= 0, "", "Remove?"),
+#                                      Check2 = ifelse(Survival_20230629 - Survival_20230620 <= 0, "", "Remove?"),
+#                                      Check3 = ifelse(Survival_20230705 - Survival_20230629 <= 0, "", "Remove?"),
+#                                      Check4 = ifelse(Survival_20230728 - Survival_20230705 <= 0, "", "Remove?"),
+#                                      Check5 = ifelse(Survival_20230801 - Survival_20230728 <= 0, "", "Remove?"),
+#                                      Check6 = ifelse(Survival_20230927 - Survival_20230801 <= 0, "", "Remove?"))
+#ARFR23.surv[ARFR23.surv$Check1=="Remove?" & !is.na(ARFR23.surv$Check1),]
+#ARFR23.surv[ARFR23.surv$Check2=="Remove?" & !is.na(ARFR23.surv$Check2),]
+#ARFR23.surv[ARFR23.surv$Check3=="Remove?" & !is.na(ARFR23.surv$Check3),]
+#ARFR23.surv[ARFR23.surv$Check4=="Remove?" & !is.na(ARFR23.surv$Check4),]
+#ARFR23.surv[ARFR23.surv$Check5=="Remove?" & !is.na(ARFR23.surv$Check5),]
+#ARFR23.surv[ARFR23.surv$Check6=="Remove?" & !is.na(ARFR23.surv$Check6),]
+## All 2023 have been fixed 
 ## ----------------------------------------------------------------------------------------------
 
 
@@ -224,7 +234,7 @@ ARFR23.surv[ARFR23.surv$Check6=="Remove?" & !is.na(ARFR23.surv$Check6),]
 ## ARFR - DATA MODS ------------------------------------
 ## Add Source column where source name format matches Source in main data frame
 ARFR.SdZn$Source <- str_replace(ARFR.SdZn$SOURCE_CODE, "4-SOS", "")
-ARFR.biovar$Source <- str_replace(ARFR.biovar$Pop, "4-SOS", "")
+#ARFR.biovar$Source <- str_replace(ARFR.biovar$Pop, "4-SOS", "")
 
 ## Add Population name abbreviation column. Within state should be ordered by increasing lat
 ARFR.SdZn$PopAbbrev[grepl("ARFR-AZ930-423-NAVAJO-18", ARFR.SdZn$Source)] = "AZ.1" #"A.AZ.1"   
@@ -240,9 +250,9 @@ ARFR.SdZn$PopAbbrev[grepl("ARFR-WY050-151-FREMONT-16", ARFR.SdZn$Source)] = "WY.
 ARFR.SdZn$PopAbbrev[grepl("ARFR-WY050-49-FREMONT-12", ARFR.SdZn$Source)] = "WY.3" #"A.WY.3"  
 
 ## Edit column names for biovariables
-colnames(ARFR.biovar) <- c("Pop","bio1","bio2","bio3","bio4","bio5","bio6","bio7","bio8",
-                           "bio9","bio10","bio11","bio12","bio13","bio14","bio15","bio16",
-                           "bio17","bio18","bio19","Source")
+#colnames(ARFR.biovar) <- c("Pop","bio1","bio2","bio3","bio4","bio5","bio6","bio7","bio8",
+#                           "bio9","bio10","bio11","bio12","bio13","bio14","bio15","bio16",
+#                           "bio17","bio18","bio19","Source")
 
 ## Add colour columns that corresponds to pop or seed zone
 #SdZn.list <- unique(ARFR.SdZn$SdZone) #If coloring by seed zone, make distinct from lat/ unique pop colors**
@@ -295,17 +305,22 @@ ARFR.SdZn$PopOrder[grepl("ARFR-WY050-49-FREMONT-12", ARFR.SdZn$Source)] = "K"
 
 
 ## ARFR - COMBINE DATA TYPES --------------------------------------------
-ARFR.biovar <- left_join(ARFR.biovar, ARFR.SdZn, by="Source")
-ARFR22.cl <- left_join(ARFR22.cl, ARFR.biovar, by="Source")
-ARFR23 <- left_join(ARFR23, ARFR.biovar, by="Source")
+identical(ARFR22$ID, ARFR23$ID)
+identical(ARFR22$ID, ARFR24$ID)
+#ARFR.biovar <- left_join(ARFR.biovar, ARFR.SdZn, by="Source")
+#ARFR22.cl <- left_join(ARFR22.cl, ARFR.biovar, by="Source")
+ARFR22 <- left_join(ARFR22, ARFR.SdZn, by="Source")
+ARFR23 <- left_join(ARFR23, ARFR.SdZn, by="Source")
 ARFR24.surv <- ARFR24.surv %>% rename(ID=Plant.ID)
 ARFR24 <- left_join(ARFR24, ARFR24.surv, by="ID")
-ARFR24 <- left_join(ARFR24, ARFR.biovar, by="Source")
+ARFR24 <- left_join(ARFR24, ARFR.SdZn, by="Source")
+ARFR23 <- cbind(ARFR23, ARFR22$ExcludeBcNotReplaced, ARFR24$ExcludeBcHarvest)
+ARFR24 <- cbind(ARFR24, ARFR22$ExcludeBcNotReplaced, ARFR23$ExcludeSurvDueToInconsistData)
+
+## ** SAVE CLEAN DATA FOR EACH YEAR ** 
 ## ----------------------------------------------------------------------
 
-## ** Do surv check in combined datasheet? **
 
-## ** Account for Harvested indivs somewhere ** 
 
 
 
@@ -364,20 +379,10 @@ ARFR23.sel <- ARFR23 %>% dplyr::select(c("ID","Height_20230927"))
 ARFR.cl <- left_join(ARFR24, ARFR23.sel, by="ID") 
 ARFR.cl <- left_join(ARFR.cl, ARFR22.sel, by="ID") 
 ARFR.cl$Source <- as.factor(ARFR.cl$Source)
-## ---------------------------------------------------------------
 
+## ** Do surv check in combined datasheet? **
 
-
-
-## Do something similar for ARFR if needed ----------------------------------------------------------
-## MAKE FILE WITH JUST COLUMNS/ PHENOTYPES OF INTEREST FOR ANALYSIS WITH GENOTYPE DATA --------------
-#ERNA.clSel <- ERNA.cl %>% dplyr::select(c("Source","ID","SentForSequencing_20230803","Length_cm_20220608",
-#                                          "Length_cm_20220719","Length_cm_20220915","DaysToFlwr","SLA_mm2permg",
-#                                          "bio1","bio2","bio3","bio4","bio5","bio6","bio7","bio8","bio9","bio10",
-#                                          "bio11","bio12","bio13","bio14","bio15","bio16","bio17","bio18","bio19",
-#                                          "Longitude","Latitude","HexCode","seed_zone","SdZnAbbrev","PopAbbrev")) 
-
-#write.csv(ERNA.clSel, "Chatfield/20241018_ChatfieldPhenotypes_ERNA.csv", row.names=FALSE)
+write.csv(ARFR.cl, "Chatfield/20251031_ChatfieldPhenotypes_ARFR.csv", row.names=FALSE)
 ## --------------------------------------------------------------------------------------------------
 
 
