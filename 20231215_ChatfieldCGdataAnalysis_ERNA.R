@@ -183,11 +183,10 @@ max(ERNA23$Flowering_20231013, na.rm=TRUE)
 
 # ** Check that phenology only increases or stays the same; once flowering=1, it shouldn't go back to 0 
 
-## ** Add other checks listed in BOGR? ** 
 # ** Check that length is only numeric
 # ** Check that if surv=0 for a given date, there are no phenology or height values for that date
 
-## *** Need to work on this **** Look at ARFR for maybe some progress ** 
+## *** Need to work on this **** Look at ARFR ** 
 #Check that once zero in surv on X/X or later, stays zero (if becomes 1 later, could be data entry error, or not depending on species)
 ## CONSOLIDATE SURVIVAL DATA
 #ERNA.Surv <- ERNA22.cl %>% dplyr::select(c(starts_with("Survival_")))
