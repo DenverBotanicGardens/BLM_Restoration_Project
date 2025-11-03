@@ -40,9 +40,9 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 
 
 ## LOAD DATA --------------------------------------------------------------------------------------
-ARFR22 <- read.csv(file="Chatfield/2022_data/20251031_ChatfieldDataClean2022_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
-ARFR23 <- read.csv(file="Chatfield/2023_data/20251031_ChatfieldDataClean2023_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
-ARFR24 <- read.csv(file="Chatfield/2024_data/20251031_ChatfieldDataClean2024_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
+ARFR22 <- read.csv(file="Chatfield/2022_data/20251031_ChatfieldDataClean2022_ARFR.csv", sep=",", header=TRUE, dec=".")#, na.strings="")
+ARFR23 <- read.csv(file="Chatfield/2023_data/20251031_ChatfieldDataClean2023_ARFR.csv", sep=",", header=TRUE, dec=".")#, na.strings="")
+ARFR24 <- read.csv(file="Chatfield/2024_data/20251031_ChatfieldDataClean2024_ARFR.csv", sep=",", header=TRUE, dec=".")#, na.strings="")
 
 ## Load PCA values from Alyson's analysis
 pca_vals <- read.csv(file="DNA_Seq/AlysonEmery/20251006_pcaTableFromAlyson_ARFR.csv", sep=",", header=TRUE, dec=".")
@@ -63,20 +63,32 @@ ARFR24$Source <- as.factor(ARFR24$Source)
 ARFR22$Treatment <- as.factor(ARFR22$Treatment)
 ARFR23$Treatment <- as.factor(ARFR23$Treatment)
 ARFR24$Treatment <- as.factor(ARFR24$Treatment)
-
-## ** Lots of Variables imported as 'chr' and should be changed **
-
 ## ----------------------------------------------------------------------------------------------
 
 
 
 
 
-## ARFR - ADD GROWTH RATE VARIABLES ------------------------------
+## ARFR - PREPARE RESPONSE VARIABLES
+
+## CHANGE DATA TO NA BASED ON VARIOUS CONDITIONS (E.G. EXCLUDE DATA IN 2023-24 IF HARVESTED IN 2022)
+ARFR22.ex <- ARFR22 %>% mutate(across((starts_with("Survival_")), 
+             ~case_when(ExcludeBcNotReplaced=="Y" ~ as.integer(NA), TRUE ~ as.integer(.x))))
+ARFR22.ex <- ARFR22 %>% mutate(across((starts_with("Length_")), 
+             ~case_when(ExcludeBcNotReplaced=="Y" ~ as.integer(NA), TRUE ~ as.integer(.x))))
+ARFR23.ex <- ARFR23 %>% mutate(across(c(starts_with("Survival_"), "Height_20230927"), 
+             ~case_when(ARFR22.ExcludeBcNotReplaced=="Y" ~ as.integer(NA), TRUE ~ as.integer(.x))))
+ARFR23.ex <- ARFR23 %>% mutate(across(c(starts_with("Survival_"), "Height_20230927"), 
+             ~case_when(ARFR24.ExcludeBcHarvest=="Y" ~ as.integer(NA), TRUE ~ as.integer(.x))))
+## ** do for 2024 data **
+
+
+
+## GROWTH RATE VARIABLES ------------------------------
 ## 'Late' growth (June to July)
-#ARFR22.cl$GrwthRate_Specific <- log(ARFR22.cl$Length_cm_20220726/ARFR22.cl$Length_cm_20220622)
-#ARFR22.cl$GrwthRate_Absolute <- ARFR22.cl$Length_cm_20220726-ARFR22.cl$Length_cm_20220622
-ARFR22.cl$GrwthRate_Relative <- (ARFR22.cl$Length_cm_20220726-ARFR22.cl$Length_cm_20220622)/ARFR22.cl$Length_cm_20220622
+ARFR22$GrwthRate_Specific <- log(ARFR22$Length_cm_20220726/ARFR22$Length_cm_20220622)
+ARFR22$GrwthRate_Absolute <- ARFR22$Length_cm_20220726-ARFR22$Length_cm_20220622
+ARFR22$GrwthRate_Relative <- (ARFR22$Length_cm_20220726-ARFR22$Length_cm_20220622)/ARFR22$Length_cm_20220622
 
 ## Could look at early vs late growth if can use pre-replacement early height measurement 20220527
 ## ---------------------------------------------------------------

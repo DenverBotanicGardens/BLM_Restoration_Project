@@ -41,8 +41,8 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 
 
 ## LOAD DATA --------------------------------------------------------------------------------------
-ARFR22 <- read.csv(file="Chatfield/2022_data/20251030_ChatfieldData2022_ARFR_clean.csv", sep=",", header=TRUE, dec=".", na.strings="")
-ARFR23 <- read.csv(file="Chatfield/2023_data/20251030_ChatfieldData2023_ARFR_AGclean.csv", sep=",", header=TRUE, dec=".", na.strings="")
+ARFR22 <- read.csv(file="Chatfield/2022_data/20251030_ChatfieldData2022_ARFR_updates.csv", sep=",", header=TRUE, dec=".", na.strings="")
+ARFR23 <- read.csv(file="Chatfield/2023_data/20251030_ChatfieldData2023_ARFR_updates.csv", sep=",", header=TRUE, dec=".", na.strings="")
 ARFR24 <- read.csv(file="Chatfield/2024_data/20241219_ChatfieldData2024_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
 ARFR24.surv <- read.csv(file="Chatfield/2024_data/CommonGarden/ARFR/20250321_ChatfieldCGsurveyData2024_ARFR_amgUpdates.csv", sep=",", header=TRUE, dec=".", na.strings="")
 
@@ -307,6 +307,7 @@ ARFR.SdZn$PopOrder[grepl("ARFR-WY050-49-FREMONT-12", ARFR.SdZn$Source)] = "K"
 ## ARFR - COMBINE DATA TYPES --------------------------------------------
 identical(ARFR22$ID, ARFR23$ID)
 identical(ARFR22$ID, ARFR24$ID)
+identical(ARFR23$ID, ARFR24$ID)
 #ARFR.biovar <- left_join(ARFR.biovar, ARFR.SdZn, by="Source")
 #ARFR22.cl <- left_join(ARFR22.cl, ARFR.biovar, by="Source")
 ARFR22 <- left_join(ARFR22, ARFR.SdZn, by="Source")
@@ -321,6 +322,10 @@ ARFR24 <- cbind(ARFR24, ARFR22$ExcludeBcNotReplaced, ARFR23$ExcludeSurvDueToInco
 write.csv(ARFR22, "Chatfield/20251031_ChatfieldDataClean2022_ARFR.csv", row.names=FALSE)
 write.csv(ARFR23, "Chatfield/20251031_ChatfieldDataClean2023_ARFR.csv", row.names=FALSE)
 write.csv(ARFR24, "Chatfield/20251031_ChatfieldDataClean2024_ARFR.csv", row.names=FALSE)
+
+## Test
+#write.csv(ARFR23, "Chatfield/20251103_ChatfieldDataClean2023_ARFR.csv", row.names=FALSE)
+#ARFR23 <- read.csv(file="Chatfield/2023_data/20251103_ChatfieldDataClean2023_ARFR.csv", sep=",", header=TRUE, dec=".")#, na.strings="")
 ## ----------------------------------------------------------------------
 
 
