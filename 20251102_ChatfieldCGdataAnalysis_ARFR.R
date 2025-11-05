@@ -11,16 +11,16 @@ rm(list=ls())
 ## LOAD PACKAGES AND FUNCTIONS --------------------------------------------------------------------
 #library(Hmisc)
 #library(tidyr)
-#library(car)
 #library(corrplot)
 #library(tidyverse)
 library(dplyr)
 library(stringr)
 library(lme4)
+library(car)
 library(plotrix)
-library(EnvStats)
+#library(EnvStats)
 library(effects)
-library(reshape2)
+#library(reshape2)
 library(gplots)
 library(AICcmodavg)
 library(PerformanceAnalytics)
@@ -131,6 +131,8 @@ ARFR23.ex$Height_20230927[ARFR23.ex$ExcludeSzDueToUncertainty=="Y" & !is.na(ARFR
 ARFR23.ex$Height_20230927[ARFR23.ex$ExcludeSurvDueToInconsistData=="Y" & !is.na(ARFR23.ex$ExcludeSurvDueToInconsistData)] <- NA
 nrow(ARFR23[!is.na(ARFR23$Height_20230927>0),])
 
+
+## CALC SURVIVAL FOR EACH YEAR HERE? **
 
 
 
@@ -273,49 +275,141 @@ barplot(surv.pop, col=ARFR.meds$PopCol, ylim=c(0,1), cex.axis=0.99, names.arg=AR
 
 
 ## MODEL TRAIT DATA ----------------------------------
+
 ## Plant size
+
+## 2022
 ARFR.sel$Block <- as.factor(ARFR.sel$Block)
-sz22.mod <- lme4::lmer(Length_cm_20220726 ~ Source + (1|Block), data=ARFR.sel)
-summary(ERNA.ht.bv.mod)
-Anova(ERNA.ht.bv.mod)
-plot(allEffects(ERNA.ht.bv.mod))
-plot(predictorEffects(ERNA.ht.bv.mod))
+sz22.mod <- lmer(Length_cm_20220726 ~ Source + (1|Block), data=ARFR.sel)
+summary(sz22.mod)
+Anova(sz22.mod)
 
-## Number of seeds produced (fecundity)
-## Negative binomial regression
-#fitSds.mm <- glmer.nb(round(numSdsAdj) ~ ecotype * habitat + (1|pop) + (1|plot), data=datLate)
+## Check distribution of residuals to assess if model form/ family is appropriate
+pResid <- residuals(sz22.mod, type="pearson")
+dResid <- residuals(sz22.mod, type="deviance")
+hist(pResid)                                          #Shape should be consistent with assumed error distribution (e.g. normal)
+hist(dResid)
+qqnorm(pResid)                                        #Points should roughly follow the diagonal line, even at tails
+qqline(dResid)
+plot(fitted(sz22.mod), pResid, abline(h=0,col="red")) #Residuals should be randomly scattered around 0 line
 
-#fitSds.src <- glm.nb(round(numSdsAdj) ~ ecotype * habitat, data=datLate)  
+## Obtain model predicted values for response variables
+predForSource <- as.data.frame(unique(ARFR.sel$Source))
+colnames(predForSource) <- "Source"
+sz22.pred <- predict(sz22.mod, newdata=predForSource, type="response", re.form=~0, se.fit=TRUE)
 
 
+## 2023
+sz23.mod <- lmer(Height_20230927 ~ Source + (1|Block), data=ARFR.sel)
+summary(sz23.mod)
+Anova(sz23.mod)
+
+## Check distribution of residuals to assess if model form/ family is appropriate
+pResid <- residuals(sz23.mod, type="pearson")
+hist(pResid)                                          #Shape should be consistent with assumed error distribution (e.g. normal)
+qqnorm(pResid)                                        #Points should roughly follow the diagonal line, even at tails
+qqline(pResid)
+plot(fitted(sz23.mod), pResid, abline(h=0,col="red")) #Residuals should be randomly scattered around 0 line
+
+## Obtain model predicted values for response variables
+sz23.pred <- predict(sz23.mod, newdata=predForSource, type="response", re.form=~0, se.fit=TRUE)
+
+
+
+## SLA
+hist(ARFR.sel$SLA_mm2permg)
+hist(log(ARFR.sel$SLA_mm2permg))
+sla.mod <- lmer(log(SLA_mm2permg) ~ Source + (1|Block), data=ARFR.sel)
+summary(sla.mod)
+Anova(sla.mod)
+
+## Check distribution of residuals to assess if model form/ family is appropriate
+pResid <- residuals(sla.mod, type="pearson")
+dResid <- residuals(sla.mod, type="deviance")
+hist(dResid)                                          #Shape should be consistent with assumed error distribution (e.g. normal)
+qqnorm(pResid)                                        #Points should roughly follow the diagonal line, even at tails
+qqline(pResid)
+plot(fitted(sla.mod), pResid, abline(h=0,col="red")) #Residuals should be randomly scattered around 0 line
+
+## Obtain model predicted values for response variables
+sla.predLog <- predict(sla.mod, newdata=predForSource, type="response", re.form=~0, se.fit=TRUE)
+sla.predOrigFit <- exp(sla.predLog$fit)
+sla.predOrigSE <- exp(sla.predLog$se.fit)
+
+
+
+## Reproductive biomass
+hist(ARFR.sel$InfBM2022_2024updated)
+hist(log(ARFR.sel$InfBM2022_2024updated))
+
+rbm.mod <- lmer(log(InfBM2022_2024updated) ~ Source + (1|Block), data=ARFR.sel)
+summary(rbm.mod)
+Anova(rbm.mod)
+
+## Check distribution of residuals to assess if model form/ family is appropriate
+pResid <- residuals(rbm.mod, type="pearson")
+hist(pResid)                                          #Shape should be consistent with assumed error distribution (e.g. normal)
+qqnorm(pResid)                                        #Points should roughly follow the diagonal line, even at tails
+qqline(pResid)
+plot(fitted(rbm.mod), pResid, abline(h=0,col="red")) #Residuals should be randomly scattered around 0 line
+## Try gamma with logged data? Or something for positive values with left skew **
+
+## Obtain model predicted values for response variables
+rbm.predLog <- predict(rbm.mod, newdata=predForSource, type="response", re.form=~0, se.fit=TRUE)
+rbm.predOrigFit <- exp(rbm.predLog$fit)
+rbm.predOrigSE <- exp(rbm.predLog$se.fit)
+
+
+
+## Survival
 ## ** From GSD **
-## Emergence 
-## Logistic regression 
-#fitEmrg.mm <- glmer(cbind(emrg, num.planted-emrg) ~ ecotype * habitat + (1|pop) + (1|plot), 
-#                    data=datEarly, family=binomial(link="logit"),
-#                    glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=20000)))
-
-#fitEmrg.src <- glm(cbind(emrg, num.planted-emrg) ~ ecotype * habitat, data=datEarly,
-#                   family=binomial(link="logit"))
-
-
-
 ## Seedling-to-adult survival 
 ## Logistic regression 
 #fitSurv.mm <- glmer(cbind(surv, emrg-surv) ~ ecotype * habitat + (1|pop) + (1|plot), 
 #                    data=datEarly, family=binomial(link="logit"),
 #                    glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=20000)))
 
-#fitSurv.src <- glm(cbind(surv, emrg-surv) ~ ecotype * habitat, data=datEarly,
-#                   family=binomial(link="logit"))
 
 
 
+## PLOT MODEL ESTIMATES AND SE
+predForSource <- dplyr::left_join(predForSource, AddnCols, by="Source")
+predForSource <- unique(predForSource)
+preds <- cbind(predForSource, sz22.pred$fit, sz22.pred$se.fit, sz23.pred$fit, sz23.pred$se.fit,
+               rbm.predOrigFit, rbm.predOrigSE, sla.predOrigFit, sla.predOrigSE)
+preds <- preds[order(preds$Lat),] #Order by lat
 
+par(mfrow=c(2,2))
 
-## Model SLA and plt size with linear models. Also try growth rate? 
-## Don't show SLA or growth rate but say that we models them and no sig diffs between sources? 
+plot(NA, NA, xlab="Seed source", ylab="Height (cm)",
+     main="FINAL SIZE 2022", cex.lab=1.25, xaxt='n', xlim=c(1,11), ylim=c(13.5,48.5))
+arrows(1:11, preds$`sz22.pred$fit`+preds$`sz22.pred$se.fit`, 1:11, preds$`sz22.pred$fit`-preds$`sz22.pred$se.fit`,
+       angle=90, col="black", code=3, length=0, lwd=2)
+points(1:11, preds$`sz22.pred$fit`, col="black", bg=preds$PopCol, pch=21, cex=1.45)
+axis(side=1, at=1:11,preds$PopAbbrev, las=2, cex.axis=0.9)
 
+plot(NA, NA, xlab="Seed source", ylab="Reproductive  biomass (g)",
+     main="REPRODUCTION 2022", cex.lab=1.25, xaxt='n', xlim=c(1,11), ylim=c(0,40))
+arrows(1:11, preds$rbm.predOrigFit+preds$rbm.predOrigSE, 1:11, preds$rbm.predOrigFit-preds$rbm.predOrigSE,
+       angle=90, col="black", code=3, length=0, lwd=2)
+points(1:11, preds$rbm.predOrigFit, col="black", bg=preds$PopCol, pch=21, cex=1.5)
+axis(side=1, at=1:11,preds$PopAbbrev, las=2, cex.axis=0.9)
+
+plot(NA, NA, xlab="Seed source", ylab="Height (cm)",
+     main="FINAL SIZE 2023", cex.lab=1.25, xaxt='n', xlim=c(1,11), ylim=c(40,68))
+arrows(1:11, preds$`sz23.pred$fit`+preds$`sz23.pred$se.fit`, 1:11, preds$`sz23.pred$fit`-preds$`sz23.pred$se.fit`,
+       angle=90, col="black", code=3, length=0, lwd=2)
+points(1:11, preds$`sz23.pred$fit`, col="black", bg=preds$PopCol, pch=21, cex=1.5)
+axis(side=1, at=1:11,preds$PopAbbrev, las=2, cex.axis=0.9)
+
+plot(NA, NA, xlab="Seed source", ylab="Specific leaf area (mm2/mg)",
+     main="SPECIFIC LEAF AREA 2024", cex.lab=1.25, xaxt='n', xlim=c(1,11), ylim=c(10,16))
+arrows(1:11, preds$sla.predOrigFit+preds$sla.predOrigSE, 1:11, preds$sla.predOrigFit-preds$sla.predOrigSE,
+       angle=90, col="black", code=3, length=0, lwd=2)
+points(1:11, preds$sla.predOrigFit, col="black", bg=preds$PopCol, pch=21, cex=1.5)
+axis(side=1, at=1:11,preds$PopAbbrev, las=2, cex.axis=0.9)
+
+## ** add asterix or letters to show significant comparisons? ** 
 
 ## Also look at coefficient of variation or sd vs mean? **
 
