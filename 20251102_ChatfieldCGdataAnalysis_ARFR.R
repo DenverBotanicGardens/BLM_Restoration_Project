@@ -273,6 +273,21 @@ barplot(surv.pop, col=ARFR.meds$PopCol, ylim=c(0,1), cex.axis=0.99, names.arg=AR
 
 
 ## MODEL TRAIT DATA ----------------------------------
+## Plant size
+ARFR.sel$Block <- as.factor(ARFR.sel$Block)
+sz22.mod <- lme4::lmer(Length_cm_20220726 ~ Source + (1|Block), data=ARFR.sel)
+summary(ERNA.ht.bv.mod)
+Anova(ERNA.ht.bv.mod)
+plot(allEffects(ERNA.ht.bv.mod))
+plot(predictorEffects(ERNA.ht.bv.mod))
+
+## Number of seeds produced (fecundity)
+## Negative binomial regression
+#fitSds.mm <- glmer.nb(round(numSdsAdj) ~ ecotype * habitat + (1|pop) + (1|plot), data=datLate)
+
+#fitSds.src <- glm.nb(round(numSdsAdj) ~ ecotype * habitat, data=datLate)  
+
+
 ## ** From GSD **
 ## Emergence 
 ## Logistic regression 
@@ -296,11 +311,6 @@ barplot(surv.pop, col=ARFR.meds$PopCol, ylim=c(0,1), cex.axis=0.99, names.arg=AR
 
 
 
-## Number of seeds produced (fecundity)
-## Negative binomial regression
-#fitSds.mm <- glmer.nb(round(numSdsAdj) ~ ecotype * habitat + (1|pop) + (1|plot), data=datLate)
-
-#fitSds.src <- glm.nb(round(numSdsAdj) ~ ecotype * habitat, data=datLate)  
 
 
 ## Model SLA and plt size with linear models. Also try growth rate? 
