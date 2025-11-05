@@ -68,105 +68,246 @@ ARFR24$Treatment <- as.factor(ARFR24$Treatment)
 
 
 
-
+## ----------------------------------------------------------------------------------------------
 ## ARFR - PREPARE RESPONSE VARIABLES
 
-## CHANGE DATA TO NA BASED ON VARIOUS CONDITIONS (E.G. EXCLUDE DATA IN 2023-24 IF HARVESTED IN 2022)
-ARFR22.ex <- ARFR22 %>% mutate(across((starts_with("Survival_")), 
-             ~case_when(ExcludeBcNotReplaced=="Y" ~ as.integer(NA), TRUE ~ as.integer(.x))))
-ARFR22.ex <- ARFR22 %>% mutate(across((starts_with("Length_")), 
-             ~case_when(ExcludeBcNotReplaced=="Y" ~ as.integer(NA), TRUE ~ as.integer(.x))))
+## CHANGE DATA TO NA BASED ON VARIOUS CONDITIONS (E.G. EXCLUDE SURV DATA IN 2023-24 IF HARVESTED IN 2022)
+ARFR22.ex <- ARFR22 %>% mutate(across(c(starts_with("Survival_"),starts_with("Length_")), 
+             ~case_when(ExcludeBcNotReplaced=="Y" ~ as.integer(NA), TRUE ~ as.numeric(.x))))
 ARFR23.ex <- ARFR23 %>% mutate(across(c(starts_with("Survival_"), "Height_20230927"), 
-             ~case_when(ARFR22.ExcludeBcNotReplaced=="Y" ~ as.integer(NA), TRUE ~ as.integer(.x))))
-ARFR23.ex <- ARFR23 %>% mutate(across(c(starts_with("Survival_"), "Height_20230927"), 
-             ~case_when(ARFR24.ExcludeBcHarvest=="Y" ~ as.integer(NA), TRUE ~ as.integer(.x))))
-## ** do for 2024 data **
+             ~case_when(ARFR22.ExcludeBcNotReplaced=="Y" ~ as.integer(NA), TRUE ~ as.numeric(.x))))
+ARFR23.ex <- ARFR23.ex %>% mutate(across(c(starts_with("Survival_"), "Height_20230927"), 
+             ~case_when(ARFR24.ExcludeBcHarvest=="Y" ~ as.integer(NA), TRUE ~ as.numeric(.x))))
+ARFR24.ex <- ARFR24 %>% mutate(across(c("Survival","LeafSurfaceArea_cm2","SLA_mm2permg","DryLeafMass_g",
+             "InfBM2022smpls_HEADS_2024weigh","InfBM2022smpls_CHAFF_2024weigh"), 
+            ~case_when(ARFR22.ExcludeBcNotReplaced=="Y" ~ as.integer(NA), TRUE ~ as.numeric(.x))))
+ARFR24.ex <- ARFR24.ex %>% mutate(across(c("Survival","LeafSurfaceArea_cm2","SLA_mm2permg","DryLeafMass_g",
+             "InfBM2022smpls_HEADS_2024weigh","InfBM2022smpls_CHAFF_2024weigh"), 
+            ~case_when(ARFR23.ExcludeSurvDueToInconsistData=="Y" ~ as.integer(NA), TRUE ~ as.numeric(.x))))
+ARFR24.ex <- ARFR24.ex %>% mutate(across(c("Survival","LeafSurfaceArea_cm2","SLA_mm2permg","DryLeafMass_g"), 
+            ~case_when(ExcludeBcHarvest=="Y" ~ as.integer(NA), TRUE ~ as.numeric(.x))))
 
 
 
-## GROWTH RATE VARIABLES ------------------------------
+
+
+## GROWTH RATE VARIABLES -----------------------------------------------------------------------
 ## 'Late' growth (June to July)
-ARFR22$GrwthRate_Specific <- log(ARFR22$Length_cm_20220726/ARFR22$Length_cm_20220622)
-ARFR22$GrwthRate_Absolute <- ARFR22$Length_cm_20220726-ARFR22$Length_cm_20220622
-ARFR22$GrwthRate_Relative <- (ARFR22$Length_cm_20220726-ARFR22$Length_cm_20220622)/ARFR22$Length_cm_20220622
+ARFR22.ex$GrwthRate_Specific <- log(ARFR22.ex$Length_cm_20220726/ARFR22.ex$Length_cm_20220622)
+ARFR22.ex$GrwthRate_Absolute <- ARFR22.ex$Length_cm_20220726-ARFR22.ex$Length_cm_20220622
+ARFR22.ex$GrwthRate_Relative <- (ARFR22.ex$Length_cm_20220726-ARFR22.ex$Length_cm_20220622)/ARFR22.ex$Length_cm_20220622
 
-## Could look at early vs late growth if can use pre-replacement early height measurement 20220527
-## ---------------------------------------------------------------
+## 'Early' growth (May to June)
+## **Need to handle pre-replacement early height measurement 20220527 differently.. i.e. exclude replaced plts
+ARFR22.ex$GrwthRateErly_Specific <- log(ARFR22.ex$Length_cm_20220622/ARFR22.ex$Length_cm_20220527)
+ARFR22.ex$GrwthRateErly_Absolute <- ARFR22.ex$Length_cm_20220622-ARFR22.ex$Length_cm_20220527
+ARFR22.ex$GrwthRateErly_Relative <- (ARFR22.ex$Length_cm_20220622-ARFR22.ex$Length_cm_20220527)/ARFR22.ex$Length_cm_20220527
 
 
 
-## COMBINE AND ADD REPRO BM DATA ---------------------------------
-#ARFR22.cl$InfBM_Wobag_g
-#ARFR22.cl$InfBM_Wobag_g[!is.na(ARFR22.cl$InfBM_Wobag_g)] #Number of plts with repro data
-#length(ARFR22.cl$InfBM_Wobag_g[!is.na(ARFR22.cl$InfBM_Wobag_g)])
-#length(ARFR22.cl$InfBM_Wbag[!is.na(ARFR22.cl$InfBM_Wbag)])
-#hist(ARFR22.cl$InfBM_Wobag_g)
-#str(ARFR22.cl$InfBM_Wobag_g)
 
+## COMBINE AND ADD REPRO BM DATA --------------------------------------------------------------
 ## Combine flwr head and chaff/seed weights + any missed smpls from initial 2022 weights
 ## Change Chaff entries to zero (from NA) if no chaff weight, but heads were weighed
-ARFR24$InfBM2022smpls_CHAFF_2024weigh[!is.na(ARFR24$InfBM2022smpls_HEADS_2024weigh) & is.na(ARFR24$InfBM2022smpls_CHAFF_2024weigh)] <- 0
-length(ARFR24$InfBM2022smpls_CHAFF_2024weigh[!is.na(ARFR24$InfBM2022smpls_CHAFF_2024weigh)]) 
+ARFR24.ex$InfBM2022smpls_CHAFF_2024weigh[!is.na(ARFR24.ex$InfBM2022smpls_HEADS_2024weigh) & is.na(ARFR24.ex$InfBM2022smpls_CHAFF_2024weigh)] <- 0
+#length(ARFR24.ex$InfBM2022smpls_CHAFF_2024weigh[!is.na(ARFR24.ex$InfBM2022smpls_CHAFF_2024weigh)]) 
 ## Add chaff and head weights together
-ARFR24$InfBM2022_2024updated <- ARFR24$InfBM2022smpls_HEADS_2024weigh + ARFR24$InfBM2022smpls_CHAFF_2024weigh
-length(ARFR24$InfBM2022_2024updated[!is.na(ARFR24$InfBM2022_2024updated)])
+ARFR24.ex$InfBM2022_2024updated <- ARFR24.ex$InfBM2022smpls_HEADS_2024weigh + ARFR24.ex$InfBM2022smpls_CHAFF_2024weigh
+length(ARFR24.ex$InfBM2022_2024updated[!is.na(ARFR24.ex$InfBM2022_2024updated)])
 ## Add several indivs (524, 885, and 908) from 2022 weights that weren't available for 2024 re-weigh
-ARFR24$InfBM2022_2024updated[ARFR24$ID==524] <- ARFR24$InfBM2022_Wobag_g[ARFR24$ID==524]
-ARFR24$InfBM2022_2024updated[ARFR24$ID==885] <- ARFR24$InfBM2022_Wobag_g[ARFR24$ID==885]
-ARFR24$InfBM2022_2024updated[ARFR24$ID==908] <- ARFR24$InfBM2022_Wobag_g[ARFR24$ID==908]
-## ---------------------------------------------------------------
+ARFR24.ex$InfBM2022_2024updated[ARFR24.ex$ID==524] <- ARFR24.ex$InfBM2022_Wobag_g[ARFR24.ex$ID==524]
+ARFR24.ex$InfBM2022_2024updated[ARFR24.ex$ID==885] <- ARFR24.ex$InfBM2022_Wobag_g[ARFR24.ex$ID==885]
+ARFR24.ex$InfBM2022_2024updated[ARFR24.ex$ID==908] <- ARFR24.ex$InfBM2022_Wobag_g[ARFR24.ex$ID==908]
 
 
 
-## COULD ADD AGB VARIABLES AS WELL? 
-## For now, I think height is better since more data and correlated to AGB
-length(ARFR22.cl$AGB_MinusBag[!is.na(ARFR22.cl$AGB_MinusBag)])
-length(ARFR24$AGB2022_MinusBag[!is.na(ARFR24$AGB2022_MinusBag)])
+## CLEAN 2023 PLT SZ FIELD MEASUREMENTS -------------------------------------------------------
+identical(ARFR23.ex$ExcludeSurvDueToInconsistData, ARFR23.ex$ExcludeSzDueToUncertainty)
+nrow(ARFR23.ex[!is.na(ARFR23.ex$ExcludeSurvDueToInconsistData),])
+nrow(ARFR23.ex[!is.na(ARFR23.ex$ExcludeSzDueToUncertainty),])
 
-
-
-## CLEAN 2023 PLT SZ FIELD MEASUREMENTS
+nrow(ARFR23.ex[!is.na(ARFR23.ex$Height_20230927>0),])
+ARFR23.ex$Height_20230927[ARFR23.ex$ExcludeSzDueToUncertainty=="Y" & !is.na(ARFR23.ex$ExcludeSzDueToUncertainty)] <- NA
+ARFR23.ex$Height_20230927[ARFR23.ex$ExcludeSurvDueToInconsistData=="Y" & !is.na(ARFR23.ex$ExcludeSurvDueToInconsistData)] <- NA
 nrow(ARFR23[!is.na(ARFR23$Height_20230927>0),])
-ARFR23$Height_20230927[ARFR23$ExcludeSzDueToUncertainty=="Y" & !is.na(ARFR23$ExcludeSzDueToUncertainty)] <- NA
-nrow(ARFR23[!is.na(ARFR23$Height_20230927>0),])
-## ** Also if excluded for surv, exclude for size? **
+
 
 
 
 ## COMBINE RELEVANT 2022, 2023, 2024 DATA
-# could add other lengths and early growth from 2022 later; make sure replacements corrected for if so
-ARFR22.sel <- ARFR22.cl %>% dplyr::select(c("ID", "Length_cm_20220726")) #, "GrwthRate_Specific", "GrwthRate_Absolute", "GrwthRate_Relative"))               
-ARFR23.sel <- ARFR23 %>% dplyr::select(c("ID","Height_20230927")) 
-ARFR.cl <- left_join(ARFR24, ARFR23.sel, by="ID") 
-ARFR.cl <- left_join(ARFR.cl, ARFR22.sel, by="ID") 
-ARFR.cl$Source <- as.factor(ARFR.cl$Source)
+# consider adding other lengths and early growth from 2022
+ARFR22.sel <- ARFR22.ex %>% dplyr::select(c("ID", "Length_cm_20220726","GrwthRate_Relative","GrwthRateErly_Specific", 
+                                            "GrwthRateErly_Absolute","GrwthRateErly_Relative","Survival_20220922"))               
+ARFR23.sel <- ARFR23.ex %>% dplyr::select(c("ID","Height_20230927","Survival_20230801")) #Don't use surv 9/27 since not all blocks surveyed
+ARFR.sel <- left_join(ARFR24.ex, ARFR23.sel, by="ID") 
+ARFR.sel <- left_join(ARFR.sel, ARFR22.sel, by="ID") 
+ARFR.sel$Source <- as.factor(ARFR.sel$Source)
 
-## ** Do surv check in combined datasheet? **
-
-#write.csv(ARFR.cl, "Chatfield/20251031_ChatfieldPhenotypes_ARFR.csv", row.names=FALSE)
-
-## ARFR - COMBINE RELEVANT DATA ACROSS YEARS --------------------------------------------------------------------
-identical(ARFR22$ID, ARFR23$ID)
-identical(ARFR22$ID, ARFR24$ID)
-identical(ARFR23$ID, ARFR24$ID)
-
-#ARFR22.cl <- left_join(ARFR22.cl, ARFR.biovar, by="Source")
-ARFR22 <- left_join(ARFR22, ARFR.SdZn, by="Source")
-ARFR23 <- left_join(ARFR23, ARFR.SdZn, by="Source")
-ARFR24.surv <- ARFR24.surv %>% rename(ID=Plant.ID)
-ARFR24 <- left_join(ARFR24, ARFR24.surv, by="ID")
-ARFR24 <- left_join(ARFR24, ARFR.SdZn, by="Source")
-ARFR23 <- cbind(ARFR23, ARFR22$ExcludeBcNotReplaced, ARFR24$ExcludeBcHarvest)
-ARFR24 <- cbind(ARFR24, ARFR22$ExcludeBcNotReplaced, ARFR23$ExcludeSurvDueToInconsistData)
-
-## SAVE CLEAN DATA FOR EACH YEAR 
-write.csv(ARFR22, "Chatfield/20251031_ChatfieldDataClean2022_ARFR.csv", row.names=FALSE)
-
-## ----------------------------------------------------------------------
-
+## Surv checks on combined data? 
+## Save?
+#write.csv(ARFR.sel, "Chatfield/20251031_ChatfieldDataTraits_ARFR.csv", row.names=FALSE)
 ## --------------------------------------------------------------------------------------------------
 
 
+
+
+
+## ARFR - VISUALIZE RAW DATA ---------------------------------------------------------------
+
+## Order populations for plotting 
+## Order by average size or lat or other trait(s)
+#ARFR.htByMed <- with(ARFR.cl, reorder(Source, Length_cm_20220726, median, na.rm=TRUE))
+#ARFR.infByMed <- with(ARFR.cl, reorder(Source, InfBM2022_2024updated, median, na.rm=TRUE))
+ARFR.latByMed <- with(ARFR.sel, reorder(Source, Lat, median, na.rm=TRUE))
+
+ARFR.meds <- ARFR.sel %>% group_by(Source) %>% 
+             dplyr::summarise(Height22_MD=median(Length_cm_20220726,na.rm=TRUE), AGB22_MD=median(AGB2022_MinusBag,na.rm=TRUE),
+             ReproBMrw_MD=median(InfBM2022_2024updated,na.rm=TRUE), Height23_MD=median(Height_20230927,na.rm=TRUE),
+             Surv24_Count=length(na.omit(Survival)), Surv24_Sum=sum(Survival, na.rm=TRUE),
+             Surv23_Count=length(na.omit(Survival_20230801)), Surv23_Sum=sum(Survival_20230801, na.rm=TRUE),
+             Surv22_Count=length(na.omit(Survival_20220922)), Surv22_Sum=sum(Survival_20220922, na.rm=TRUE))
+             #LeafArea_MD=median(LeafSurfaceArea_cm2, na.rm=TRUE), LeafMass_MD=median(DryLeafMass_g, na.rm=TRUE),
+             #GrowthReE_MD=median(GrwthRateErly_Relative,na.rm=TRUE), SLA_MD=median(SLA_mm2permg,na.rm=TRUE),
+             #GrowthSpE_MD=median(GrwthRateErly_Specific,na.rm=TRUE), GrowthAbE_MD=median(GrwthRateErly_Absolute,na.rm=TRUE))#Surv24_MN=mean(Survival, na.rm=TRUE)
+
+#ARFR.meds <- left_join(ARFR.meds, ARFR.SdZn, by="Source") 
+AddnCols <- as.data.frame(cbind(ARFR.sel$PopAbbrev,ARFR.sel$PopCol,as.numeric(ARFR.sel$Lat),as.character(ARFR.sel$Source)))
+colnames(AddnCols) <- c("PopAbbrev","PopCol","Lat","Source")
+ARFR.meds <- left_join(ARFR.meds, AddnCols, by="Source")
+ARFR.meds <- unique(ARFR.meds)
+
+## Estimate survival each year
+surv24.pop <- ARFR.meds$Surv24_Sum/ARFR.meds$Surv24_Count
+surv23.pop <- ARFR.meds$Surv23_Sum/ARFR.meds$Surv23_Count
+surv22.pop <- ARFR.meds$Surv22_Sum/ARFR.meds$Surv22_Count
+
+
+
+## Boxplots of raw data 
+ARFR.meds <- ARFR.meds[order(ARFR.meds$Lat),] #Order by lat
+
+par(mfrow=c(2,3))
+
+## Size 2022
+#ARFR.meds <- ARFR.meds[order(ARFR.meds$Height22_MD),] #Order by median sz
+boxplot(Length_cm_20220726 ~ ARFR.latByMed, data=ARFR.sel,
+        ylab="Height (cm)", xlab=NA, cex.lab=1.25, horizontal=FALSE,
+        cex.axis=0.99, names=ARFR.meds$PopAbbrev, las=2,
+        main="FINAL SIZE 2022", cex.main=1.5, col=ARFR.meds$PopCol)
+
+
+## Growth rate(s) 
+#ARFR.meds <- ARFR.meds[order(ARFR.meds$Growth_MD),]
+boxplot(GrwthRateErly_Relative ~ ARFR.latByMed, data=ARFR.sel, las=2,
+        xlab="Plant early relative growth", ylab=NA, cex.lab=1.25, cex.axis=0.99, 
+        names=ARFR.meds$PopAbbrev, ylim=c(-0.5,5.5),
+        cex.main=1.5, col=ARFR.meds$PopCol, ylim=c(-0.4,7), main="GROWTH RATE 2022")
+
+boxplot(GrwthRateErly_Absolute ~ ARFR.latByMed, data=ARFR.sel, las=2,
+        xlab=NA, ylab="Plant early absolute growth", cex.lab=1, cex.axis=0.9, names=ARFR.meds$PopAbbrev,
+        cex.main=1.5, col=ARFR.meds$PopCol, ylim=c(-0.9,20))
+
+boxplot(GrwthRateErly_Specific ~ ARFR.latByMed, data=ARFR.sel,
+        xlab="Population", ylab="Plant early specific growth", cex.lab=1.5, names=ARFR.meds$PopAbbrev,
+        cex.axis=0.7, cex.main=1.5, col=ARFR.meds$PopCol)
+
+
+## Repro
+boxplot(InfBM2022_2024updated ~ ARFR.latByMed, data=ARFR.sel, las=2,
+        ylab="Reproductive biomass (g)", xlab=NA, cex.lab=1.25, cex.axis=0.99, 
+        names=ARFR.meds$PopAbbrev, horizontal=FALSE, ylim=c(0,80),
+        cex.main=1.5, col=ARFR.meds$PopCol, main="REPRODUCTIVE OUTPUT 2022")
+
+
+## Size 2023
+#ARFR.meds <- ARFR.meds[order(ARFR.meds$Height23_MD),] #Order by median 2023 sz
+boxplot(Height_20230927 ~ ARFR.latByMed, data=ARFR.sel,
+        ylab="Height (cm)", xlab=NA, cex.lab=1.25, horizontal=FALSE,
+        cex.axis=0.99, names=ARFR.meds$PopAbbrev, las=2, ylim=c(15,90),
+        main="FINAL SIZE 2023", cex.main=1.5, col=ARFR.meds$PopCol)
+
+
+## SLA 2024
+boxplot(SLA_mm2permg ~ ARFR.latByMed, data=ARFR.sel, las=2,
+        ylab="Specific leaf area (mm2/mg)", xlab=NA, cex.lab=1.25, cex.axis=0.99, 
+        names=ARFR.meds$PopAbbrev, horizontal=FALSE, ylim=c(0,40),
+        cex.main=1.5, col=ARFR.meds$PopCol, main="SPECIFIC LEAF AREA 2024")
+boxplot(LeafSurfaceArea_cm2 ~ ARFR.latByMed, data=ARFR.sel, las=2,
+        ylab="leaf area (cm2)", xlab=NA, cex.lab=1.25, cex.axis=0.99, 
+        names=ARFR.meds$PopAbbrev, horizontal=FALSE, ylim=c(0,2.3),
+        cex.main=1.5, col=ARFR.meds$PopCol, main="LEAF AREA 2024")
+boxplot(DryLeafMass_g ~ ARFR.latByMed, data=ARFR.sel, las=2,
+        ylab="leaf mass (g)", xlab=NA, cex.lab=1.25, cex.axis=0.99, 
+        names=ARFR.meds$PopAbbrev, horizontal=FALSE, ylim=c(0,0.02),
+        cex.main=1.5, col=ARFR.meds$PopCol, main="LEAF MASS 2024")
+
+
+## Survival 2024
+barplot(surv.pop, col=ARFR.meds$PopCol, ylim=c(0,1), cex.axis=0.99, names.arg=ARFR.meds$PopAbbrev,
+        las=2, ylab="Survival rate", main="SURVIVAL 2022-2024", cex.main=1.5)
+
+## Try stacked bar plot with survival rate by year ** 
+## Make stacked barplot to visualize cv for each trait and population
+#ERNA.cvT <- as.matrix(rbind(as.vector(ERNA.cv$Height_CV), as.vector(ERNA.cv$Growth_CV),
+#                            as.vector(ERNA.cv$DaysToFlwr_CV)))#, as.vector(ERNA.cv$GrowthE_CV)
+#colnames(ERNA.cvT) <- ERNA.cv$Source
+
+#barplot(ERNA.cvT, names=ERNA.cv$PopAbbrev, las=2, col=c("black","dodgerblue","bisque3"),
+#        ylab="Coefficient of variation", cex.lab=1.3)
+
+
+
+
+## Blank plot
+#plot.new()
+#legend("center", unique(ARFR.meds$Source[order(ARFR.meds$PopOrder, decreasing=TRUE)]), 
+#       col=unique(ARFR.meds$PopCol[order(ARFR.meds$PopOrder, decreasing=TRUE)]), cex=1.1, pch=19)
+
+## Generate legend figure with seed zone colors used in map and seed zone abbrevs 
+#legend("center", unique(ARFR.meds$SdZnAbbrev[order(ARFR.meds$PopOrder, decreasing=TRUE)]), 
+#       col=unique(ARFR.meds$SdZnCol[order(ARFR.meds$PopOrder, decreasing=TRUE)]), cex=2, pch=19)
+## ---------------------------------------------------
+
+
+
+
+
+## MODEL TRAIT DATA ----------------------------------
+## ** From GSD **
+## Emergence 
+## Logistic regression 
+#fitEmrg.mm <- glmer(cbind(emrg, num.planted-emrg) ~ ecotype * habitat + (1|pop) + (1|plot), 
+#                    data=datEarly, family=binomial(link="logit"),
+#                    glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=20000)))
+
+#fitEmrg.src <- glm(cbind(emrg, num.planted-emrg) ~ ecotype * habitat, data=datEarly,
+#                   family=binomial(link="logit"))
+
+
+
+## Seedling-to-adult survival 
+## Logistic regression 
+#fitSurv.mm <- glmer(cbind(surv, emrg-surv) ~ ecotype * habitat + (1|pop) + (1|plot), 
+#                    data=datEarly, family=binomial(link="logit"),
+#                    glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=20000)))
+
+#fitSurv.src <- glm(cbind(surv, emrg-surv) ~ ecotype * habitat, data=datEarly,
+#                   family=binomial(link="logit"))
+
+
+
+## Number of seeds produced (fecundity)
+## Negative binomial regression
+#fitSds.mm <- glmer.nb(round(numSdsAdj) ~ ecotype * habitat + (1|pop) + (1|plot), data=datLate)
+
+#fitSds.src <- glm.nb(round(numSdsAdj) ~ ecotype * habitat, data=datLate)  
+
+
+## Model SLA and plt size with linear models. Also try growth rate? 
+## Don't show SLA or growth rate but say that we models them and no sig diffs between sources? 
+
+
+## Also look at coefficient of variation or sd vs mean? **
 
 
 
@@ -201,133 +342,6 @@ write.csv(ARFR22, "Chatfield/20251031_ChatfieldDataClean2022_ARFR.csv", row.name
 ## -----------------------------------------------------------------------------------------
 
 
-
-
-## ARFR - VISUALIZE RAW DATA ---------------------------------------------------------------
-
-## Order populations for plotting 
-## Order by average size or lat or other trait(s)
-#ARFR.htByMed <- with(ARFR.cl, reorder(Source, Length_cm_20220726, median, na.rm=TRUE))
-#ARFR.ht23ByMed <- with(ARFR.cl, reorder(Source, Height_20230927, median, na.rm=TRUE))
-#ARFR.infByMed <- with(ARFR.cl, reorder(Source, InfBM2022_2024updated, median, na.rm=TRUE))
-ARFR.latByMed <- with(ARFR.cl, reorder(Source, Lat, median, na.rm=TRUE))
-
-ARFR.meds <- ARFR.cl %>% group_by(Source) %>% 
-             dplyr::summarise(Height22_MD=median(Length_cm_20220726,na.rm=TRUE), AGB22_MD=median(AGB2022_MinusBag,na.rm=TRUE),
-             ReproBMrw_MD=median(InfBM2022_2024updated,na.rm=TRUE), Height23_MD=median(Height_20230927,na.rm=TRUE),
-             Surv24_MD=median(Survival, na.rm=TRUE), Surv24_MN=mean(Survival, na.rm=TRUE), Surv24_Sum=sum(Survival, na.rm=TRUE),
-             LeafArea_MD=median(LeafSurfaceArea_cm2, na.rm=TRUE), LeafMass_MD=median(DryLeafMass_g, na.rm=TRUE))#,
-             #GrowthRe_MD=median(GrwthRate_Relative,na.rm=TRUE), ReproBM22_MD=median(InfBM2022_Wobag_g,na.rm=TRUE),
-             #GrowthSp_MD=median(GrwthRate_Specific,na.rm=TRUE), GrowthAb_MD=median(GrwthRate_Absolute,na.rm=TRUE),Surv24_Count=n())
-ARFR.meds <- left_join(ARFR.meds, ARFR.SdZn, by="Source")
-
-## Get individual counts per population in 2022 post transplant death
-#ARFR.popCount <- ARFR22.cl %>% group_by(Source) %>% dplyr::summarise(PopCount=n())
-## And remove lines with NAs from 2024 survival
-tempSurv <- left_join(ARFR22.cl, ARFR24.surv, by="ID")
-tempSurv.rmNA <- tempSurv[!is.na(tempSurv$Survival),]
-surv.rmNA <- tempSurv.rmNA %>% group_by(Source) %>% dplyr::summarise(Surv24_Count=n())
-ARFR.meds <- left_join(ARFR.meds, surv.rmNA, by="Source")
-surv.pop <- ARFR.meds$Surv24_Sum/ARFR.meds$Surv24_Count
-
-
-## Boxplots of raw data 
-ARFR.meds <- ARFR.meds[order(ARFR.meds$Lat),] #Order by lat
-
-par(mfrow=c(2,3))
-
-## Size 2022
-#ARFR.meds <- ARFR.meds[order(ARFR.meds$Height22_MD),] #Order by median sz
-#boxplot(Length_cm_20220726 ~ ARFR.htByMed, data=ARFR.cl,
-#        xlab=NA, ylab="Height (cm)", cex.lab=1.25,
-#        cex.axis=0.99, names=ARFR.meds$PopAbbrev, las=2,
-#        main="FINAL SIZE", cex.main=1.5, col=ARFR.meds$PopCol)
-boxplot(Length_cm_20220726 ~ ARFR.latByMed, data=ARFR.cl,
-        ylab="Height (cm)", xlab=NA, cex.lab=1.25, horizontal=FALSE,
-        cex.axis=0.99, names=ARFR.meds$PopAbbrev, las=2,
-        main="FINAL SIZE 2022", cex.main=1.5, col=ARFR.meds$PopCol)
-
-
-## Growth rate(s) ** Add time interval to growth rate calcs? **
-#ARFR.meds <- ARFR.meds[order(ARFR.meds$Growth_MD),]
-#boxplot(GrwthRate_Relative ~ ARFR.latByMed, data=ARFR.cl, las=2, horizontal=TRUE,
-#        xlab="Plant relative growth", ylab=NA, cex.lab=1.25, cex.axis=0.99, 
-#        names=ARFR.meds$PopAbbrev, ylim=c(-0.5,5.5),
-#        cex.main=1.5, col=ARFR.meds$PopCol, ylim=c(-0.4,7), main="GROWTH RATE 2022")
-
-#boxplot(GrwthRate_Absolute ~ ARFR.htByMed, data=ARFR.cl, las=2,
-#        xlab=NA, ylab="Plant absolute growth", cex.lab=1, cex.axis=0.9, names=ARFR.meds$PopAbbrev,
-#        cex.main=1.5, col=ARFR.meds$PopCol)
-
-#ARFR.SdZn <- ARFR.SdZn[order(ARFR.SdZn$GR_SP),]
-#boxplot(GrwthRate_Specific ~ ARFR.grsByMed, data=ARFR.cl,
-#        xlab="Population", ylab="Plant specific growth", cex.lab=1.5, names=ARFR.SdZn$PopAbbrev,
-#        cex.axis=0.7, main="Bouteloua gracilis", cex.main=1.5, col=ARFR.SdZn$PopCol)
-
-## Blank plot
-#plot.new()
-#legend("center", unique(ARFR.meds$Source[order(ARFR.meds$PopOrder, decreasing=TRUE)]), 
-#       col=unique(ARFR.meds$PopCol[order(ARFR.meds$PopOrder, decreasing=TRUE)]), cex=1.1, pch=19)
-
-
-## Repro
-#boxplot(InfBM_Wobag_g ~ ARFR.htByMed, data=ARFR.cl, las=2,
-#        xlab=NA, ylab="Reproductive biomass", cex.lab=1.25, cex.axis=0.99, names=ARFR.meds$PopAbbrev,
-#        cex.main=1.5, col=ARFR.meds$PopCol, main="REPRODUCTIVE OUTPUT")
-
-boxplot(InfBM2022_2024updated ~ ARFR.latByMed, data=ARFR.cl, las=2,
-        ylab="Reproductive biomass (g)", xlab=NA, cex.lab=1.25, cex.axis=0.99, 
-        names=ARFR.meds$PopAbbrev, horizontal=FALSE, ylim=c(0,60),
-        cex.main=1.5, col=ARFR.meds$PopCol, main="REPRODUCTIVE OUTPUT 2022")
-
-#ARFR.meds <- ARFR.meds[order(ARFR.meds$ReproBMrw_MD),]
-#boxplot(InfBM2022smpls_2024reweigh ~ ARFR.infByMed, data=ARFR.cl, las=2,
-#        xlab=NA, ylab="Reproductive biomass", cex.lab=1.25, names=ARFR.meds$PopAbbrev,
-#        cex.axis=0.79, main="Artemisia frigida", cex.main=1.5, col=ARFR.meds$PopCol)
-
-
-## Size 2023
-#ARFR.meds <- ARFR.meds[order(ARFR.meds$Height23_MD),] #Order by median 2023 sz
-boxplot(Height_20230927 ~ ARFR.latByMed, data=ARFR.cl,
-        ylab="Height (cm)", xlab=NA, cex.lab=1.25, horizontal=FALSE,
-        cex.axis=0.99, names=ARFR.meds$PopAbbrev, las=2, ylim=c(15,90),
-        main="FINAL SIZE 2023", cex.main=1.5, col=ARFR.meds$PopCol)
-
-
-## SLA 2024
-boxplot(SLA_mm2permg ~ ARFR.latByMed, data=ARFR.cl, las=2,
-        ylab="Specific leaf area (mm2/mg)", xlab=NA, cex.lab=1.25, cex.axis=0.99, 
-        names=ARFR.meds$PopAbbrev, horizontal=FALSE, ylim=c(0,40),
-        cex.main=1.5, col=ARFR.meds$PopCol, main="SPECIFIC LEAF AREA 2024")
-boxplot(LeafSurfaceArea_cm2 ~ ARFR.latByMed, data=ARFR.cl, las=2,
-        ylab="leaf area (cm2)", xlab=NA, cex.lab=1.25, cex.axis=0.99, 
-        names=ARFR.meds$PopAbbrev, horizontal=FALSE, ylim=c(0,2.3),
-        cex.main=1.5, col=ARFR.meds$PopCol, main="LEAF AREA 2024")
-boxplot(DryLeafMass_g ~ ARFR.latByMed, data=ARFR.cl, las=2,
-        ylab="leaf mass (g)", xlab=NA, cex.lab=1.25, cex.axis=0.99, 
-        names=ARFR.meds$PopAbbrev, horizontal=FALSE, ylim=c(0,0.02),
-        cex.main=1.5, col=ARFR.meds$PopCol, main="LEAF MASS 2024")
-
-
-## Survival 2024
-barplot(surv.pop, col=ARFR.meds$PopCol, ylim=c(0,1), cex.axis=0.99, names.arg=ARFR.meds$PopAbbrev,
-        las=2, ylab="Survival rate", main="SURVIVAL 2022-2024", cex.main=1.5)
-
-## Try stacked bar plot with survival rate by year ** 
-
-## ** If looking at 2023 Surv, use exclude Suv col in 2023 to clean entries **
-## ** Address NAs in surv data from 9/27 (not all blocks surveyed), could remove this survey, or just treat NAs appropriately 
-
-
-plot.new()
-legend("center", unique(ARFR.meds$Source[order(ARFR.meds$PopOrder, decreasing=TRUE)]), 
-       col=unique(ARFR.meds$PopCol[order(ARFR.meds$PopOrder, decreasing=TRUE)]), cex=1.25, pch=19)
-
-
-## Generate legend figure with seed zone colors used in map and seed zone abbrevs 
-legend("center", unique(ARFR.meds$SdZnAbbrev[order(ARFR.meds$PopOrder, decreasing=TRUE)]), 
-       col=unique(ARFR.meds$SdZnCol[order(ARFR.meds$PopOrder, decreasing=TRUE)]), cex=2, pch=19)
-## ---------------------------------------------------
 
 
 
@@ -514,16 +528,6 @@ plot(genPCrange, rep(0.5, length(genPCrange)), col=colors.genPCrange, pch=15, ce
 # Generate colors for the data
 #PC1.mean$color <- color_function(PC1.mean$PC1mean)
 ## -------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-## Plot source pops on a map and color by seed zone or other characteristics (e.g. PCA scores). 
-## Try in ArcGIS online
 
 
 
