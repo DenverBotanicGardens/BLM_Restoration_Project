@@ -362,12 +362,14 @@ rbm.predOrigSE <- exp(rbm.predLog$se.fit)
 
 
 ## Survival
-## ** From GSD **
-## Seedling-to-adult survival 
-## Logistic regression 
-#fitSurv.mm <- glmer(cbind(surv, emrg-surv) ~ ecotype * habitat + (1|pop) + (1|plot), 
-#                    data=datEarly, family=binomial(link="logit"),
-#                    glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=20000)))
+surv24.mod <- glmer(Survival ~ Source + (1|Block), data=ARFR.sel, family=binomial(link="logit"))
+summary(surv24.mod)
+Anova(surv24.mod)
+
+## Obtain model predicted values for response variables
+surv24.pred <- predict(surv24.mod, newdata=predForSource, type="response", re.form=~0, se.fit=TRUE)
+
+
 
 
 
@@ -376,7 +378,7 @@ rbm.predOrigSE <- exp(rbm.predLog$se.fit)
 predForSource <- dplyr::left_join(predForSource, AddnCols, by="Source")
 predForSource <- unique(predForSource)
 preds <- cbind(predForSource, sz22.pred$fit, sz22.pred$se.fit, sz23.pred$fit, sz23.pred$se.fit,
-               rbm.predOrigFit, rbm.predOrigSE, sla.predOrigFit, sla.predOrigSE)
+               rbm.predOrigFit, rbm.predOrigSE, sla.predOrigFit, sla.predOrigSE, surv24.pred$fit, surv24.pred$se.fit)
 preds <- preds[order(preds$Lat),] #Order by lat
 
 par(mfrow=c(2,2))
@@ -409,7 +411,16 @@ arrows(1:11, preds$sla.predOrigFit+preds$sla.predOrigSE, 1:11, preds$sla.predOri
 points(1:11, preds$sla.predOrigFit, col="black", bg=preds$PopCol, pch=21, cex=1.5)
 axis(side=1, at=1:11,preds$PopAbbrev, las=2, cex.axis=0.9)
 
+plot(NA, NA, xlab="Seed source", ylab="Survival rate",
+     main="SURVIVAL 2022-2024", cex.lab=1.25, xaxt='n', xlim=c(1,11), ylim=c(0,1.9))
+arrows(1:11, preds$`surv24.pred$fit`+preds$`surv24.pred$se.fit`, 1:11, preds$`surv24.pred$fit`-preds$`surv24.pred$se.fit`,
+       angle=90, col="black", code=3, length=0, lwd=2)
+points(1:11, preds$`surv24.pred$fit`, col="black", bg=preds$PopCol, pch=21, cex=1.5)
+axis(side=1, at=1:11,preds$PopAbbrev, las=2, cex.axis=0.9)
+
 ## ** add asterix or letters to show significant comparisons? ** 
+
+
 
 ## Also look at coefficient of variation or sd vs mean? **
 
@@ -571,7 +582,7 @@ popNames <- unique(indvNames$PopID)
 ## Calculate mean PC1 values for each population
 PC1.mean <- dfScores %>% group_by(Source) %>% summarise(PC1mean = mean(PC1score), n=n())
 
-## ** Look into what 'NA' is can clean up ****
+### ** Look into what 'NA' is can clean up ***
 PC1.mean <- PC1.mean[1:11,]
 
 
