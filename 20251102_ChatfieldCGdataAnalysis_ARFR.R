@@ -276,6 +276,14 @@ barplot(surv.pop, col=ARFR.meds$PopCol, ylim=c(0,1), cex.axis=0.99, names.arg=AR
 
 ## MODEL TRAIT DATA ----------------------------------
 
+## Re-order Source as factor before running models
+AddnCols.unq <- unique(AddnCols)
+AddnCols.unq <- AddnCols.unq[order(AddnCols.unq$Lat),] #Order by lat
+
+ARFR.sel$Source <- factor(ARFR.sel$Source, levels=AddnCols.unq$Source)
+
+
+
 ## Plant size
 
 ## 2022
@@ -294,7 +302,7 @@ qqline(dResid)
 plot(fitted(sz22.mod), pResid, abline(h=0,col="red")) #Residuals should be randomly scattered around 0 line
 
 ## Obtain model predicted values for response variables
-predForSource <- as.data.frame(unique(ARFR.sel$Source))
+predForSource <- as.data.frame(AddnCols.unq$Source) #(unique(ARFR.sel$Source))
 colnames(predForSource) <- "Source"
 sz22.pred <- predict(sz22.mod, newdata=predForSource, type="response", re.form=~0, se.fit=TRUE)
 
@@ -379,7 +387,7 @@ predForSource <- dplyr::left_join(predForSource, AddnCols, by="Source")
 predForSource <- unique(predForSource)
 preds <- cbind(predForSource, sz22.pred$fit, sz22.pred$se.fit, sz23.pred$fit, sz23.pred$se.fit,
                rbm.predOrigFit, rbm.predOrigSE, sla.predOrigFit, sla.predOrigSE, surv24.pred$fit, surv24.pred$se.fit)
-preds <- preds[order(preds$Lat),] #Order by lat
+#preds <- preds[order(preds$Lat),] #Order by lat
 
 par(mfrow=c(2,2))
 
@@ -418,7 +426,30 @@ arrows(1:11, preds$`surv24.pred$fit`+preds$`surv24.pred$se.fit`, 1:11, preds$`su
 points(1:11, preds$`surv24.pred$fit`, col="black", bg=preds$PopCol, pch=21, cex=1.5)
 axis(side=1, at=1:11,preds$PopAbbrev, las=2, cex.axis=0.9)
 
-## ** add asterix or letters to show significant comparisons? ** 
+
+
+## Add Compact Letter Display to plots to show significant comparisons
+
+#library(emmeans)
+#sz23.mns <- emmeans(sz23.mod, specs="Source", type="response") #Use emmeans to get model means
+library(multcomp)
+sz23.glht <- glht(sz23.mod, linfct=mcp(Source="Tukey"), alternative="two.sided")
+sz23.cld <- cld(sz23.glht, level=0.05) #adjust="Tukey", Letters=LETTERS,
+
+rbm.glht <- glht(rbm.mod, linfct=mcp(Source="Tukey"), alternative="two.sided")
+rbm.cld <- cld(rbm.glht, level=0.05) 
+
+sla.glht <- glht(sla.mod, linfct=mcp(Source="Tukey"))
+sla.cld <- cld(sla.glht, level=0.05) 
+
+surv.glht <- glht(surv24.mod, linfct=mcp(Source="Tukey"))
+surv.cld <- cld(surv.glht, level=0.05) 
+
+## Try instead just looking at emmeans output and generating cld by hand? **
+sz23.pw <- emmeans(sz23.mod, specs = pairwise ~ Source, type="response")
+rbm.pw <- emmeans(rbm.mod, specs = pairwise ~ Source, type="response")
+sla.pw <- emmeans(sla.mod, specs = pairwise ~ Source, type="response")
+surv.pw <- emmeans(surv24.mod, specs = pairwise ~ Source, type="response")
 
 
 
