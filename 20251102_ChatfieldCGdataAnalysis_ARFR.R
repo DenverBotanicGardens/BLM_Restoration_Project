@@ -445,7 +445,7 @@ sla.cld <- cld(sla.glht, level=0.05)
 surv.glht <- glht(surv24.mod, linfct=mcp(Source="Tukey"))
 surv.cld <- cld(surv.glht, level=0.05) 
 
-## Try instead just looking at emmeans output and generating cld by hand? **
+## Try instead just looking at emmeans output and generating cld by hand or putting results in tbl**
 sz23.pw <- emmeans(sz23.mod, specs = pairwise ~ Source, type="response")
 rbm.pw <- emmeans(rbm.mod, specs = pairwise ~ Source, type="response")
 sla.pw <- emmeans(sla.mod, specs = pairwise ~ Source, type="response")
@@ -563,8 +563,8 @@ colors.traitPCrange <- rgb(rgb_matrixRange[,1], rgb_matrixRange[,2], rgb_matrixR
 plot(traitPCrange, rep(0.25, length(traitPCrange)), col=colors.traitPCrange, pch=15, cex=4)
 
 
-## ** ** Make different from genomic PC gradient ** 
-## ** Try black and white ** 
+## Make different from genomic PC gradient? 
+## Try black and white?
 
 ## ---------------------------------------------------
 
