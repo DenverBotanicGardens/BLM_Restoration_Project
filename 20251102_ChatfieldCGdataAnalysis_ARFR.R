@@ -389,8 +389,7 @@ preds <- cbind(predForSource, sz22.pred$fit, sz22.pred$se.fit, sz23.pred$fit, sz
                rbm.predOrigFit, rbm.predOrigSE, sla.predOrigFit, sla.predOrigSE, surv24.pred$fit, surv24.pred$se.fit)
 #preds <- preds[order(preds$Lat),] #Order by lat
 
-par(mfrow=c(2,2))
-
+par(mfrow=c(1,1))
 plot(NA, NA, xlab="Seed source", ylab="Height (cm)",
      main="FINAL SIZE 2022", cex.lab=1.25, xaxt='n', xlim=c(1,11), ylim=c(13.5,48.5))
 arrows(1:11, preds$`sz22.pred$fit`+preds$`sz22.pred$se.fit`, 1:11, preds$`sz22.pred$fit`-preds$`sz22.pred$se.fit`,
@@ -398,6 +397,8 @@ arrows(1:11, preds$`sz22.pred$fit`+preds$`sz22.pred$se.fit`, 1:11, preds$`sz22.p
 points(1:11, preds$`sz22.pred$fit`, col="black", bg=preds$PopCol, pch=21, cex=1.45)
 axis(side=1, at=1:11,preds$PopAbbrev, las=2, cex.axis=0.9)
 
+
+par(mfrow=c(2,2))
 plot(NA, NA, xlab="Seed source", ylab="Reproductive  biomass (g)",
      main="REPRODUCTION 2022", cex.lab=1.25, xaxt='n', xlim=c(1,11), ylim=c(0,40))
 arrows(1:11, preds$rbm.predOrigFit+preds$rbm.predOrigSE, 1:11, preds$rbm.predOrigFit-preds$rbm.predOrigSE,
@@ -425,6 +426,13 @@ arrows(1:11, preds$`surv24.pred$fit`+preds$`surv24.pred$se.fit`, 1:11, preds$`su
        angle=90, col="black", code=3, length=0, lwd=2)
 points(1:11, preds$`surv24.pred$fit`, col="black", bg=preds$PopCol, pch=21, cex=1.5)
 axis(side=1, at=1:11,preds$PopAbbrev, las=2, cex.axis=0.9)
+
+
+
+## Look at correlation in trait estimates
+plot(preds$`sz22.pred$fit`, preds$`sz23.pred$fit`)
+plot(preds$`sz22.pred$fit`, preds$rbm.predOrigFit)
+plot(preds$`sz23.pred$fit`, preds$rbm.predOrigFit)
 
 
 
