@@ -438,7 +438,7 @@ plot(preds$`sz23.pred$fit`, preds$rbm.predOrigFit)
 
 ## Add Compact Letter Display to plots to show significant comparisons
 
-#library(emmeans)
+library(emmeans)
 #sz23.mns <- emmeans(sz23.mod, specs="Source", type="response") #Use emmeans to get model means
 library(multcomp)
 sz23.glht <- glht(sz23.mod, linfct=mcp(Source="Tukey"), alternative="two.sided")
@@ -502,16 +502,32 @@ surv.pw <- emmeans(surv24.mod, specs = pairwise ~ Source, type="response")
 
 
 ## Trait PCA ----------------------------------------
-ARFR.traits <- ARFR.cl %>% dplyr::select(c("Surv_2022","Survival","Length_cm_20220726", "Height_20230927", "SLA_mm2permg",
-                                           "AGB2022_MinusBag","InfBM2022_2024updated", "DryLeafMass_g", "LeafSurfaceArea_cm2")) 
-                                            #Add growth rate(s)?
+ARFR.traits <- ARFR.sel %>% dplyr::select(c("Survival","Length_cm_20220726","Height_20230927", "SLA_mm2permg",
+                                           "InfBM2022_2024updated"))#, "DryLeafMass_g", "LeafSurfaceArea_cm2")) 
+                                            #Add growth rate(s)? #,"Surv_2022","AGB2022_MinusBag",
 
-ARFR.traits <- ARFR.traits[!is.na(ARFR.traits$Length_cm_20220726) & ARFR.traits$Surv_2022==1,] #Remove indivs that died early & have no data
-#ARFR.traits <- ARFR.traits[,2:8] #Remove survival
+ARFR.traits <- ARFR.traits[!is.na(ARFR.traits$Length_cm_20220726),] #Remove indivs that died early & have no data
+#ARFR.traits <- ARFR.traits[!is.na(ARFR.traits$Survival),] #Remove rows without surv data
+#block 1, block 2 row 6, block 8
+
+## Look at trait correlations
+ARFR.traitsCor <- cor(ARFR.traits, use="pairwise.complete.obs")
+corrplot(ARFR.traitsCor)
+
 ARFR.traitsT <- t(ARFR.traits)
 
+## Make covariance matrix and run pca
+covMat.traits <- cov(ARFR.traitsT, use="pairwise.complete.obs")
+# Remove rows with all missing values
+covMat.traits <- covMat.traits[rowSums(is.na(covMat.traits)) != ncol(covMat.traits), ]
+test <- covMat.traits[rowSums(is.na(covMat.traits)) < ncol(covMat.traits), ]
+#covMat.traits <- na.omit(covMat.traits)
+#covMat.traits <- cov(ARFR.traits, use="pairwise.complete.obs")
+pca.results <- prcomp(covMat.traits, center=TRUE)#, scale.=TRUE)
+
+
 ## Get sample list with pop ID and colors
-ARFR.indivPop <- ARFR.cl %>% dplyr::select(c("Source", "ID", "HexCode_Indv"))
+ARFR.indivPop <- ARFR.sel %>% dplyr::select(c("Source", "ID", "HexCode_Indv"))
 ARFR.indivPop$ID <- as.factor(ARFR.indivPop$ID)
 indivs.traitPCA <- as.factor(colnames(ARFR.traitsT))
 indivs.traitPCA <- as.data.frame(indivs.traitPCA)
@@ -519,29 +535,28 @@ colnames(indivs.traitPCA) <- "ID"
 indivs.traitPCA <- left_join(indivs.traitPCA, ARFR.indivPop, by="ID")
 
 ## If some individuals have NAs in all columns, probably no data for any traits for these samples
-#covMat.traitsNoNA <- covMat.traits %>% dplyr::drop_na(covMat.traits)
 #filter(covMat.traits, rowSums(is.na(covMat.traits)) != ncol(covMat.traits))
-#covMat.traits[complete.cases(as.data.frame(covMat.traits)),] #(na.omit(covMat.traits))
+#covMat.traits <- covMat.traits[complete.cases(as.data.frame(covMat.traits)),] 
 
-## Make covariance matrix and run pca
-covMat.traits <- cov(ARFR.traitsT, use="pairwise.complete.obs")
-pca.results <- prcomp(covMat.traits)
 
 
 par(mfrow=c(1,1))
 #cols <- viridis(9)
-plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv, main="Trait PCA", ylim=c(-15000,0))
+plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv, main="Trait PCA")#, ylim=c(-15000,0))
 plot(x=pca.results$x[,2], y=pca.results$x[,3],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv)
 #legend("topleft", colnames(ARFR.traits), col=cols, cex=0.75, pch=19)
 ## ** Look into why weird lines 
-## ** Look into loadings (which traits contribute most to PC1)
+
+## Look into loadings (which traits contribute most to PC1)?
+#ld <- pca.results$rotation
+
 
 ## Calculate PC1 mean values for each source population
-trait.PCscores <- as.data.frame(cbind(pca.results$x[,1], as.character(indivs.traitPCA$Source)))
-colnames(trait.PCscores) <- c("PC1", "Source")
+trait.PCscores <- as.data.frame(cbind(pca.results$x[,1], pca.results$x[,2], as.character(indivs.traitPCA$Source)))
+colnames(trait.PCscores) <- c("PC1", "PC2", "Source")
 trait.PCscores$PC1 <- as.numeric(trait.PCscores$PC1)
 traitPC1.mean <- trait.PCscores %>% group_by(Source) %>% summarise(PC1mean = mean(PC1), n=n())
-
+## * Save trait PC values (trait.PCscores) as R object/rds **
 
 ## Create color gradient and assign colors based on numeric continuous PC1 mean values
 # From ChatGPT
@@ -561,6 +576,7 @@ colors.traitPC <- rgb(rgb_matrix[,1], rgb_matrix[,2], rgb_matrix[,3], maxColorVa
 plot(traitPC1.mean$PC1mean, rep(1, length(traitPC1.mean$PC1mean)), col=colors.traitPC, pch=16, cex=2)
 
 traitPC1.mean$color <- colors.traitPC
+#** save mean color plot to show in supp mat as it shows separation into three groups
 
 
 ## Plot range of color gradient as a legend
