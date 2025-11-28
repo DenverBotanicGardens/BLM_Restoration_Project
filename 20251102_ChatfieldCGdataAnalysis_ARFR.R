@@ -35,6 +35,8 @@ calcSE <- function(x){sd(x, na.rm=TRUE)/sqrt(length(x))}
 
 ## SET WORKING DIRECTORY --------------------------------------------------------------------------
 setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland")
+setwd("C:/Users/april/Denver Botanic Gardens/Conservation - BLM-Grassland")
+
 ## ------------------------------------------------------------------------------------------------
 
 
