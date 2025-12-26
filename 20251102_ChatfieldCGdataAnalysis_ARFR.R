@@ -464,7 +464,7 @@ surv.pw <- emmeans(surv24.mod, specs = pairwise ~ Source, type="response")
 
 
 ## Also look at coefficient of variation or sd vs mean? **
-
+## For sd? https://rdrr.io/cran/emmeans/man/eff_size.html
 
 
 
@@ -547,7 +547,7 @@ par(mfrow=c(1,1))
 plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv, main="Trait PCA")#, ylim=c(-15000,0))
 plot(x=pca.results$x[,2], y=pca.results$x[,3],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv)
 #legend("topleft", colnames(ARFR.traits), col=cols, cex=0.75, pch=19)
-## ** Look into why weird lines 
+## ** Look into why straight lines 
 
 ## Look into loadings (which traits contribute most to PC1)?
 #ld <- pca.results$rotation
@@ -565,10 +565,10 @@ traitPC1.mean <- trait.PCscores %>% group_by(Source) %>% summarise(PC1mean = mea
 # Define a color gradient (e.g., from blue to red)
 gradient_fn <- colorRamp(c("greenyellow",   "deeppink"))
 
-# Normalize your values to [0,1] scale
+# Normalize values to [0,1] scale
 vals_norm <- (traitPC1.mean$PC1mean - min(traitPC1.mean$PC1mean)) / (max(traitPC1.mean$PC1mean) - min(traitPC1.mean$PC1mean))
 
-# Get RGB colors (as integers 0–255)
+# Get RGB colors (as integers 0-255)
 rgb_matrix <- gradient_fn(vals_norm)
 
 # Convert to hex color strings
@@ -588,9 +588,6 @@ rgb_matrixRange <- gradient_fn(vals_normRange)
 colors.traitPCrange <- rgb(rgb_matrixRange[,1], rgb_matrixRange[,2], rgb_matrixRange[,3], maxColorValue = 255)
 plot(traitPCrange, rep(0.25, length(traitPCrange)), col=colors.traitPCrange, pch=15, cex=4)
 
-
-## Make different from genomic PC gradient? 
-## Try black and white?
 
 ## ---------------------------------------------------
 
