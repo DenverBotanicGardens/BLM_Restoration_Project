@@ -43,6 +43,12 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 ## LOAD DATA --------------------------------------------------------------------------------------
 ARFR22 <- read.csv(file="Chatfield/2022_data/20251030_ChatfieldData2022_ARFR_updates.csv", sep=",", header=TRUE, dec=".", na.strings="")
 ARFR23 <- read.csv(file="Chatfield/2023_data/20251030_ChatfieldData2023_ARFR_updates.csv", sep=",", header=TRUE, dec=".", na.strings="")
+
+#ARFR23v1 <- read.csv(file="Chatfield/2023_data/20251031_ChatfieldDataClean2023_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
+#ARFR23v2 <- read.csv(file="Chatfield/2023_data/20251103_ChatfieldDataClean2023_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
+#identical(ARFR23v1, ARFR23v2)
+#comparedf(ARFR23v1, ARFR23v2)
+
 ARFR24 <- read.csv(file="Chatfield/2024_data/20241219_ChatfieldData2024_ARFR.csv", sep=",", header=TRUE, dec=".", na.strings="")
 ARFR24.surv <- read.csv(file="Chatfield/2024_data/CommonGarden/ARFR/20250321_ChatfieldCGsurveyData2024_ARFR_amgUpdates.csv", sep=",", header=TRUE, dec=".", na.strings="")
 
