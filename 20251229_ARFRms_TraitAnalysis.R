@@ -1,6 +1,6 @@
-## Author - Organization
-## Script date 2025-11-02 
-## Analysis of Artemisia frigida trait data from Chatfield Common Garden  
+## A. Goebl - 
+## Script updated 2025-11-02 
+## Analysis of Artemisia frigida trait data from common garden experiment  
 
 
 rm(list=ls())
@@ -33,7 +33,7 @@ ARFR22 <- read.csv(file="20251031_ChatfieldDataClean2022_ARFR.csv", sep=",", hea
 ARFR23 <- read.csv(file="20251031_ChatfieldDataClean2023_ARFR.csv", sep=",", header=TRUE, dec=".")
 ARFR24 <- read.csv(file="20251031_ChatfieldDataClean2024_ARFR.csv", sep=",", header=TRUE, dec=".")
 
-## Load PCA values from Alyson's analysis
+## Load PCA values from AE's analysis
 pca_vals <- read.csv(file="20251006_pcaTableFromAE_ARFR.csv", sep=",", header=TRUE, dec=".")
 ## ----------------------------------------------------------------------------------------------
 
@@ -131,10 +131,9 @@ ARFR.latByMed <- with(ARFR.sel, reorder(Source, Lat, median, na.rm=TRUE))
 ARFR.meds <- ARFR.sel %>% group_by(Source) %>% 
              dplyr::summarise(Height22_MD=median(Length_cm_20220726,na.rm=TRUE), AGB22_MD=median(AGB2022_MinusBag,na.rm=TRUE),
              ReproBMrw_MD=median(InfBM2022_2024updated,na.rm=TRUE), Height23_MD=median(Height_20230927,na.rm=TRUE),
-             Surv24_Count=length(na.omit(Survival)), Surv24_Sum=sum(Survival, na.rm=TRUE),
+             SLA_MD=median(SLA_mm2permg,na.rm=TRUE), Surv24_Count=length(na.omit(Survival)), Surv24_Sum=sum(Survival, na.rm=TRUE),
              Surv23_Count=length(na.omit(Survival_20230801)), Surv23_Sum=sum(Survival_20230801, na.rm=TRUE),
              Surv22_Count=length(na.omit(Survival_20220922)), Surv22_Sum=sum(Survival_20220922, na.rm=TRUE))
-             #LeafArea_MD=median(LeafSurfaceArea_cm2, na.rm=TRUE), LeafMass_MD=median(DryLeafMass_g, na.rm=TRUE), SLA_MD=median(SLA_mm2permg,na.rm=TRUE)
 
 ARFR.meds <- left_join(ARFR.meds, AddnCols, by="Source")
 ARFR.meds <- unique(ARFR.meds)
@@ -177,26 +176,13 @@ boxplot(SLA_mm2permg ~ ARFR.latByMed, data=ARFR.sel, las=2,
         ylab="Specific leaf area (mm2/mg)", xlab=NA, cex.lab=1.25, cex.axis=0.99, 
         names=ARFR.meds$PopAbbrev, horizontal=FALSE, ylim=c(0,40),
         cex.main=1.5, col=ARFR.meds$PopCol, main="SPECIFIC LEAF AREA 2024")
-boxplot(LeafSurfaceArea_cm2 ~ ARFR.latByMed, data=ARFR.sel, las=2,
-        ylab="leaf area (cm2)", xlab=NA, cex.lab=1.25, cex.axis=0.99, 
-        names=ARFR.meds$PopAbbrev, horizontal=FALSE, ylim=c(0,2.3),
-        cex.main=1.5, col=ARFR.meds$PopCol, main="LEAF AREA 2024")
-boxplot(DryLeafMass_g ~ ARFR.latByMed, data=ARFR.sel, las=2,
-        ylab="leaf mass (g)", xlab=NA, cex.lab=1.25, cex.axis=0.99, 
-        names=ARFR.meds$PopAbbrev, horizontal=FALSE, ylim=c(0,0.02),
-        cex.main=1.5, col=ARFR.meds$PopCol, main="LEAF MASS 2024")
 
 
 ## Survival 2024
 barplot(surv24.pop, col=ARFR.meds$PopCol, ylim=c(0,1), cex.axis=0.99, names.arg=ARFR.meds$PopAbbrev,
         las=2, ylab="Survival rate", main="SURVIVAL 2022-2024", cex.main=1.5)
-
-
-## Blank plot and legend
-#plot.new()
-#legend("center", unique(ARFR.meds$Source[order(ARFR.meds$PopOrder, decreasing=TRUE)]), 
-#       col=unique(ARFR.meds$PopCol[order(ARFR.meds$PopOrder, decreasing=TRUE)]), cex=1.1, pch=19)
 ## ---------------------------------------------------
+
 
 
 
@@ -230,7 +216,7 @@ qqline(dResid)
 plot(fitted(sz22.mod), pResid, abline(h=0,col="red")) #Residuals should be randomly scattered around 0 line
 
 ## Obtain model predicted values for response variables
-predForSource <- as.data.frame(AddnCols.unq$Source) #(unique(ARFR.sel$Source))
+predForSource <- as.data.frame(AddnCols.unq$Source) 
 colnames(predForSource) <- "Source"
 sz22.pred <- predict(sz22.mod, newdata=predForSource, type="response", re.form=~0, se.fit=TRUE)
 
@@ -391,7 +377,7 @@ ARFR.traitsT <- t(ARFR.traits)
 
 ## Make covariance matrix and run pca
 covMat.traits <- cov(ARFR.traitsT, use="pairwise.complete.obs")
-pca.results <- prcomp(covMat.traits, center=TRUE)#, scale.=TRUE)
+pca.results <- prcomp(covMat.traits, center=TRUE)
 
 
 ## Get sample list with pop ID and colors
@@ -405,7 +391,7 @@ indivs.traitPCA <- left_join(indivs.traitPCA, ARFR.indivPop, by="ID")
 
 
 par(mfrow=c(1,1))
-plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv, main="Trait PCA")#, ylim=c(-15000,0))
+plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv, main="Trait PCA")
 plot(x=pca.results$x[,2], y=pca.results$x[,3],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv)
 
 
@@ -443,7 +429,7 @@ traitPC1.mean$color <- colors.traitPC
 
 
 
-### VCF table and PCA  --------------------------------------------------------------------------
+### VCF table and genomic PCA  --------------------------------------------------------------------------
 ## Get list of sample names 
 indvNames <- as.data.frame(as.character(pca_vals$sample.id))
 colnames(indvNames) <- "Sample"
@@ -453,7 +439,6 @@ indvNames$Temp <- str_replace(indvNames$Sample, "ARFR_", "")
 indvNames$ID <- as.integer(str_replace(indvNames$Temp, "_sorted", ""))
 ## Join by ID to get source (pop ID)
 indvNames <- left_join(indvNames, ARFR24, by="ID")
-
 
 
 
