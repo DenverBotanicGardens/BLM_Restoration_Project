@@ -312,3 +312,5 @@ species <- as.character("PEVI")
 #saveRDS(biovar.means, file=paste(date,species,"BiovarsAvg1980_2022",sep="_"))
 write.csv(biovar.means, file=paste(date,species,"BiovarsAvg1980_2022.csv",sep="_"), row.names=FALSE)
 
+ARFR_biovars <- readRDS("20230814_ARFR_BiovarsAvg1980_2021")
+write.csv(ARFR_biovars, file="20230814_ARFR_BiovarsAvg1980_2021.csv", row.names=FALSE)
