@@ -529,6 +529,14 @@ test <- covMat.traits[rowSums(is.na(covMat.traits)) < ncol(covMat.traits), ]
 #covMat.traits <- cov(ARFR.traits, use="pairwise.complete.obs")
 pca.results <- prcomp(covMat.traits, center=TRUE)#, scale.=TRUE)
 
+#ARFR.traitsT <- t(ARFR.traits)
+
+## Make covariance matrix and run pca
+#covMat.traits <- cov(ARFR.traitsT, use="pairwise.complete.obs")
+#pca.results <- prcomp(covMat.traits, scale.=TRUE) #center=TRUE, 
+#pca.results <- prcomp(ARFR.traitsComplete, scale.=TRUE) #center=TRUE, 
+
+
 
 ## Get sample list with pop ID and colors
 ARFR.indivPop <- ARFR.sel %>% dplyr::select(c("Source", "ID", "HexCode_Indv"))
@@ -546,9 +554,11 @@ indivs.traitPCA <- left_join(indivs.traitPCA, ARFR.indivPop, by="ID")
 
 par(mfrow=c(1,1))
 #cols <- viridis(9)
+#plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv, main="Trait PCA")
+#plot(x=pca.results$x[,2], y=pca.results$x[,3],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv)
+
 plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv, main="Trait PCA")#, ylim=c(-15000,0))
 plot(x=pca.results$x[,2], y=pca.results$x[,3],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv)
-#legend("topleft", colnames(ARFR.traits), col=cols, cex=0.75, pch=19)
 ## ** Look into why straight lines 
 
 ## Look into loadings (which traits contribute most to PC1)?
