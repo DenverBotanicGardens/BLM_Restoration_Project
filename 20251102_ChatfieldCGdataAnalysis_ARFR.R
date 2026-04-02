@@ -333,6 +333,8 @@ sz23.pred <- predict(sz23.mod, newdata=predForSource, se.fit=TRUE, type="respons
 hist(ARFR.sel$SLA_mm2permg)
 hist(log(ARFR.sel$SLA_mm2permg))
 sla.mod <- lmer(log(SLA_mm2permg) ~ Source + (1|Block), data=ARFR.sel)
+#sla.mod <- lmer(SLA_mm2permg ~ Source + (1|Block), data=ARFR.sel) no good
+#sla.mod <- glmer(SLA_mm2permg ~ Source + (1|Block), family = Gamma(link = "log"), data=ARFR.sel, control=glmerControl(optimizer="bobyqa"))
 summary(sla.mod)
 Anova(sla.mod)
 
@@ -651,6 +653,7 @@ PC1.mean <- dfScores %>% group_by(Source) %>% summarise(PC1mean = mean(PC1score)
 ### ** Look into what 'NA' is can clean up ***
 PC1.mean <- PC1.mean[1:11,]
 
+#trait.PCscores <- as.data.frame(cbind(pca.results$x[,1], pca.results$x[,2], as.character(indivs.traitPCA$Source)))
 
 
 
