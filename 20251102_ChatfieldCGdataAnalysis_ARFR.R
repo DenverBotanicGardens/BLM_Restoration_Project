@@ -1,7 +1,7 @@
 ## April Goebl
 ## Script modified 2025-11-02 
 ## BLM Restoration project at Denver Botanic Gardens
-## Analyze ARFR data from Chatfield Common Garden  
+## DRAFT code to analyze ARFR data from Chatfield Common Garden  
 
 
 rm(list=ls())
@@ -43,9 +43,10 @@ setwd("C:/Users/april/Denver Botanic Gardens/Conservation - BLM-Grassland")
 
 
 ## LOAD DATA --------------------------------------------------------------------------------------
+## Look for updated versions 
 ARFR22 <- read.csv(file="Chatfield/2022_data/20251031_ChatfieldDataClean2022_ARFR.csv", sep=",", header=TRUE, dec=".")#, na.strings="")
-ARFR23 <- read.csv(file="Chatfield/2023_data/20251031_ChatfieldDataClean2023_ARFR.csv", sep=",", header=TRUE, dec=".")#, na.strings="")
-ARFR24 <- read.csv(file="Chatfield/2024_data/20251031_ChatfieldDataClean2024_ARFR.csv", sep=",", header=TRUE, dec=".")#, na.strings="")
+ARFR23 <- read.csv(file="Chatfield/2023_data/20251031_ChatfieldDataClean2023_ARFR.csv", sep=",", header=TRUE, dec=".")
+ARFR24 <- read.csv(file="Chatfield/2024_data/20251031_ChatfieldDataClean2024_ARFR.csv", sep=",", header=TRUE, dec=".")
 
 ## Load PCA values from Alyson's analysis
 pca_vals <- read.csv(file="DNA_Seq/AlysonEmery/20251006_pcaTableFromAlyson_ARFR.csv", sep=",", header=TRUE, dec=".")
@@ -101,10 +102,10 @@ ARFR22.ex$GrwthRate_Absolute <- ARFR22.ex$Length_cm_20220726-ARFR22.ex$Length_cm
 ARFR22.ex$GrwthRate_Relative <- (ARFR22.ex$Length_cm_20220726-ARFR22.ex$Length_cm_20220622)/ARFR22.ex$Length_cm_20220622
 
 ## 'Early' growth (May to June)
-## **Need to handle pre-replacement early height measurement 20220527 differently.. i.e. exclude replaced plts
-ARFR22.ex$GrwthRateErly_Specific <- log(ARFR22.ex$Length_cm_20220622/ARFR22.ex$Length_cm_20220527)
-ARFR22.ex$GrwthRateErly_Absolute <- ARFR22.ex$Length_cm_20220622-ARFR22.ex$Length_cm_20220527
-ARFR22.ex$GrwthRateErly_Relative <- (ARFR22.ex$Length_cm_20220622-ARFR22.ex$Length_cm_20220527)/ARFR22.ex$Length_cm_20220527
+## (**handle pre-replacement early height measurement 20220527 differently.. i.e. exclude replaced plts**)
+#ARFR22.ex$GrwthRateErly_Specific <- log(ARFR22.ex$Length_cm_20220622/ARFR22.ex$Length_cm_20220527)
+#ARFR22.ex$GrwthRateErly_Absolute <- ARFR22.ex$Length_cm_20220622-ARFR22.ex$Length_cm_20220527
+#ARFR22.ex$GrwthRateErly_Relative <- (ARFR22.ex$Length_cm_20220622-ARFR22.ex$Length_cm_20220527)/ARFR22.ex$Length_cm_20220527
 
 
 
@@ -135,20 +136,19 @@ ARFR23.ex$Height_20230927[ARFR23.ex$ExcludeSurvDueToInconsistData=="Y" & !is.na(
 nrow(ARFR23[!is.na(ARFR23$Height_20230927>0),])
 
 
-## CALC SURVIVAL FOR EACH YEAR HERE? **
+## CALC SURVIVAL FOR EACH YEAR?
 
 
 
 ## COMBINE RELEVANT 2022, 2023, 2024 DATA
 # consider adding other lengths and early growth from 2022
-ARFR22.sel <- ARFR22.ex %>% dplyr::select(c("ID", "Length_cm_20220726","GrwthRate_Relative","GrwthRateErly_Specific", 
-                                            "GrwthRateErly_Absolute","GrwthRateErly_Relative","Survival_20220922"))               
+ARFR22.sel <- ARFR22.ex %>% dplyr::select(c("ID", "Length_cm_20220726","GrwthRate_Relative", 
+                                            "Survival_20220922"))  #"GrwthRateErly_Specific",             
 ARFR23.sel <- ARFR23.ex %>% dplyr::select(c("ID","Height_20230927","Survival_20230801")) #Don't use surv 9/27 since not all blocks surveyed
 ARFR.sel <- left_join(ARFR24.ex, ARFR23.sel, by="ID") 
 ARFR.sel <- left_join(ARFR.sel, ARFR22.sel, by="ID") 
 ARFR.sel$Source <- as.factor(ARFR.sel$Source)
 
-## Surv checks on combined data? 
 ## Save?
 #write.csv(ARFR.sel, "Chatfield/20251031_ChatfieldDataTraits_ARFR.csv", row.names=FALSE)
 ## --------------------------------------------------------------------------------------------------
@@ -254,13 +254,6 @@ barplot(surv.pop, col=ARFR.meds$PopCol, ylim=c(0,1), cex.axis=0.99, names.arg=AR
         las=2, ylab="Survival rate", main="SURVIVAL 2022-2024", cex.main=1.5)
 
 ## Try stacked bar plot with survival rate by year ** 
-## Make stacked barplot to visualize cv for each trait and population
-#ERNA.cvT <- as.matrix(rbind(as.vector(ERNA.cv$Height_CV), as.vector(ERNA.cv$Growth_CV),
-#                            as.vector(ERNA.cv$DaysToFlwr_CV)))#, as.vector(ERNA.cv$GrowthE_CV)
-#colnames(ERNA.cvT) <- ERNA.cv$Source
-
-#barplot(ERNA.cvT, names=ERNA.cv$PopAbbrev, las=2, col=c("black","dodgerblue","bisque3"),
-#        ylab="Coefficient of variation", cex.lab=1.3)
 
 
 
@@ -307,7 +300,7 @@ qqline(dResid)
 plot(fitted(sz22.mod), pResid, abline(h=0,col="red")) #Residuals should be randomly scattered around 0 line
 
 ## Obtain model predicted values for response variables
-predForSource <- as.data.frame(AddnCols.unq$Source) #(unique(ARFR.sel$Source))
+predForSource <- as.data.frame(AddnCols.unq$Source) 
 colnames(predForSource) <- "Source"
 sz22.pred <- predict(sz22.mod, newdata=predForSource, type="response", re.form=~0)#, se.fit=TRUE)
 
@@ -322,7 +315,7 @@ pResid <- residuals(sz23.mod, type="pearson")
 hist(pResid)                                          #Shape should be consistent with assumed error distribution (e.g. normal)
 qqnorm(pResid)                                        #Points should roughly follow the diagonal line, even at tails
 qqline(pResid)
-plot(fitted(sz23.mod), pResid, abline(h=0,col="red")) #Residuals should be randomly scattered around 0 line
+plot(fitted(sz23.mod), pResid, abline(h=0,col="red")) 
 
 ## Obtain model predicted values for response variables
 sz23.pred <- predict(sz23.mod, newdata=predForSource, se.fit=TRUE, type="response", re.form=~0)
@@ -334,17 +327,17 @@ hist(ARFR.sel$SLA_mm2permg)
 hist(log(ARFR.sel$SLA_mm2permg))
 sla.mod <- lmer(log(SLA_mm2permg) ~ Source + (1|Block), data=ARFR.sel)
 #sla.mod <- lmer(SLA_mm2permg ~ Source + (1|Block), data=ARFR.sel) no good
-#sla.mod <- glmer(SLA_mm2permg ~ Source + (1|Block), family = Gamma(link = "log"), data=ARFR.sel, control=glmerControl(optimizer="bobyqa"))
+## Look at gamma model as an option
 summary(sla.mod)
 Anova(sla.mod)
 
 ## Check distribution of residuals to assess if model form/ family is appropriate
 pResid <- residuals(sla.mod, type="pearson")
 dResid <- residuals(sla.mod, type="deviance")
-hist(dResid)                                          #Shape should be consistent with assumed error distribution (e.g. normal)
-qqnorm(pResid)                                        #Points should roughly follow the diagonal line, even at tails
+hist(dResid)                                          
+qqnorm(pResid)                                        
 qqline(pResid)
-plot(fitted(sla.mod), pResid, abline(h=0,col="red")) #Residuals should be randomly scattered around 0 line
+plot(fitted(sla.mod), pResid, abline(h=0,col="red")) 
 
 ## Obtain model predicted values for response variables
 sla.predLog <- predict(sla.mod, newdata=predForSource, type="response", re.form=~0, se.fit=TRUE)
@@ -363,11 +356,11 @@ Anova(rbm.mod)
 
 ## Check distribution of residuals to assess if model form/ family is appropriate
 pResid <- residuals(rbm.mod, type="pearson")
-hist(pResid)                                          #Shape should be consistent with assumed error distribution (e.g. normal)
-qqnorm(pResid)                                        #Points should roughly follow the diagonal line, even at tails
+hist(pResid)                                          
+qqnorm(pResid)                                        
 qqline(pResid)
-plot(fitted(rbm.mod), pResid, abline(h=0,col="red")) #Residuals should be randomly scattered around 0 line
-## Try gamma with logged data? Or something for positive values with left skew **
+plot(fitted(rbm.mod), pResid, abline(h=0,col="red")) 
+## Try without logged data? Include zeros or no?
 
 ## Obtain model predicted values for response variables
 rbm.predLog <- predict(rbm.mod, newdata=predForSource, type="response", re.form=~0, se.fit=TRUE)
@@ -384,7 +377,7 @@ Anova(surv24.mod)
 ## Obtain model predicted values for response variables
 surv24.pred <- predict(surv24.mod, newdata=predForSource, type="response", re.form=~0, se.fit=TRUE)
 
-
+## ** check for overdispersion ** 
 
 
 
@@ -443,23 +436,9 @@ plot(preds$`sz23.pred$fit`, preds$rbm.predOrigFit)
 plot(sz23.pred, sla.predLog)
 plot(sla.predLog, surv24.pred)
 
-## Add Compact Letter Display to plots to show significant comparisons?
+## Add Compact Letter Display to plots to show significant comparisons **
 
-#sz23.mns <- emmeans(sz23.mod, specs="Source", type="response") #Use emmeans to get model means
-library(multcomp)
-sz23.glht <- glht(sz23.mod, linfct=mcp(Source="Tukey"), alternative="two.sided")
-sz23.cld <- cld(sz23.glht, level=0.05) #adjust="Tukey", Letters=LETTERS,
-
-rbm.glht <- glht(rbm.mod, linfct=mcp(Source="Tukey"), alternative="two.sided")
-rbm.cld <- cld(rbm.glht, level=0.05) 
-
-sla.glht <- glht(sla.mod, linfct=mcp(Source="Tukey"))
-sla.cld <- cld(sla.glht, level=0.05) 
-
-surv.glht <- glht(surv24.mod, linfct=mcp(Source="Tukey"))
-surv.cld <- cld(surv.glht, level=0.05) 
-
-## Try instead just looking at emmeans output and generating cld by hand or putting results in tbl**
+## Look at emmeans output for generating cld based on pairwise comparisons?
 sz23.pw <- emmeans(sz23.mod, specs = pairwise ~ Source, type="response")
 rbm.pw <- emmeans(rbm.mod, specs = pairwise ~ Source, type="response")
 sla.pw <- emmeans(sla.mod, specs = pairwise ~ Source, type="response")
@@ -467,19 +446,16 @@ surv.pw <- emmeans(surv24.mod, specs = pairwise ~ Source, type="response")
 
 
 
-## Also look at coefficient of variation or sd vs mean? **
-## For sd? https://rdrr.io/cran/emmeans/man/eff_size.html
+## Also look at coefficient of variation or sd vs mean?
 
 
 
 
 ## ARFR - TEST FOR TREATMENT EFFECT -------------------------------------------------------
-## Review and update models as needed **
-#hist(log(ARFR.cl$AGB_MinusBag))
+## Review and update models as needed 
 #hist(ARFR$AGB_MinusBag)
 #ARFR.tx.mod <- aov(ARFR$AGB_MinusBag ~ ARFR$Source + ARFR$Treatment)
 #ARFR.tx.mod <- lmer(log(AGB_MinusBag) ~ Source + Treatment + (1|Block), data=ARFR)
-#summary(ARFR.tx.mod)
 #ARFR.pop.mod <- lmer(log(AGB_MinusBag) ~ Source + (1|Block), data=ARFR)
 
 #models <- list(ARFR.tx.mod, ARFR.pop.mod)
@@ -487,7 +463,6 @@ surv.pw <- emmeans(surv24.mod, specs = pairwise ~ Source, type="response")
 #aictab(cand.set = models, modnames = mod.names )
 # No support for treatment 
 
-#hist(log(ARFR$Length_cm_20220726))
 #hist(ARFR$Length_cm_20220726)
 #ARFR.tx.mod <- aov(log(ARFR$Length_cm_20220726) ~ ARFR$Source + ARFR$Treatment)
 #ARFR.tx.modlog <- lmer(log(ARFR$Length_cm_20220726) ~ Source + Treatment + (1|Block), data=ARFR)
@@ -498,7 +473,7 @@ surv.pw <- emmeans(surv24.mod, specs = pairwise ~ Source, type="response")
 #models <- list(ARFR.tx.mod, ARFR.pop.mod)
 #mod.names <- c('IncldTx', 'JustPop')
 #aictab(cand.set = models, modnames = mod.names )
-# No support for treatment? 
+# No support for treatment
 ## -----------------------------------------------------------------------------------------
 
 
@@ -522,21 +497,16 @@ corrplot(ARFR.traitsCor)
 
 ARFR.traitsT <- t(ARFR.traits)
 
-## Make covariance matrix and run pca
-covMat.traits <- cov(ARFR.traitsT, use="pairwise.complete.obs")
-# Remove rows with all missing values
-covMat.traits <- covMat.traits[rowSums(is.na(covMat.traits)) != ncol(covMat.traits), ]
-test <- covMat.traits[rowSums(is.na(covMat.traits)) < ncol(covMat.traits), ]
-#covMat.traits <- na.omit(covMat.traits)
-#covMat.traits <- cov(ARFR.traits, use="pairwise.complete.obs")
-pca.results <- prcomp(covMat.traits, center=TRUE)#, scale.=TRUE)
-
-#ARFR.traitsT <- t(ARFR.traits)
-
+## Use traits directly since on diff scales/ diff units, not cov mx 
 ## Make covariance matrix and run pca
 #covMat.traits <- cov(ARFR.traitsT, use="pairwise.complete.obs")
-#pca.results <- prcomp(covMat.traits, scale.=TRUE) #center=TRUE, 
-#pca.results <- prcomp(ARFR.traitsComplete, scale.=TRUE) #center=TRUE, 
+## How to deal with missing values?
+#covMat.traits <- covMat.traits[rowSums(is.na(covMat.traits)) != ncol(covMat.traits), ]
+#filter(covMat.traits, rowSums(is.na(covMat.traits)) != ncol(covMat.traits))
+#covMat.traits <- na.omit(covMat.traits)
+#covMat.traits <- covMat.traits[complete.cases(as.data.frame(covMat.traits)),] 
+#pca.results <- prcomp(covMat.traits, center=TRUE)#, scale.=TRUE)
+
 
 
 
@@ -548,20 +518,12 @@ indivs.traitPCA <- as.data.frame(indivs.traitPCA)
 colnames(indivs.traitPCA) <- "ID"
 indivs.traitPCA <- left_join(indivs.traitPCA, ARFR.indivPop, by="ID")
 
-## If some individuals have NAs in all columns, probably no data for any traits for these samples
-#filter(covMat.traits, rowSums(is.na(covMat.traits)) != ncol(covMat.traits))
-#covMat.traits <- covMat.traits[complete.cases(as.data.frame(covMat.traits)),] 
 
 
-
-par(mfrow=c(1,1))
 #cols <- viridis(9)
 #plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv, main="Trait PCA")
 #plot(x=pca.results$x[,2], y=pca.results$x[,3],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv)
 
-plot(x=pca.results$x[,1], y=pca.results$x[,2],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv, main="Trait PCA")#, ylim=c(-15000,0))
-plot(x=pca.results$x[,2], y=pca.results$x[,3],pch=19, cex=1.2, col=indivs.traitPCA$HexCode_Indv)
-## ** Look into why straight lines 
 
 ## Look into loadings (which traits contribute most to PC1)?
 #ld <- pca.results$rotation
@@ -572,10 +534,9 @@ trait.PCscores <- as.data.frame(cbind(pca.results$x[,1], pca.results$x[,2], as.c
 colnames(trait.PCscores) <- c("PC1", "PC2", "Source")
 trait.PCscores$PC1 <- as.numeric(trait.PCscores$PC1)
 traitPC1.mean <- trait.PCscores %>% group_by(Source) %>% summarise(PC1mean = mean(PC1), n=n())
-## * Save trait PC values (trait.PCscores) as R object/rds **
 
 ## Create color gradient and assign colors based on numeric continuous PC1 mean values
-# From ChatGPT
+# (Modified from ChatGPT)
 # Define a color gradient (e.g., from blue to red)
 gradient_fn <- colorRamp(c("greenyellow",   "deeppink"))
 
@@ -592,7 +553,7 @@ colors.traitPC <- rgb(rgb_matrix[,1], rgb_matrix[,2], rgb_matrix[,3], maxColorVa
 plot(traitPC1.mean$PC1mean, rep(1, length(traitPC1.mean$PC1mean)), col=colors.traitPC, pch=16, cex=2)
 
 traitPC1.mean$color <- colors.traitPC
-#** save mean color plot to show in supp mat as it shows separation into three groups
+## Save mean color plot to show in supp mat as it shows separation into (three) groups
 
 
 ## Plot range of color gradient as a legend
@@ -601,8 +562,6 @@ vals_normRange <- (traitPCrange - min(traitPCrange)) / (max(traitPCrange) - min(
 rgb_matrixRange <- gradient_fn(vals_normRange)
 colors.traitPCrange <- rgb(rgb_matrixRange[,1], rgb_matrixRange[,2], rgb_matrixRange[,3], maxColorValue = 255)
 plot(traitPCrange, rep(0.25, length(traitPCrange)), col=colors.traitPCrange, pch=15, cex=4)
-
-
 ## ---------------------------------------------------
 
 
@@ -612,6 +571,7 @@ plot(traitPCrange, rep(0.25, length(traitPCrange)), col=colors.traitPCrange, pch
 
 
 ### VCF table and PCA  --------------------------------------------------------------------------
+## ** Re-do with PC1/2 scores from AE's genomic PCA for consistency 
 ## Get list of sample names from filtered vcf table 
 genotype_mxFilt <- vcfR::extract.gt(vcf_filt, as.numeric=TRUE)
 indvNames <- as.data.frame(colnames(genotype_mxFilt))
@@ -622,7 +582,6 @@ indvNames$Temp <- str_replace(indvNames$Sample, "ARFR_", "")
 indvNames$ID <- as.integer(str_replace(indvNames$Temp, "_sorted", ""))
 #join by ID to get source (pop ID)
 indvNames <- left_join(indvNames, ARFR24, by="ID")
-
 
 
 
@@ -650,21 +609,13 @@ popNames <- unique(indvNames$PopID)
 ## Calculate mean PC1 values for each population
 PC1.mean <- dfScores %>% group_by(Source) %>% summarise(PC1mean = mean(PC1score), n=n())
 
-### ** Look into what 'NA' is can clean up ***
+### Look into and clean up 'NA' 
 PC1.mean <- PC1.mean[1:11,]
 
-#trait.PCscores <- as.data.frame(cbind(pca.results$x[,1], pca.results$x[,2], as.character(indivs.traitPCA$Source)))
 
 
 
 ## Create color gradient and assign colors based on numeric continuous PC1 mean values
-# From ChatGPT
-# Define a color gradient (e.g., from blue to red)
-#sdZnColsOld <- c("#EEB422", "#EEB422", "#B4EEB4", "#8FBC8F", "#B4EEB4", "#8FBC8F", "#B4EEB4", "#8FBC8F", 
-#             "#C1FFC1", "#FFEC8B", "#ffff8b")
-
-#gradient_fn <- colorRamp(c("#EEB422",   "#C1FFC1", "#ffff8b"))
-#gradient_fn <- colorRamp(c("#EEB422",   "#C1FFC1"))
 gradient_fn <- colorRamp(c("greenyellow",   "deeppink"))
 
 # Normalize your values to [0,1] scale
@@ -687,30 +638,6 @@ vals_normGenRange <- (genPCrange - min(genPCrange)) / (max(genPCrange) - min(gen
 rgb_matrixGenRange <- gradient_fn(vals_normGenRange)
 colors.genPCrange <- rgb(rgb_matrixGenRange[,1], rgb_matrixGenRange[,2], rgb_matrixGenRange[,3], maxColorValue = 255)
 plot(genPCrange, rep(0.5, length(genPCrange)), col=colors.genPCrange, pch=15, cex=4)
-
-
-## ** make legend of color gradient **
-
-## Not sure if this full works as intended... 
-#colorAccording2(
-#  x,
-#  gradTy = "logGray",
-#  nStartOmit = NULL,
-#  nEndOmit = "sep",
-#  revCol = FALSE,
-#  alpha = 1,
-#  silent = FALSE,
-#  debug = FALSE,
-#  callFrom = NULL
-#)
-#plot(1:11,PC1.mean$PC1mean,pch=16,cex=2,col=colorAccording2(PC1.mean$PC1mean))
-#plot(PC1.mean$PC1mean, col=colorAccording2(PC1.mean$PC1mean), pch=19, cex=1.5)
-#PC1.mean$HexCode <- colorAccording2(PC1.mean$PC1mean)
-#col <- c("#00FF2EFF", "#00FFB9FF", "#FF008BFF", "#5D00FFFF", "#002EFFFF", "#FF0000FF", "#00B9FFFF")
-# Create the color ramp function (from AI)
-#color_function <- colorRampPalette(c("blue", "red"))
-# Generate colors for the data
-#PC1.mean$color <- color_function(PC1.mean$PC1mean)
 ## -------------------------------------------------------------------------------------------
 
 
