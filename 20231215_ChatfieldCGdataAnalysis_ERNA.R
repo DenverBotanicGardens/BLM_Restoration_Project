@@ -5,7 +5,7 @@
 
 
 rm(list=ls())
-dev.off()
+#dev.off()
 
 
 ## LOAD PACKAGES AND FUNCTIONS --------------------------------------------------------------------
@@ -38,6 +38,31 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 
 
 
+## ADD AND COMBINE FILES FOR GWAS/ GEA -----------------------------------------
+ERNApheno <- read.csv(file="AGoebl/ProjectWriteupsAndSlides/ERNA_ms/20241018_ChatfieldPhenotypes_2022.2023_ERNA.csv", sep=",", header=TRUE, dec=".")
+ERNAfam <- read.csv(file="AGoebl/ProjectWriteupsAndSlides/ERNA_ms/ERNA_biallelic_individ60miss_hetexcess_depthmin3max15_sitemiss0.8_mq40.fam", sep="\t", header=FALSE)
+
+## Add new ID column to match fam file
+ERNApheno$IDnew <- paste0("AG_ERNA_", ERNApheno$ID)
+
+## Add desired phenotype for relevant indivs to fam file
+colnames(ERNAfam) <- c("IDnew","V2","V3","V4","V5","V6")
+ERNAfam <- left_join(ERNAfam, (ERNApheno %>% select(IDnew,DaysToFlwr2023)), by="IDnew")
+## Remove column with all -9
+ERNAfam <- ERNAfam %>% select(1:5,7)
+colnames(ERNAfam) <- NULL
+
+## Save updated fam file
+write.table(ERNAfam, file="AGoebl/ProjectWriteupsAndSlides/ERNA_ms/ERNA_biallelic_individ60miss_hetexcess_depthmin3max15_sitemiss0.8_mq40_DAYSTOFLWR.fam", 
+            sep="\t", row.names=FALSE, quote=FALSE)
+## -----------------------------------------------------------------------------
+
+
+
+
+
+
+
 ## LOAD DATA --------------------------------------------------------------------------------------
 ERNA22 <- read.csv(file="Chatfield/2022_data/20230302_ChatfieldData2022_ERNA.csv", sep=",", header=TRUE, dec=".")
 ERNA.SdZn <- read.csv(file="AGoebl/Seeds/20231215_ERNA_LatLongSdZn_hexcodes.csv", sep=",", header=TRUE, dec=".")
@@ -47,10 +72,12 @@ ERNA.bioVarCG <- readRDS("AGoebl/Seeds/20240207_Chatfield_Biovars2022")
 ERNA.sla <- read.csv(file="Chatfield/2023_data/20241017_ChatfieldSLAdata2023_ERNA.csv", sep=",", header=TRUE, dec=".")
 ## ----------------------------------------------------------------------------------------------
 
+## *** ADD 2024 and 2025 data ***
 
 
 
-## ERNA - DATA CLEAN UP ---------------------------------------------
+
+## ERNA - DATA CLEAN UP --------------------------------------------------------
 str(ERNA22)
 str(ERNA23)
 
@@ -186,7 +213,7 @@ max(ERNA23$Flowering_20231013, na.rm=TRUE)
 # ** Check that length is only numeric
 # ** Check that if surv=0 for a given date, there are no phenology or height values for that date
 
-## *** Need to work on this **** Look at ARFR ** 
+## *** Need to work on this **** Look at ARFR and Katie's methods for PEVI ** 
 #Check that once zero in surv on X/X or later, stays zero (if becomes 1 later, could be data entry error, or not depending on species)
 ## CONSOLIDATE SURVIVAL DATA
 #ERNA.Surv <- ERNA22.cl %>% dplyr::select(c(starts_with("Survival_")))
@@ -294,6 +321,8 @@ nrow(ERNA23[ERNA23$FlwrYesNo==0,])                                             #
 ## ---------------------------------------------------------------
 ## ---------------------------------------------------------------
 
+## *** ESTIMATE PHENOLOGY FROM 2024 AS WELL ****
+
 
 
 ## ERNA - ADD GROWTH RATE VARIABLES ------------------------------
@@ -344,6 +373,10 @@ ERNA22.cl$AliveYesNo[ERNA22.cl$Survival_20221108==1] <- 1
 ERNA22.cl$AliveYesNo[(ERNA22.cl$OrigPltSurvival_20220518==0) & (ERNA22.cl$Replaced_YorN=="N" | ERNA22.cl$Replaced_YorN=="")] <- NA
 #ERNA.cl$AliveYesNo[(ERNA.cl$OrigPltSurvival_20220518==0 | ERNA.cl$Survival_20220608==0) & (ERNA.cl$Replaced_YorN=="N" | ERNA.cl$Replaced_YorN=="")] <- NA
 #ERNA.cl %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_Avg=mean(AliveYesNo,na.rm=TRUE))
+
+## ** ESTIMATE SURVIVAL FOR 2024 and 2025 **
+## ** Models with all years together and year as a fixed effect? **
+## ** Try CoxHaz model for time to death estimates ** 
 ## ---------------------------------------------------------------
 
 
