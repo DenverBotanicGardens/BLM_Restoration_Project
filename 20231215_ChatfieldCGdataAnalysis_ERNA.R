@@ -70,7 +70,17 @@ ERNAassoc.ord <- ERNAassoc[order(ERNAassoc$p_wald),]
 ERNAassoc.loP <- ERNAassoc[ERNAassoc$p_wald<=0.001,]
 ERNAassoc.loP <- ERNAassoc[-log10(ERNAassoc$p_wald)>=4,]
 
-unique(ERNAassoc.loP$chr)
+## Plot p-values along genomic coordiates
+chr.list <- unique(ERNAassoc.loP$chr)
+
+par(mfrow=c(5,2))
+for (cc in chr.list) {
+  chr.subst <- subset(ERNAassoc, chr == cc)
+  
+  plot(chr.subst$ps, -log10(chr.subst$p_wald), pch=19,cex=0.9,main=cc,
+       xlab="Position along scafffold", ylab="-log10(p-val)",ylim=c(0,7))
+}
+
 ## -----------------------------------------------------------------------------
 
 
