@@ -8,7 +8,7 @@ rm(list=ls())
 #dev.off()
 
 
-## LOAD PACKAGES AND FUNCTIONS --------------------------------------------------------------------
+## LOAD PACKAGES AND FUNCTIONS -------------------------------------------------
 library(Hmisc)
 library(dplyr)
 library(stringr)
@@ -25,16 +25,15 @@ library(gplots)
 library(corrplot)
 library(PerformanceAnalytics)
 calcSE <- function(x){sd(x, na.rm=TRUE)/sqrt(length(x))}
-## ------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 
 
 
-
-
-## SET WORKING DIRECTORY --------------------------------------------------------------------------
+## SET WORKING DIRECTORY -------------------------------------------------------
 setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland")
 #setwd("C:/Users/april/Denver Botanic Gardens/Conservation - BLM-Grassland")
-## ------------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
+
 
 
 
@@ -55,6 +54,23 @@ colnames(ERNAfam) <- NULL
 ## Save updated fam file
 write.table(ERNAfam, file="AGoebl/ProjectWriteupsAndSlides/ERNA_ms/ERNA_biallelic_individ60miss_hetexcess_depthmin3max15_sitemiss0.8_mq40_DAYSTOFLWR.fam", 
             sep="\t", row.names=FALSE, quote=FALSE)
+## -----------------------------------------------------------------------------
+
+
+
+## LOOK AT FILES FROM GWAS/ GEA ------------------------------------------------
+ERNAassoc <- read.csv(file="AGoebl/ProjectWriteupsAndSlides/ERNA_ms/ERNA_biallelic_individ60miss_hetexcess_depthmin3max15_sitemiss0.8_mq40_DaysToFlwr.ulmm.assoc.txt", sep="\t", header=TRUE)
+hist(ERNAassoc$p_wald)
+hist(-log10(ERNAassoc$p_wald))
+max(-log10(ERNAassoc$p_wald))
+length(unique(ERNAassoc$chr))
+
+## Look at lowest p-vals
+ERNAassoc.ord <- ERNAassoc[order(ERNAassoc$p_wald),] 
+ERNAassoc.loP <- ERNAassoc[ERNAassoc$p_wald<=0.001,]
+ERNAassoc.loP <- ERNAassoc[-log10(ERNAassoc$p_wald)>=4,]
+
+unique(ERNAassoc.loP$chr)
 ## -----------------------------------------------------------------------------
 
 
