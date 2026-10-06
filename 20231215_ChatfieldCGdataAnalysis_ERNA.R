@@ -77,7 +77,7 @@ par(mfrow=c(5,2))
 for (cc in chr.list) {
   chr.subst <- subset(ERNAassoc, chr == cc)
   
-  plot(chr.subst$ps, -log10(chr.subst$p_wald), pch=19,cex=0.9,main=cc,
+  plot(chr.subst$ps, -log10(chr.subst$p_wald), pch=19,cex=0.8,main=cc,
        xlab="Position along scafffold", ylab="-log10(p-val)",ylim=c(0,7))
 }
 
@@ -98,7 +98,7 @@ ERNA.bioVarCG <- readRDS("AGoebl/Seeds/20240207_Chatfield_Biovars2022")
 ERNA.sla <- read.csv(file="Chatfield/2023_data/20241017_ChatfieldSLAdata2023_ERNA.csv", sep=",", header=TRUE, dec=".")
 ## ----------------------------------------------------------------------------------------------
 
-## *** ADD 2024 and 2025 data ***
+## *** ADD 2024, 2025, and 2026 data ***
 
 
 
