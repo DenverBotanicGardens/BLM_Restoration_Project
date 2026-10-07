@@ -96,9 +96,12 @@ ERNA.biovar <- readRDS("AGoebl/Seeds/20240131_ERNA_BiovarsAvg1980_2021")
 ERNA23 <- read.csv(file="Chatfield/2023_data/20241017_ChatfieldData2023_ERNA.csv", sep=",", header=TRUE, dec=".")
 ERNA.bioVarCG <- readRDS("AGoebl/Seeds/20240207_Chatfield_Biovars2022")
 ERNA.sla <- read.csv(file="Chatfield/2023_data/20241017_ChatfieldSLAdata2023_ERNA.csv", sep=",", header=TRUE, dec=".")
-## ----------------------------------------------------------------------------------------------
 
-## *** ADD 2024, 2025, and 2026 data ***
+## ADD 2024, 2025, and 2026 data 
+ERNA24 <- read.csv(file="Chatfield/2024_data/CommonGarden/ERNA/20250321_ChatfieldCGsurveyData2024_ERNA_amgUpdates.csv", sep=",", header=TRUE, dec=".")
+ERNA25 <- read.csv(file="Chatfield/2025_data/20251009_ERNA_plant_1_amgUpdates.csv", sep=",", header=TRUE, dec=".")
+ERNA26 <- read.csv(file="Chatfield/2026_data/20261001_ERNA_plant_1_amgUpdates.csv", sep=",", header=TRUE, dec=".")
+## ----------------------------------------------------------------------------------------------
 
 
 
