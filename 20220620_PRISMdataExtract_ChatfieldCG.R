@@ -273,7 +273,7 @@ tmax.means
 
 
 ## USE BIOVARS FUNCTION TO ESTIMATE 19 BIOVARIABLES
-setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds")
+#setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds")
 #ppt.means <- readRDS("20230311_ARFR_pptMonthly")
 #tmin.means <- readRDS("20230311_ARFR_tminMonthly")
 #tmax.means <- readRDS("20230314_ARFR_tmaxMonthly")
@@ -283,6 +283,10 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 #ppt.means <- readRDS("20221129_BOGR_pptMonthly")
 #tmin.means <- readRDS("20221129_BOGR_tminMonthly")
 #tmax.means <- readRDS("20230824_BOGR_tmaxMonthly")
+
+setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/")
+ClimCG <- read.csv(file ='DNA_Seq/KatieBardsley/PRISM_ppt_tmin_tmean_tmax_Unlikely_to_change_800m_202201_202412_39.5509_-105.1000.csv', sep=',', header = TRUE)  
+
 
 ppt.means.nopops <- ppt.means[,2:13]
 tmin.means.nopops <- tmin.means[,2:13]
