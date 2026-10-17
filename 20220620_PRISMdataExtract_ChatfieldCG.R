@@ -285,36 +285,58 @@ tmax.means
 #tmax.means <- readRDS("20230824_BOGR_tmaxMonthly")
 
 setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/")
-ClimCG <- read.csv(file ='DNA_Seq/KatieBardsley/PRISM_ppt_tmin_tmean_tmax_Unlikely_to_change_800m_202201_202412_39.5509_-105.1000.csv', sep=',', header = TRUE)  
+climCG <- read.csv(file ='DNA_Seq/KatieBardsley/PRISM_ppt_tmin_tmean_tmax_Unlikely_to_change_800m_202201_202412_39.5509_-105.1000.csv', sep=',', header = TRUE)  
+climCG <- climCG[1:36,]
 
+## Add column with year
+climCG$Yr <- str_sub(climCG$Date, start=1, end=4)
 
-ppt.means.nopops <- ppt.means[,2:13]
-tmin.means.nopops <- tmin.means[,2:13]
-tmax.means.nopops <- tmax.means[,2:13]
-ppt.means.t <- t(ppt.means.nopops)
-tmin.means.t <- t(tmin.means.nopops)
-tmax.means.t <- t(tmax.means.nopops)
+## Make variable for each clim variable and year and convet units to mm and deg C
+ppt.22 <- (climCG$ppt..inches.[climCG$Yr=="2022"]) * 25.4
+ppt.23 <- (climCG$ppt..inches.[climCG$Yr=="2023"]) * 25.4
+ppt.24 <- (climCG$ppt..inches.[climCG$Yr=="2024"]) * 25.4
+tmin.22 <- (climCG$tmin..degrees.F.[climCG$Yr=="2022"] - 32) * (5/9)
+tmin.23 <- (climCG$tmin..degrees.F.[climCG$Yr=="2023"] - 32) * (5/9)
+tmin.24 <- (climCG$tmin..degrees.F.[climCG$Yr=="2024"] - 32) * (5/9)
+tmax.22 <- (climCG$tmax..degrees.F.[climCG$Yr=="2022"] - 32) * (5/9)
+tmax.23 <- (climCG$tmax..degrees.F.[climCG$Yr=="2023"] - 32) * (5/9)
+tmax.24 <- (climCG$tmax..degrees.F.[climCG$Yr=="2024"] - 32) * (5/9)
 
-biovar.means <- as.data.frame(matrix(NA, num.pops, 20))
-colnames(biovar.means) <- c("Pop", as.character(1:19))
-biovar.means$Pop <- pops_LatLong$Code
+#ppt.means.nopops <- ppt.means[,2:13]
+#tmin.means.nopops <- tmin.means[,2:13]
+#tmax.means.nopops <- tmax.means[,2:13]
+#ppt.means.t <- t(ppt.means.nopops)
+#tmin.means.t <- t(tmin.means.nopops)
+#tmax.means.t <- t(tmax.means.nopops)
 
-for (pp in 1:num.pops) {
-  bioVars.BOGR <- biovars(as.vector(ppt.means.t[,pp]), as.vector(tmin.means.t[,pp]),
-                          as.vector(tmax.means.t[,pp]))
+num.pops <- 1
+
+#biovar.means <- as.data.frame(matrix(NA, num.pops, 20))
+#colnames(biovar.means) <- c("Pop", as.character(1:19))
+#biovar.means$Pop <- pops_LatLong$Code
+
+#for (pp in 1:num.pops) {
+#  bioVars.BOGR <- biovars(as.vector(ppt.means.t[,pp]), as.vector(tmin.means.t[,pp]),
+#                          as.vector(tmax.means.t[,pp]))
   
-  biovar.means[pp,2:20] <- bioVars.BOGR
-}
+#  biovar.means[pp,2:20] <- bioVars.BOGR
+#}
 
+bioVars.chat22 <- biovars(as.vector(ppt.22), as.vector(tmin.22), as.vector(tmax.22))
+bioVars.chat23 <- biovars(as.vector(ppt.23), as.vector(tmin.23), as.vector(tmax.23))
+bioVars.chat24 <- biovars(as.vector(ppt.24), as.vector(tmin.24), as.vector(tmax.24))
+
+bioVars.chat <- as.data.frame(rbind(bioVars.chat22, bioVars.chat23, bioVars.chat24))
+bioVars.chat$Year <- c("2022","2023","2024")
 
 #setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/AGoebl/Seeds")
 date <- Sys.Date()  
 date <- gsub("-", "", date)
-#species <- as.character("Chatfield")
-species <- as.character("PEVI")
+species <- as.character("Chatfield")
+#species <- as.character("PEVI")
 #saveRDS(biovar.means, file=paste(date,species,"Biovars2022",sep="_"))
 #saveRDS(biovar.means, file=paste(date,species,"BiovarsAvg1980_2022",sep="_"))
-write.csv(biovar.means, file=paste(date,species,"BiovarsAvg1980_2022.csv",sep="_"), row.names=FALSE)
+write.csv(bioVars.chat, file=paste(date,species,"Biovars2022_2024_mmAndC.csv",sep="_"), row.names=FALSE)
 
 ARFR_biovars <- readRDS("20230814_ARFR_BiovarsAvg1980_2021")
 write.csv(ARFR_biovars, file="20230814_ARFR_BiovarsAvg1980_2021.csv", row.names=FALSE)
