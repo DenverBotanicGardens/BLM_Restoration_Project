@@ -57,7 +57,6 @@ write.table(ERNAfam, file="AGoebl/ProjectWriteupsAndSlides/ERNA_ms/ERNA_bialleli
 ## -----------------------------------------------------------------------------
 
 
-
 ## LOOK AT FILES FROM GWAS/ GEA ------------------------------------------------
 ERNAassoc <- read.csv(file="AGoebl/ProjectWriteupsAndSlides/ERNA_ms/ERNA_biallelic_individ60miss_hetexcess_depthmin3max15_sitemiss0.8_mq40_DaysToFlwr.ulmm.assoc.txt", sep="\t", header=TRUE)
 hist(ERNAassoc$p_wald)
@@ -80,7 +79,6 @@ for (cc in chr.list) {
   plot(chr.subst$ps, -log10(chr.subst$p_wald), pch=19,cex=0.8,main=cc,
        xlab="Position along scafffold", ylab="-log10(p-val)",ylim=c(0,7))
 }
-
 ## -----------------------------------------------------------------------------
 
 
@@ -111,6 +109,8 @@ str(ERNA22)
 str(ERNA23)
 
 ERNA22$Source <- as.factor(ERNA22$Source)
+ERNA22$Block <- as.factor(ERNA22$Block)
+ERNA22$ID <- as.factor(ERNA22$ID)
 ERNA23$Source <- as.factor(ERNA23$Source)
 ERNA23$Survival_20231013 <- as.integer(as.character(ERNA23$Survival_20231013))
 ERNA23$Flowering_20231013 <- as.integer(as.character(ERNA23$Flowering_20231013))
@@ -120,13 +120,16 @@ ERNA23$Flowering_20231013 <- as.integer(as.character(ERNA23$Flowering_20231013))
 ##If OrigPltSurv_20220518 = 0 & plt not replaced (N), ignore data for this plt, i.e. future surv should be NA, not 0; died from transplant
 #ERNA22.cl <- ERNA22[ERNA22$OrigPltSurvival_20220518==1 | (ERNA22$OrigPltSurvival_20220518==0 & ERNA22$Replaced_YorN=="Y"),]
 ## OR, instead of removing rows: ** confirm that these are relevant rows **
-ERNA22[ERNA22$OrigPltSurvival_20220518==0 & ERNA22$Replaced_YorN=="N",13:29] <- NA
+#ERNA22[ERNA22$OrigPltSurvival_20220518==0 & ERNA22$Replaced_YorN=="N",13:29] <- NA
+ERNA22$ExcludeBcNotReplaced <- NULL
+ERNA22$ExcludeBcNotReplaced[ERNA22$OrigPltSurvival_20220518==0 & ERNA22$Replaced_YorN=="N"] <- "Y"
 
 
 ##If not replaced, but died before planting, don't use subsequent data 
 #ERNA.cl <- ERNA.cl[ERNA.cl$DateMortalityObservedPreTransplant=="",] 
 ## OR, instead of removing rows: ** confirm that these are relevant rows **
-ERNA22[ERNA22$DateMortalityObservedPreTransplant!="",13:29] <- NA 
+#ERNA22[ERNA22$DateMortalityObservedPreTransplant!="",13:29] <- NA 
+ERNA22$ExcludeBcNotReplaced[ERNA22$DateMortalityObservedPreTransplant != ""] <- "Y"
 
 
 #Note: Don't use OrigPltSurv_20220518 data in days to mort or other field analyses,
@@ -164,6 +167,18 @@ ERNA22.cl <- ERNA22
 #nrow(ERNA.cl[ERNA.cl$OrigPltSurvival_20220518==0 & (ERNA.cl$Survival_20220608==0 & ERNA.cl$Replaced_YorN=="Y"),])
 
 
+## Don't use individuals that have "Y" and "N" in Replaced_YorN column b/c of confusion around timing and what it means for subsequent data
+length(ERNA22$Replaced_YorN[ERNA22$Replaced_YorN!=""])
+nrow(ERNA22[ERNA22$Replaced_YorN!="" & ERNA22$TissueCollected=="Y",])
+ERNA22[ERNA22$Replaced_YorN!="" & ERNA22$TissueCollected=="Y",]
+ERNA22[ERNA22$Replaced_YorN=="N" & ERNA22$TissueCollected=="Y",]
+length(ERNA22$TissueCollected[ERNA22$TissueCollected=="Y"])
+
+ERNA22$ExcludeBcReplaceYorN[ERNA22$Replaced_YorN!=""] <- "Y"
+
+
+
+
 
 ## 2023 -----------------------------
 ## For 2023, if H, harvested, harvest, h., coll AGB in notes (e.g. 'H' in Notes_20231013) subsequent surv should be NA
@@ -198,6 +213,16 @@ ERNA23$Flowering_20230914[ERNA23$Survival_20230914==1 & is.na(ERNA23$Flowering_2
 ERNA23$Flowering_20231013[ERNA23$Survival_20231013==1 & is.na(ERNA23$Flowering_20231013)] <- 0
 ## ---------------------------------------------------------------
 
+
+## For 2024 ***
+## * Confirm who was harvested
+## * Check for consistency in survival and flowering across the year
+
+## For 2025 and 2026 ***
+## * Confirm who was harvested
+## * Look into who was removed for SER transplants
+## * check for consistency in survival from previous years
+## *******************************************************
 
 
 ## Checks 
