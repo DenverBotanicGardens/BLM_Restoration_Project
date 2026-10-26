@@ -125,6 +125,18 @@ ERNA22$ExcludeBcReplaceYorN[ERNA22$Replaced_YorN!=""] <- "Y"
 testRm <- ERNA22[ERNA22$Replaced_YorN!="",] 
 testKeep <- ERNA22[ERNA22$Replaced_YorN=="",] 
 
+## Check that surv is only 1, 0 and maybe NA
+ERNA22[(ERNA22$Survival_20220608 < 0 | ERNA22$Survival_20220608 > 1) & !is.na(ERNA22$Survival_20220608),]
+ERNA22[(ERNA22$Survival_20220719 < 0 | ERNA22$Survival_20220719 > 1) & !is.na(ERNA22$Survival_20220719),]
+ERNA22[(ERNA22$Survival_20221108 < 0 | ERNA22$Survival_20221108 > 1) & !is.na(ERNA22$Survival_20221108),]
+
+## Check that surv is only integers
+ERNA22[ERNA22$Survival_20220608 - floor(ERNA22$Survival_20220608) != 0,]
+ERNA22[ERNA22$Survival_20220719 - floor(ERNA22$Survival_20220719) != 0,] 
+ERNA22[ERNA22$Survival_20221108 - floor(ERNA22$Survival_20221108) != 0,]
+
+## Most indivs didn't flower in the first year, ignore phenology for 2022
+## ----------------------------------
 
 
 
@@ -155,85 +167,65 @@ ERNA23 <- ERNA23 %>% mutate(across(c(Flowering_20230901, Flowering_20230914, Flo
 ERNA23[grepl("harvest", ERNA23$Notes_20230901),]          
 ERNA23[grepl("h\\.", ERNA23$Notes_20230901),]          
 ERNA23[grepl("H", ERNA23$Notes_20230901),]      
-## ** add mutate code lines here ** 
+ERNA23 <- ERNA23 %>% mutate(across(c(Survival_20230914, Survival_20231013, Flowering_20230914, Flowering_20231013), 
+                                   ~ if_else(str_starts(ERNA23$Notes_20230901,"harvest"), NA, .x)))
+ERNA23 <- ERNA23 %>% mutate(across(c(Survival_20230914, Survival_20231013, Flowering_20230914, Flowering_20231013), 
+                                   ~ if_else(str_detect(ERNA23$Notes_20230901,"h\\."), NA, .x)))
+ERNA23 <- ERNA23 %>% mutate(across(c(Survival_20230914, Survival_20231013, Flowering_20230914, Flowering_20231013), 
+                                   ~ if_else(str_detect(ERNA23$Notes_20230901,"H"), NA, .x)))
 
-ERNA23[grepl("H", ERNA23$Notes_20230914),]     
+ERNA23[grepl("H", ERNA23$Notes_20230914),]  
+ERNA23 <- ERNA23 %>% mutate(across(c(Survival_20231013, Flowering_20231013), ~ if_else(Notes_20230914=="H", NA, .x)))
 
-ERNA23[grepl("H", ERNA23$Notes_20231013),]          
-ERNA23$Survival_20231013[grepl("H", ERNA23$Notes_20231013)] <- NA
+ERNA23[grepl("H", ERNA23$Notes_20231013),] 
+ERNA23 <- ERNA23 %>% mutate(across(c(Survival_20231013, Flowering_20231013), ~ if_else(Notes_20231013=="H", NA, .x)))
 
+
+## ** Add a column with Harvested Yes/No (any date in 2023) to use in filtering of data from later years **
+## ****
+
+## Check that surv is only 1, 0 and maybe NA
+ERNA23[(ERNA23$Survival_20230607 < 0 | ERNA23$Survival_20230607 > 1) & !is.na(ERNA23$Survival_20230607),]
+ERNA23[(ERNA23$Survival_20231013 < 0 | ERNA23$Survival_20231013 > 1) & !is.na(ERNA23$Survival_20231013),]
+
+#Check that surv is only integers
+ERNA23[ERNA23$Survival_20230607 - floor(ERNA23$Survival_20230607) != 0,]
+## ** check other dates? **
+
+
+#If plt alive and 1 was not entered in flowering col, enter 0 (not NA)
+ERNA23$Flowering_20230607[ERNA23$Survival_20230607==1 & is.na(ERNA23$Flowering_20230607)] <- 0
+ERNA23$Flowering_20230620[ERNA23$Survival_20230620==1 & is.na(ERNA23$Flowering_20230620)] <- 0
+ERNA23$Flowering_20230705[ERNA23$Survival_20230705==1 & is.na(ERNA23$Flowering_20230705)] <- 0
+ERNA23$Flowering_20230901[ERNA23$Survival_20230901==1 & is.na(ERNA23$Flowering_20230901)] <- 0 
+ERNA23$Flowering_20230914[ERNA23$Survival_20230914==1 & is.na(ERNA23$Flowering_20230914)] <- 0
+ERNA23$Flowering_20231013[ERNA23$Survival_20231013==1 & is.na(ERNA23$Flowering_20231013)] <- 0
 ## ---------------------------------------------------------------
+
+
+## For all years, add checks on integers only, or 1/0/NA only, etc? (before combining)
+
+
+## ** After combining data (here probably),
+## don't use individuals that have "Y" or "N" in 2022 Replaced_YorN column b/c of confusion around timing and what it means for subsequent data **
 
 
 
 ## For 2024 ***
-## * Confirm who was harvested
-## * Check for consistency in survival and flowering across the year
+## * Confirm who was harvested (after combining)
+## * Check for consistency in survival and flowering across the year (do this for 22-23 as well)
 
 ## For 2025 and 2026 ***
 ## * Confirm who was harvested
-## * Look into who was removed for SER transplants
+## * Look into who was removed for SER transplants (before combining?)
 ## * check for consistency in survival from previous years
 ## *******************************************************
-
-
-
-## ** After combining data (here or below),
-## don't use individuals that have "Y" or "N" in 2022 Replaced_YorN column b/c of confusion around timing and what it means for subsequent data **
 
 
 
 
 
 ## Checks 
-## Check that surv is only 1, 0 and maybe NA
-ERNA22.cl[ERNA22.cl$Survival_20220608 < 0 | ERNA22.cl$Survival_20220608 > 1,]
-ERNA22.cl[(ERNA22.cl$Survival_20220719 < 0 | ERNA22.cl$Survival_20220719 > 1) & !is.na(ERNA22.cl$Survival_20220719),]
-ERNA22.cl[(ERNA22.cl$Survival_20221108 < 0 | ERNA22.cl$Survival_20221108 > 1) & !is.na(ERNA22.cl$Survival_20221108),]
-ERNA23[(ERNA23$Survival_20231013 < 0 | ERNA23$Survival_20231013 > 1) & !is.na(ERNA23$Survival_20231013),]
-ERNA23[ERNA23$Survival_20230607 < 0 | ERNA23$Survival_20230607 > 1,]
-
-#Check that surv is only integers
-ERNA22.cl[ERNA22.cl$Survival_20220608 - floor(ERNA22.cl$Survival_20220608) != 0,]
-ERNA22.cl[ERNA22.cl$Survival_20220719 - floor(ERNA22.cl$Survival_20220719) != 0,] #*Should this be zero rows?*
-ERNA22.cl[ERNA22.cl$Survival_20221108 - floor(ERNA22.cl$Survival_20221108) != 0,]
-ERNA23[ERNA23$Survival_20230607 - floor(ERNA23$Survival_20230607) != 0,]
-
-#Flowering cols should only be 1, 0, NA 
-min(ERNA23$Flowering_20230607, na.rm=TRUE)
-min(ERNA23$Flowering_20230620, na.rm=TRUE)
-min(ERNA23$Flowering_20230627, na.rm=TRUE)
-min(ERNA23$Flowering_20230705, na.rm=TRUE)
-min(ERNA23$Flowering_20230728, na.rm=TRUE)
-min(ERNA23$Flowering_20230811, na.rm=TRUE)
-min(ERNA23$Flowering_20230901, na.rm=TRUE)
-min(ERNA23$Flowering_20230914, na.rm=TRUE)
-min(ERNA23$Flowering_20231013, na.rm=TRUE)
-
-max(ERNA23$Flowering_20230607, na.rm=TRUE)
-max(ERNA23$Flowering_20230620, na.rm=TRUE)
-max(ERNA23$Flowering_20230627, na.rm=TRUE)
-max(ERNA23$Flowering_20230705, na.rm=TRUE)
-max(ERNA23$Flowering_20230728, na.rm=TRUE)
-max(ERNA23$Flowering_20230811, na.rm=TRUE)
-max(ERNA23$Flowering_20230901, na.rm=TRUE)
-max(ERNA23$Flowering_20230914, na.rm=TRUE)
-max(ERNA23$Flowering_20231013, na.rm=TRUE) 
-#which.max(ERNA23$Flowering_20231013) 
-#ERNA23$Flowering_20231013[which.max(ERNA23$Flowering_20231013)] <- 1
-
-
-#If plt alive and 1 was not entered in flowering col, enter 0 (not NA)
-ERNA23$Flowering_20230607[ERNA23$Survival_20230607==1 & is.na(ERNA23$Flowering_20230607)] <- 0
-ERNA23$Flowering_20230620[ERNA23$Survival_20230620==1 & is.na(ERNA23$Flowering_20230620)] <- 0
-ERNA23$Flowering_20230627[ERNA23$Survival_20230627==1 & is.na(ERNA23$Flowering_20230627)] <- 0
-ERNA23$Flowering_20230705[ERNA23$Survival_20230705==1 & is.na(ERNA23$Flowering_20230705)] <- 0
-ERNA23$Flowering_20230728[ERNA23$Survival_20230728==1 & is.na(ERNA23$Flowering_20230728)] <- 0
-ERNA23$Flowering_20230811[ERNA23$Survival_20230811==1 & is.na(ERNA23$Flowering_20230811)] <- 0
-ERNA23$Flowering_20230901[ERNA23$Survival_20230901==1 & is.na(ERNA23$Flowering_20230901)] <- 0 #**Needs fixing?
-ERNA23$Flowering_20230914[ERNA23$Survival_20230914==1 & is.na(ERNA23$Flowering_20230914)] <- 0
-ERNA23$Flowering_20231013[ERNA23$Survival_20231013==1 & is.na(ERNA23$Flowering_20231013)] <- 0
-
 
 # ** Check that phenology only increases or stays the same; once flowering=1, it shouldn't go back to 0 
 
