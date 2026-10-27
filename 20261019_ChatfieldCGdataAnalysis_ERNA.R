@@ -93,6 +93,9 @@ ERNA26 <- read.csv(file="Chatfield/2026_data/20261001_ERNA_plant_1_amgUpdates.cs
 ## ERNA - DATA CLEAN UP --------------------------------------------------------
 str(ERNA22)
 str(ERNA23)
+str(ERNA24)
+str(ERNA25)
+
 
 ERNA22$Source <- as.factor(ERNA22$Source)
 ERNA22$Block <- as.factor(ERNA22$Block)
@@ -102,6 +105,10 @@ ERNA23$Block <- as.factor(ERNA23$Block)
 ERNA23$ID <- as.factor(ERNA23$ID)
 ERNA23$Survival_20231013 <- as.integer(as.character(ERNA23$Survival_20231013))
 ERNA23$Flowering_20231013 <- as.integer(as.character(ERNA23$Flowering_20231013))
+ERNA24$ID <- as.factor(ERNA24$plantID)
+ERNA25$ID <- as.factor(ERNA25$plantID)
+
+## ** make an updated date column for 2024 data, remove time, save as date data format? ** 
 
 
 
@@ -129,6 +136,7 @@ testKeep <- ERNA22[ERNA22$Replaced_YorN=="",]
 ERNA22[(ERNA22$Survival_20220608 < 0 | ERNA22$Survival_20220608 > 1) & !is.na(ERNA22$Survival_20220608),]
 ERNA22[(ERNA22$Survival_20220719 < 0 | ERNA22$Survival_20220719 > 1) & !is.na(ERNA22$Survival_20220719),]
 ERNA22[(ERNA22$Survival_20221108 < 0 | ERNA22$Survival_20221108 > 1) & !is.na(ERNA22$Survival_20221108),]
+## **check other dates? **
 
 ## Check that surv is only integers
 ERNA22[ERNA22$Survival_20220608 - floor(ERNA22$Survival_20220608) != 0,]
@@ -136,6 +144,18 @@ ERNA22[ERNA22$Survival_20220719 - floor(ERNA22$Survival_20220719) != 0,]
 ERNA22[ERNA22$Survival_20221108 - floor(ERNA22$Survival_20221108) != 0,]
 
 ## Most indivs didn't flower in the first year, ignore phenology for 2022
+
+## Check that length is only numeric
+is.numeric(ERNA22$Length_cm_20220608)
+is.numeric(ERNA22$Length_cm_20220719)
+is.numeric(ERNA22$Length_cm_20220915)
+
+## Check that if surv=0 for a given date, there are no phenology or height values for that date 
+ERNA22$Length_cm_20220608[ERNA22$Survival_20220608 == 0]
+ERNA22$Length_cm_20220719[ERNA22$Survival_20220719 == 0]
+ERNA22$Phenology_20220909[ERNA22$Survival_20220909 == 0]
+ERNA22$Length_cm_20220915[ERNA22$Survival_20220915 == 0]
+ERNA22$Phenology_20221108[ERNA22$Survival_20221108 == 0]
 ## ----------------------------------
 
 
@@ -181,8 +201,15 @@ ERNA23[grepl("H", ERNA23$Notes_20231013),]
 ERNA23 <- ERNA23 %>% mutate(across(c(Survival_20231013, Flowering_20231013), ~ if_else(Notes_20231013=="H", NA, .x)))
 
 
-## ** Add a column with Harvested Yes/No (any date in 2023) to use in filtering of data from later years **
-## ****
+## Add a column with Harvested Yes/No (any date in 2023) to use in filtering of data from later years **
+#ERNA23 <- ERNA23 %>% mutate(Harvested_2023=if_else(
+#                     str_starts(Notes_20230811.1,"coll AGB") | str_starts(Notes_20230901,"harvest") |
+#                     str_detect(Notes_20230901,"h\\.") | str_detect(Notes_20230901,"H") |
+#                     str_detect(Notes_20230914,"H") | str_detect(Notes_20231013,"H"), "Y", "N"))
+#ERNA23$Harvested_2023[!is.na(ERNA23test5$AboveGroundBiomass_g)] #Some harvested plants didn't have note added 
+ERNA23 <- ERNA23 %>% mutate(Harvested_2023=if_else(!is.na(AboveGroundBiomass_g), "Y", "N"))
+testKeep <- ERNA23[ERNA23$Harvested_2023=="N",] 
+
 
 ## Check that surv is only 1, 0 and maybe NA
 ERNA23[(ERNA23$Survival_20230607 < 0 | ERNA23$Survival_20230607 > 1) & !is.na(ERNA23$Survival_20230607),]
@@ -190,8 +217,23 @@ ERNA23[(ERNA23$Survival_20231013 < 0 | ERNA23$Survival_20231013 > 1) & !is.na(ER
 
 #Check that surv is only integers
 ERNA23[ERNA23$Survival_20230607 - floor(ERNA23$Survival_20230607) != 0,]
+ERNA23[ERNA23$Survival_20230620 - floor(ERNA23$Survival_20230620) != 0,]
 ## ** check other dates? **
 
+## Check that biomass is only numeric
+is.numeric(ERNA23$AboveGroundBiomass_g)
+is.numeric(ERNA23$ReproBiomass_g)
+
+## Check that if surv=0 for a given date, there are no phenology values for that date
+ERNA23$Flowering_20230607[ERNA23$Survival_20230607 == 0]
+ERNA23$Flowering_20230620[ERNA23$Survival_20230620 == 0]
+ERNA23$Flowering_20230627[ERNA23$Survival_20230627 == 0]
+ERNA23$Flowering_20230705[ERNA23$Survival_20230705 == 0] <- NA
+ERNA23$Flowering_20230728[ERNA23$Survival_20230728 == 0]
+ERNA23$Flowering_20230811[ERNA23$Survival_20230811 == 0]
+ERNA23$Flowering_20230901[ERNA23$Survival_20230901 == 0]
+ERNA23$Flowering_20230914[ERNA23$Survival_20230914 == 0]
+ERNA23$Flowering_20231013[ERNA23$Survival_20231013 == 0]
 
 #If plt alive and 1 was not entered in flowering col, enter 0 (not NA)
 ERNA23$Flowering_20230607[ERNA23$Survival_20230607==1 & is.na(ERNA23$Flowering_20230607)] <- 0
@@ -200,40 +242,58 @@ ERNA23$Flowering_20230705[ERNA23$Survival_20230705==1 & is.na(ERNA23$Flowering_2
 ERNA23$Flowering_20230901[ERNA23$Survival_20230901==1 & is.na(ERNA23$Flowering_20230901)] <- 0 
 ERNA23$Flowering_20230914[ERNA23$Survival_20230914==1 & is.na(ERNA23$Flowering_20230914)] <- 0
 ERNA23$Flowering_20231013[ERNA23$Survival_20231013==1 & is.na(ERNA23$Flowering_20231013)] <- 0
+
+## ** Think about for repro, if didn't flower, should repro bm be zero or NA? ** 
+
+## ** rename columns with 'flowering' to 'phenology' 
 ## ---------------------------------------------------------------
 
 
-## For all years, add checks on integers only, or 1/0/NA only, etc? (before combining)
+## For all years, add checks on integers only, or 1/0/NA only, and numeric only for size, etc? (before combining)
+
+
+## 2024 -----------------------------
+## ** size measured on subset on plts on 10/10 (end of 2024 season)
+
+
+## 2025 -----------------------------
+ERNA25 <- ERNA25 %>% rename(Survival_20251009 = survival, Phenology_20251009 = phenology)
+## ** no size in 2025
+## Check that surv is only 1, 0 and maybe NA ***
+#ERNA23[(ERNA23$Survival_20230607 < 0 | ERNA23$Survival_20230607 > 1) & !is.na(ERNA23$Survival_20230607),]
+#ERNA23[(ERNA23$Survival_20231013 < 0 | ERNA23$Survival_20231013 > 1) & !is.na(ERNA23$Survival_20231013),]
+
+#Check that surv is only integers
+#ERNA23[ERNA23$Survival_20230607 - floor(ERNA23$Survival_20230607) != 0,]
+
+## Check that if surv=0 for a given date, there are no phenology values for that date
+#ERNA23$Flowering_20230607[ERNA23$Survival_20230607 == 0]
+
+## ** Look into who was removed for SER transplants (before combining?)
+
+
+## 2026 -----------------------------
+## ** rename phenology and survival columns to include year
+## ** size in 2026
+## ** Look into who was removed for SER transplants (before combining?)
+
+
 
 
 ## ** After combining data (here probably),
 ## don't use individuals that have "Y" or "N" in 2022 Replaced_YorN column b/c of confusion around timing and what it means for subsequent data **
 
-
-
-## For 2024 ***
-## * Confirm who was harvested (after combining)
-## * Check for consistency in survival and flowering across the year (do this for 22-23 as well)
-
-## For 2025 and 2026 ***
-## * Confirm who was harvested
-## * Look into who was removed for SER transplants (before combining?)
-## * check for consistency in survival from previous years
-## *******************************************************
-
+## * Confirm who was harvested 2023-2026 (after combining)
+## * Check for consistency in survival and flowering across the year (do this for 22-26)
+# ** Check that phenology only increases or stays the same; once flowering=1, it shouldn't go back to 0 
+# ** Check that once zero in surv on X/X or later, stays zero (if becomes 1 later, could be data entry error, or not depending on species)
 
 
 
 
 ## Checks 
 
-# ** Check that phenology only increases or stays the same; once flowering=1, it shouldn't go back to 0 
-
-# ** Check that length is only numeric
-# ** Check that if surv=0 for a given date, there are no phenology or height values for that date
-
 ## *** Need to work on this **** Look at ARFR and Katie's methods for PEVI ** 
-#Check that once zero in surv on X/X or later, stays zero (if becomes 1 later, could be data entry error, or not depending on species)
 ## CONSOLIDATE SURVIVAL DATA
 #ERNA.Surv <- ERNA22.cl %>% dplyr::select(c(starts_with("Survival_")))
 #for (rr in 1:nrow(ERNA.Surv)) {
