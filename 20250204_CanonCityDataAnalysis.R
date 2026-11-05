@@ -49,7 +49,6 @@ dats$Plot.Number <- as.factor(dats$Plot.Number)
 dats$Site <- as.factor(dats$Site)
 dats$Treatment <- as.factor(dats$Treatment)
 #dats$Contents <- as.factor(dats$Contents)
-#Change 'Date' to date or parse out year, etc?
 ## ------------------------------------------------------------------------------------------------
 
 
@@ -64,18 +63,21 @@ dats$HalfSplit <- rep(c(rep("H1",12), rep("H2",13)),60)
 unique(dats$Contents)
 unique(dats$Treatment)
 #dats <- dats[dats$Contents != "empty",]
-#dats <- dats[dats$Contents != "controlAndSave",]  #Or should we keep negative control? 
+#dats <- dats[dats$Contents != "controlAndSave",]  #Or keep negative control for confirmation first (below)
 dats <- dats[dats$Treatment != "skip",]
 dats <- dats[dats$Treatment != "pilot",]
 #droplevels function
 
 
-## Data checks
-#seedling count should only be numeric
-#seedling count on 20240918 should only be 1 or 0, should not be empty
-#percent cover 202406 should not be empty, change NAs to 0 (below)
+## Data checks **
+#ARFR (seedling/ plant) count should only be numeric
+#Percent cover (veg and repro) should only be numeric or NA
+#Flowering (yes/no) should only be 1, 0, or NA
+
+#ARFR (seedling) count on 20240918 should only be 1 or 0, should not be empty
 #other checks..?
 #If seedling count>0, then percent cover should be >0
+#Repro % cover should not be more than veg % cover, but they can be equal 
 
 
 ## Check if any ARFR seen in negative controls?
@@ -186,11 +188,42 @@ for (ee in 1:length(unique(dats$Contents))) {
 
 
 ## 2024 ------------------------------------------------
+## ARFR NEW seedling column added to record any ARFR outside of a given plot (with in 0.25m)
+## Two survey dates:
+## in June all individual ARFR within plots were counted and percent vegetative cover was estimated. Leaf tissue was also collected. 
+## in Sept ARFR count column used as Yes/No to indicate if any ARFR present, no veg cover recorded, but repro cover was now assessed.  
+
 dats24 <- dats[grepl("2024", dats$Date),]
 dats2406 <- dats24[dats24$Date!="9/18/2024 18:00",]
 
-## Change any NAs (empty entries) to zero in percent veg cover
+## June: Change any NAs (empty entries) to zero in percent veg cover
 dats2406$ARFR.Percent.Cover[is.na(dats2406$ARFR.Percent.Cover)] <- 0
+
+## Sept: If no plants present, change repro cover to NA, not zero? 
+
+
+
+## 2025 ------------------------------------------------
+## Flowering (1=yes, 0=no) column added as a redundancy to repro cover 
+
+## If no plants present, change repro cover to NA, not zero? 
+
+
+## 2026 ------------------------------------------------
+## Leaf tissue column added 
+
+## If no plants present, change repro cover to NA, not zero? 
+
+
+
+
+
+## Analysis ideas:
+## Survival from each annual transition, 23-24, 24-25, 25-26. 
+## Growth (changes in veg cover overtime)
+## Relative repro (repro cover divided by total cover) 
+## Relative size (total cover/ number of plants)
+
 
 
 
