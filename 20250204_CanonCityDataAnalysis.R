@@ -29,7 +29,6 @@ calcSE <- function(x){sd(x, na.rm=TRUE)/sqrt(length(x))}
 
 ## SET WORKING DIRECTORY --------------------------------------------------------------------------
 #setwd("C:/Users/april.goebl/OneDrive - Denver Botanic Gardens/AGoebl_NonProject_WorkRelated/BLM_Restoration_Project")
-#setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/CanyonCity")
 setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/CanyonCity")
 ## ------------------------------------------------------------------------------------------------
 
@@ -37,8 +36,10 @@ setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BL
 
 ## LOAD DATA --------------------------------------------------------------------------------------
 #dats <- read.csv(file="20231102_CanonCityData_ARFR.csv", sep=",", header=TRUE, dec=".")
-dats <- read.csv(file="20250203_CanonCityData_ARFRforAnalysis.csv", sep=",", header=TRUE, dec=".")
+#dats <- read.csv(file="20250203_CanonCityData_ARFRforAnalysis.csv", sep=",", header=TRUE, dec=".")
+dats <- read.csv(file="Data_CanyonCity/20261104_CanonCityData23to26_ARFRforAnalysis.csv", sep=",", header=TRUE, dec=".")
 ## ------------------------------------------------------------------------------------------------
+
 
 
 
@@ -48,22 +49,25 @@ dats$Plot.Number <- as.factor(dats$Plot.Number)
 #dats$PlotTagNum <- as.factor(dats$PlotTagNum)
 dats$Site <- as.factor(dats$Site)
 dats$Treatment <- as.factor(dats$Treatment)
-#dats$Contents <- as.factor(dats$Contents)
+dats$Contents <- as.factor(dats$Contents)
 ## ------------------------------------------------------------------------------------------------
+
 
 
 
 ## ADD AND REMOVE FROM DATAFRAME ------------------------------------------------------------------
 ## Add in spatial variable designating position in 10x25 grid
-dats$HalfSplit <- rep(c(rep("H1",12), rep("H2",13)),60)
-#dats$QuadSplit <- rep(c(rep("H1",12), rep("H2",13)),60) ** split into 4 quads ... 
+totRows <- nrow(dats)
+multipBy <- totRows/25
+dats$HalfSplit <- rep(c(rep("H1",12), rep("H2",13)),multipBy)
+#dats$QuadSplit <-  ** split into 4 quads? ** 
 
 
 ## Remove empty, control, and pilot categories 
 unique(dats$Contents)
 unique(dats$Treatment)
 #dats <- dats[dats$Contents != "empty",]
-#dats <- dats[dats$Contents != "controlAndSave",]  #Or keep negative control for confirmation first (below)
+#dats <- dats[dats$Contents != "controlAndSave",]  #Or keep negative controls for confirmation first (below)
 dats <- dats[dats$Treatment != "skip",]
 dats <- dats[dats$Treatment != "pilot",]
 #droplevels function
@@ -219,8 +223,8 @@ dats2406$ARFR.Percent.Cover[is.na(dats2406$ARFR.Percent.Cover)] <- 0
 
 
 ## Analysis ideas:
-## Survival from each annual transition, 23-24, 24-25, 25-26. 
-## Growth (changes in veg cover overtime)
+## Survival from each annual transition, 23-24, 24-25, 25-26
+## Growth: changes in veg cover overtime, 24-25, 25-26
 ## Relative repro (repro cover divided by total cover) 
 ## Relative size (total cover/ number of plants)
 
