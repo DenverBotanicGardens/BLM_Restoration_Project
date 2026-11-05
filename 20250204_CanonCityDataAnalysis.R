@@ -75,19 +75,22 @@ dats <- dats[dats$Treatment != "pilot",]
 
 ## Data checks **
 #ARFR (seedling/ plant) count should only be numeric
-#Percent cover (veg and repro) should only be numeric or NA
+#Percent cover (total and repro) should only be numeric or NA
 #Flowering (yes/no) should only be 1, 0, or NA
 
 #ARFR (seedling) count on 20240918 should only be 1 or 0, should not be empty
+#If seedling count>0, then percent cover (total) should be >0
+#If seedling count=0, then percent cover (total) should=0
+#Repro % cover should not be more than total % cover, but they can be equal 
 #other checks..?
-#If seedling count>0, then percent cover should be >0
-#Repro % cover should not be more than veg % cover, but they can be equal 
+
+
 
 
 ## Check if any ARFR seen in negative controls?
 unique(dats$ARFR.Seedling.Count[dats$Treatment=="17"])
 dats[dats$Treatment=="17" & dats$ARFR.Seedling.Count==1,]
-##There is one incidence of a single ARFR seedling being counted in one survey in a single control plot
+##There is one incidence of a single ARFR seedling being counted in one survey in a single control plot (23-24)
 ## Remove negative control rows
 dats <- dats[dats$Treatment != "17",] #Negative controls
 
@@ -203,20 +206,20 @@ dats2406 <- dats24[dats24$Date!="9/18/2024 18:00",]
 ## June: Change any NAs (empty entries) to zero in percent veg cover
 dats2406$ARFR.Percent.Cover[is.na(dats2406$ARFR.Percent.Cover)] <- 0
 
-## Sept: If no plants present, change repro cover to NA, not zero? 
+## Sept: If no plants present, change repro cover to NA, not zero 
 
 
 
 ## 2025 ------------------------------------------------
 ## Flowering (1=yes, 0=no) column added as a redundancy to repro cover 
 
-## If no plants present, change repro cover to NA, not zero? 
+## If no plants present, change repro cover to NA, not zero 
 
 
 ## 2026 ------------------------------------------------
 ## Leaf tissue column added 
 
-## If no plants present, change repro cover to NA, not zero? 
+## If no plants present, change repro cover to NA, not zero 
 
 
 
@@ -224,8 +227,8 @@ dats2406$ARFR.Percent.Cover[is.na(dats2406$ARFR.Percent.Cover)] <- 0
 
 ## Analysis ideas:
 ## Survival from each annual transition, 23-24, 24-25, 25-26
-## Growth: changes in veg cover overtime, 24-25, 25-26
-## Relative repro (repro cover divided by total cover) 
+## Growth: changes in total cover overtime, 24-25, 25-26
+## Proportion repro (repro cover divided by total cover) 
 ## Relative size (total cover/ number of plants)
 
 
