@@ -107,6 +107,7 @@ ERNA23$Survival_20231013 <- as.integer(as.character(ERNA23$Survival_20231013))
 ERNA23$Flowering_20231013 <- as.integer(as.character(ERNA23$Flowering_20231013))
 ERNA24$ID <- as.factor(ERNA24$plantID)
 ERNA25$ID <- as.factor(ERNA25$plantID)
+ERNA26$ID <- as.factor(ERNA26$plantID)
 
 
 
@@ -255,8 +256,6 @@ ERNA23$Flowering_20231013[ERNA23$Survival_20231013==1 & is.na(ERNA23$Flowering_2
 names(ERNA23) <- sub("Flowering_", "Phenology_", names(ERNA23))
 ## ---------------------------------------------------------------
 
-## For all years, add checks on integers only, or 1/0/NA only, and numeric only for size, etc? (before combining)
-## *****
 
 
 
@@ -288,20 +287,77 @@ names(ERNA24wide) <- sub("^phenology_", "Phenology_", names(ERNA24wide))
 names(ERNA24wide) <- sub("^lengthInCm_", "Length_", names(ERNA24wide))
 names(ERNA24wide) <- sub("^notes_", "Notes_", names(ERNA24wide))
 
-## Check that surv is only 1, 0 and maybe NA **
-#ERNA25[(ERNA25$Survival_20251009 < 0 | ERNA25$Survival_20251009 > 1) & !is.na(ERNA25$Survival_20251009),]
+## Check that surv is only 1, 0 and maybe NA 
+ERNA24wide[(ERNA24wide$Survival_20240626 < 0 | ERNA24wide$Survival_20240626 > 1) & !is.na(ERNA24wide$Survival_20240626),]
+ERNA24wide[(ERNA24wide$Survival_20240701 < 0 | ERNA24wide$Survival_20240701 > 1) & !is.na(ERNA24wide$Survival_20240701),]
+ERNA24wide[(ERNA24wide$Survival_20240711 < 0 | ERNA24wide$Survival_20240711 > 1) & !is.na(ERNA24wide$Survival_20240711),]
+ERNA24wide[(ERNA24wide$Survival_20240718 < 0 | ERNA24wide$Survival_20240718 > 1) & !is.na(ERNA24wide$Survival_20240718),]
+ERNA24wide[(ERNA24wide$Survival_20240725 < 0 | ERNA24wide$Survival_20240725 > 1) & !is.na(ERNA24wide$Survival_20240725),]
+ERNA24wide[(ERNA24wide$Survival_20240730 < 0 | ERNA24wide$Survival_20240730 > 1) & !is.na(ERNA24wide$Survival_20240730),]
+ERNA24wide[(ERNA24wide$Survival_20240808 < 0 | ERNA24wide$Survival_20240808 > 1) & !is.na(ERNA24wide$Survival_20240808),]
+ERNA24wide[(ERNA24wide$Survival_20240813 < 0 | ERNA24wide$Survival_20240813 > 1) & !is.na(ERNA24wide$Survival_20240813),]
+ERNA24wide[(ERNA24wide$Survival_20240820 < 0 | ERNA24wide$Survival_20240820 > 1) & !is.na(ERNA24wide$Survival_20240820),]
+ERNA24wide[(ERNA24wide$Survival_20240827 < 0 | ERNA24wide$Survival_20240827 > 1) & !is.na(ERNA24wide$Survival_20240827),]
+ERNA24wide[(ERNA24wide$Survival_20240903 < 0 | ERNA24wide$Survival_20240903 > 1) & !is.na(ERNA24wide$Survival_20240903),]
+ERNA24wide[(ERNA24wide$Survival_20240910 < 0 | ERNA24wide$Survival_20240910 > 1) & !is.na(ERNA24wide$Survival_20240910),]
+ERNA24wide[(ERNA24wide$Survival_20240925 < 0 | ERNA24wide$Survival_20240925 > 1) & !is.na(ERNA24wide$Survival_20240925),]
+ERNA24wide[(ERNA24wide$Survival_20241004 < 0 | ERNA24wide$Survival_20241004 > 1) & !is.na(ERNA24wide$Survival_20241004),]
+ERNA24wide[(ERNA24wide$Survival_20241010 < 0 | ERNA24wide$Survival_20241010 > 1) & !is.na(ERNA24wide$Survival_20241010),]
 
-## Check that phenology is only 1, 0 and maybe NA **
-#ERNA25[(ERNA25$Phenology_20251009 < 0 | ERNA25$Phenology_20251009 > 1) & !is.na(ERNA25$Phenology_20251009),]
+## Check that phenology is only 1, 0 and maybe NA 
+ERNA24wide[(ERNA24wide$Phenology_20240626 < 0 | ERNA24wide$Phenology_20240626 > 1) & !is.na(ERNA24wide$Phenology_20240626),]
+ERNA24wide[(ERNA24wide$Phenology_20240701 < 0 | ERNA24wide$Phenology_20240701 > 1) & !is.na(ERNA24wide$Phenology_20240701),]
+ERNA24wide[(ERNA24wide$Phenology_20240711 < 0 | ERNA24wide$Phenology_20240711 > 1) & !is.na(ERNA24wide$Phenology_20240711),]
+ERNA24wide[(ERNA24wide$Phenology_20240718 < 0 | ERNA24wide$Phenology_20240718 > 1) & !is.na(ERNA24wide$Phenology_20240718),]
+ERNA24wide[(ERNA24wide$Phenology_20240725 < 0 | ERNA24wide$Phenology_20240725 > 1) & !is.na(ERNA24wide$Phenology_20240725),]
+ERNA24wide[(ERNA24wide$Phenology_20240730 < 0 | ERNA24wide$Phenology_20240730 > 1) & !is.na(ERNA24wide$Phenology_20240730),]
+ERNA24wide[(ERNA24wide$Phenology_20240808 < 0 | ERNA24wide$Phenology_20240808 > 1) & !is.na(ERNA24wide$Phenology_20240808),]
+ERNA24wide[(ERNA24wide$Phenology_20240813 < 0 | ERNA24wide$Phenology_20240813 > 1) & !is.na(ERNA24wide$Phenology_20240813),]
+ERNA24wide[(ERNA24wide$Phenology_20240820 < 0 | ERNA24wide$Phenology_20240820 > 1) & !is.na(ERNA24wide$Phenology_20240820),]
+ERNA24wide[(ERNA24wide$Phenology_20240827 < 0 | ERNA24wide$Phenology_20240827 > 1) & !is.na(ERNA24wide$Phenology_20240827),]
+ERNA24wide[(ERNA24wide$Phenology_20240903 < 0 | ERNA24wide$Phenology_20240903 > 1) & !is.na(ERNA24wide$Phenology_20240903),]
+ERNA24wide[(ERNA24wide$Phenology_20240910 < 0 | ERNA24wide$Phenology_20240910 > 1) & !is.na(ERNA24wide$Phenology_20240910),]
+ERNA24wide[(ERNA24wide$Phenology_20240925 < 0 | ERNA24wide$Phenology_20240925 > 1) & !is.na(ERNA24wide$Phenology_20240925),]
+ERNA24wide[(ERNA24wide$Phenology_20241004 < 0 | ERNA24wide$Phenology_20241004 > 1) & !is.na(ERNA24wide$Phenology_20241004),]
+ERNA24wide[(ERNA24wide$Phenology_20241010 < 0 | ERNA24wide$Phenology_20241010 > 1) & !is.na(ERNA24wide$Phenology_20241010),]
 
-## Check that size is only numeric **
+## Check that size is only numeric 
 ## Note: Size measured on a subset of plts on 10/10 (end of 2024 season)
+is.numeric(ERNA24wide$Length_20241010)
 
-## Check that if surv=0 for a given date, there are no phenology values for that date **
-#ERNA25$Phenology_20251009[ERNA25$Survival_20251009 == 0]
+## Check that if surv=0 for a given date, there are no phenology values for that date
+ERNA24wide$Phenology_20240626[ERNA24wide$Survival_20240626 == 0]
+ERNA24wide$Phenology_20240701[ERNA24wide$Survival_20240701 == 0]
+ERNA24wide$Phenology_20240711[ERNA24wide$Survival_20240711 == 0]
+ERNA24wide$Phenology_20240718[ERNA24wide$Survival_20240718 == 0]
+ERNA24wide$Phenology_20240725[ERNA24wide$Survival_20240725 == 0]
+ERNA24wide$Phenology_20240730[ERNA24wide$Survival_20240730 == 0]
+ERNA24wide$Phenology_20240808[ERNA24wide$Survival_20240808 == 0]
+ERNA24wide$Phenology_20240813[ERNA24wide$Survival_20240813 == 0]
+ERNA24wide$Phenology_20240820[ERNA24wide$Survival_20240820 == 0]
+ERNA24wide$Phenology_20240827[ERNA24wide$Survival_20240827 == 0]
+ERNA24wide$Phenology_20240903[ERNA24wide$Survival_20240903 == 0]
+ERNA24wide$Phenology_20240910[ERNA24wide$Survival_20240910 == 0]
+ERNA24wide$Phenology_20240925[ERNA24wide$Survival_20240925 == 0]
+ERNA24wide$Phenology_20241004[ERNA24wide$Survival_20241004 == 0]
+ERNA24wide$Phenology_20241010[ERNA24wide$Survival_20241010 == 0]
 
-## If plt alive and 1 was not entered in flowering col, enter 0 (not NA) **
-#ERNA23$Flowering_20230607[ERNA23$Survival_20230607==1 & is.na(ERNA23$Flowering_20230607)] <- 0
+## If plt alive and 1 was not entered in flowering col, enter 0 (not NA) 
+ERNA24wide$Phenology_20240626[ERNA24wide$Survival_20240626==1 & is.na(ERNA24wide$Phenology_20240626)] 
+ERNA24wide$Phenology_20240701[ERNA24wide$Survival_20240701==1 & is.na(ERNA24wide$Phenology_20240701)] 
+ERNA24wide$Phenology_20240711[ERNA24wide$Survival_20240711==1 & is.na(ERNA24wide$Phenology_20240711)] 
+ERNA24wide$Phenology_20240718[ERNA24wide$Survival_20240718==1 & is.na(ERNA24wide$Phenology_20240718)] 
+ERNA24wide$Phenology_20240725[ERNA24wide$Survival_20240725==1 & is.na(ERNA24wide$Phenology_20240725)] 
+ERNA24wide$Phenology_20240730[ERNA24wide$Survival_20240730==1 & is.na(ERNA24wide$Phenology_20240730)] 
+ERNA24wide$Phenology_20240808[ERNA24wide$Survival_20240808==1 & is.na(ERNA24wide$Phenology_20240808)] 
+ERNA24wide$Phenology_20240813[ERNA24wide$Survival_20240813==1 & is.na(ERNA24wide$Phenology_20240813)] 
+ERNA24wide$Phenology_20240820[ERNA24wide$Survival_20240820==1 & is.na(ERNA24wide$Phenology_20240820)] 
+ERNA24wide$Phenology_20240827[ERNA24wide$Survival_20240827==1 & is.na(ERNA24wide$Phenology_20240827)] 
+ERNA24wide$Phenology_20240903[ERNA24wide$Survival_20240903==1 & is.na(ERNA24wide$Phenology_20240903)] 
+ERNA24wide$Phenology_20240910[ERNA24wide$Survival_20240910==1 & is.na(ERNA24wide$Phenology_20240910)] 
+ERNA24wide$Phenology_20240925[ERNA24wide$Survival_20240925==1 & is.na(ERNA24wide$Phenology_20240925)] 
+ERNA24wide$Phenology_20241004[ERNA24wide$Survival_20241004==1 & is.na(ERNA24wide$Phenology_20241004)] 
+ERNA24wide$Phenology_20241010[ERNA24wide$Survival_20241010==1 & is.na(ERNA24wide$Phenology_20241010)] 
 ## ---------------------------------------------------------------
 
 
@@ -323,33 +379,67 @@ ERNA25[(ERNA25$Phenology_20251009 < 0 | ERNA25$Phenology_20251009 > 1) & !is.na(
 ERNA25$Phenology_20251009[ERNA25$Survival_20251009 == 0]
 
 #If plt alive and 1 was not entered in flowering col, enter 0 (not NA)
+ERNA25$Phenology_20251009[ERNA25$Survival_20251009==1 & is.na(ERNA25$Phenology_20251009)] 
 
-
-## ** Look into who was removed for SER transplants (before combining?)
 
 
 
 ## 2026 -----------------------------
-## ** rename phenology and survival columns to include year
-## ** size in 2026
-## ** Look into who was removed for SER transplants (before combining?)
+colnames(ERNA26)
+## Rename phenology and survival columns to include year
+ERNA26 <- ERNA26 %>% rename(Survival_20260924 = survival, Phenology_20260924 = phenology, Length_20260924 = lengthInCm)
+
+## Check that surv is only 1, 0 and maybe NA
+ERNA26[(ERNA26$Survival_20260924 < 0 | ERNA26$Survival_20260924 > 1) & !is.na(ERNA26$Survival_20260924),]
+
+#Check that phenology is only 1, 0 and maybe NA
+ERNA26[(ERNA26$Phenology_20260924 < 0 | ERNA26$Phenology_20260924 > 1) & !is.na(ERNA26$Phenology_20260924),]
+
+## Check that if surv=0 for a given date, there are no phenology values for that date
+ERNA26$Phenology_20260924[ERNA26$Survival_20260924 == 0]
+
+#If plt alive and 1 was not entered in flowering col, enter 0 (not NA)
+ERNA26$Phenology_20260924[ERNA26$Survival_20260924==1 & is.na(ERNA26$Phenology_20260924)] 
+
+## Size measured in 2026
+## Check that size is only numeric 
+is.numeric(ERNA26$Length_20260924)
+## ----------------------------------------------------------------------
 
 
 
+## **********************************************************************************************
 
-## ** After combining data (here probably),
-## don't use individuals that have "Y" or "N" in 2022 Replaced_YorN column b/c of confusion around timing and what it means for subsequent data **
+## Combine data from different years (here probably),
+#ERNA23 <- left_join(ERNA23, ERNA.SdZn, by="Source")
+#ERNA23 <- left_join(ERNA23, ERNA.biovar, by="Source")
+#ERNA25plus <- left_join(ERNA25, ERNA24wide, by="ID")
+#ERNA25plus <- left_join(ERNA25plus, ERNA22, by="ID")
+## ----------------------------------------------------------------------
 
-## * Confirm who was harvested 2023-2026 (after combining)
-## * Check for consistency in survival and flowering across the year (do this for 22-26)
-# ** Check that phenology only increases or stays the same; once flowering=1, it shouldn't go back to 0 
-# ** Check that once zero in surv on X/X or later, stays zero (if becomes 1 later, could be data entry error, or not depending on species)
+
+## Look into which plts were removed for SER transplants (6 plts dug up)
+unique(ERNA25$notes[ERNA25$notes!=""])
+ERNA25[grepl("SER", ERNA25$notes),]
+ERNA25$plantID[grepl("H", ERNA25$notes)]
+ERNA23$ID[ERNA23$Harvested_2023=="Y" & ERNA23$Block==10] 
+## Combine 24 and 25 data to look at recent deaths and associated notes
+ERNA25plus$notes[ERNA25plus$Survival_20251009==0 & ERNA25plus$Survival_20241010==1 & ERNA25plus$Block==7 & ERNA25plus$notes==""] 
+ERNA25plus$notes[ERNA25plus$Survival_20251009==0 & ERNA25plus$Survival_20241010==1 & ERNA25plus$Block==8] 
+ERNA25plus$notes[ERNA25plus$Survival_20251009==0 & ERNA25plus$Survival_20241010==1 & ERNA25plus$Block==9] 
+ERNA25plus$notes[ERNA25plus$Survival_20251009==0 & ERNA25plus$Survival_20241010==1 & ERNA25plus$Block==10] 
+## Make new column to indicate if potentially removed for SER conference display. Change future data to NA? ** ***
+#ERNA23 <- ERNA23 %>% mutate(Harvested_2023=if_else(!is.na(AboveGroundBiomass_g), "Y", "N"))
 
 
+## ** don't use individuals that have "Y" or "N" in 2022 Replaced_YorN column b/c of confusion around timing and what it means for subsequent data **
+## ** Confirm who was harvested 2023-2026 (after combining)
+## ** Check for consistency in survival and flowering across the year (do this for 22-26)
+## ** Check that phenology only increases or stays the same; once flowering=1, it shouldn't go back to 0 
+## ** Check that once zero in surv on X/X or later, stays zero (if becomes 1 later, could be data entry error, or not depending on species)
 
 
 ## Checks 
-
 ## *** Need to work on this **** Look at ARFR and Katie's methods for PEVI ** 
 ## CONSOLIDATE SURVIVAL DATA
 #ERNA.Surv <- ERNA22.cl %>% dplyr::select(c(starts_with("Survival_")))
@@ -376,12 +466,10 @@ ERNA25$Phenology_20251009[ERNA25$Survival_20251009 == 0]
 ERNA.SdZn$Source <- str_replace(ERNA.SdZn$Code, "10-SOS", "")
 ERNA.biovar$Source <- str_replace(ERNA.biovar$Pop, "10-SOS", "")
 
-
 ## Edit column names for biovariables
 colnames(ERNA.biovar) <- c("Pop","bio1","bio2","bio3","bio4","bio5","bio6","bio7","bio8",
                            "bio9","bio10","bio11","bio12","bio13","bio14","bio15","bio16",
                            "bio17","bio18","bio19","Source")
-
 
 ## Add seed zone name abbreviation column
 ERNA.SdZn$SdZnAbbrev[grepl("15 - 20 Deg. F. / 2 - 3", ERNA.SdZn$seed_zone)] = "humid, warm"  
@@ -422,13 +510,9 @@ ERNA.SdZn$SdZnOrderNum[grepl("20 - 25 Deg. F. / 12 - 30", ERNA.SdZn$seed_zone)] 
 
 
 
-## ERNA - COMBINE DATA TYPES --------------------------------------------
-ERNA.biovar <- left_join(ERNA.biovar, ERNA.SdZn, by="Source")
-ERNA22.cl <- left_join(ERNA22.cl, ERNA.biovar, by="Source")
-#ERNA23 <- left_join(ERNA23, ERNA.SdZn, by="Source")
-ERNA23 <- left_join(ERNA23, ERNA.biovar, by="Source")
-## ----------------------------------------------------------------------
-
+## ERNA - COMBINE DATA TYPES  ***  --------------------------------------------------------------
+#ERNA.biovar <- left_join(ERNA.biovar, ERNA.SdZn, by="Source")
+#ERNA22.cl <- left_join(ERNA22.cl, ERNA.biovar, by="Source")
 ## *********************
 
 
@@ -460,10 +544,12 @@ ERNA23$FlwrYesNo[!is.na(ERNA23$DaysToFlwr)] <- 1                               #
 ERNA23$FlwrYesNo[is.na(ERNA23$DaysToFlwr) & ERNA23$Survival_20231013==1] <- 0  #If plt alive and didn't flw, enter No
 nrow(ERNA23[ERNA23$FlwrYesNo==0,])                                             #Num that survived but didn't flower 
 #ERNA23 %>% group_by(Source) %>% dplyr::summarise(FlwrYesNo_Avg=mean(FlwrYesNo,na.rm=TRUE)) #Or could try sum and/or NUM=n()
+
+
+## *** ESTIMATE PHENOLOGY FROM 2024 AS WELL ****
 ## ---------------------------------------------------------------
 ## ---------------------------------------------------------------
 
-## *** ESTIMATE PHENOLOGY FROM 2024 AS WELL ****
 
 
 
@@ -504,11 +590,6 @@ str(ERNA23$ReproBiomass_g)
 
 
 ## ERNA - ESTIMATE SURVIVAL 
-## For 2023, estimate survival based on if alive at end of season (i.e. 20231013 survey)
-ERNA23$AliveYesNo <- 0
-ERNA23$AliveYesNo[ERNA23$Survival_20231013==1] <- 1
-# ** Remove plants that died early in 2022 (e.g. from transplant shock) and were not replaced **
-
 ## 2022
 ERNA22.cl$AliveYesNo <- 0
 ERNA22.cl$AliveYesNo[ERNA22.cl$Survival_20221108==1] <- 1
@@ -516,10 +597,16 @@ ERNA22.cl$AliveYesNo[(ERNA22.cl$OrigPltSurvival_20220518==0) & (ERNA22.cl$Replac
 #ERNA.cl$AliveYesNo[(ERNA.cl$OrigPltSurvival_20220518==0 | ERNA.cl$Survival_20220608==0) & (ERNA.cl$Replaced_YorN=="N" | ERNA.cl$Replaced_YorN=="")] <- NA
 #ERNA.cl %>% group_by(Source) %>% dplyr::summarise(AliveYesNo_Avg=mean(AliveYesNo,na.rm=TRUE))
 
+## For 2023, estimate survival based on if alive at end of season (i.e. 20231013 survey)
+ERNA23$AliveYesNo <- 0
+ERNA23$AliveYesNo[ERNA23$Survival_20231013==1] <- 1
+# ** Remove plants that died early in 2022 (e.g. from transplant shock) and were not replaced **
+
 ## ** ESTIMATE SURVIVAL FOR 2023-2026 **
 ## ** Models with all years together and year as a fixed effect? **
-## ** Try CoxHaz model for time to death estimates ** 
+## ** Try CoxHaz model for time to death estimates? ** (look at phenology estimates of days to first flower, do similar things for surv: days to death)
 ## ---------------------------------------------------------------
+
 
 
 
