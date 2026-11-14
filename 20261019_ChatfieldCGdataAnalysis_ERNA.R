@@ -73,7 +73,7 @@ for (cc in chr.list) {
 
 
 
-## LOAD DATA --------------------------------------------------------------------------------------
+## LOAD PHENOTYPE DATA --------------------------------------------------------------------------------------
 ERNA22 <- read.csv(file="Chatfield/2022_data/20230302_ChatfieldData2022_ERNA.csv", sep=",", header=TRUE, dec=".")
 ERNA.SdZn <- read.csv(file="AGoebl/Seeds/20231215_ERNA_LatLongSdZn_hexcodes.csv", sep=",", header=TRUE, dec=".")
 ERNA.biovar <- readRDS("AGoebl/Seeds/20240131_ERNA_BiovarsAvg1980_2021")
@@ -123,29 +123,29 @@ ERNA.sla$ID <- as.factor(ERNA.sla$ID)
 ## Given this, ignore plants that died (likely from transplant shock) after initial planting and were either replaced or not. 
 
 ## Look at how many individuals fall into early death, which of these had tissue collected for DNA, etc. 
-length(ERNA22$Replaced_YorN[ERNA22$Replaced_YorN!=""])
-nrow(ERNA22[ERNA22$Replaced_YorN!="" & ERNA22$TissueCollected=="Y",])
-ERNA22[ERNA22$Replaced_YorN!="" & ERNA22$TissueCollected=="Y",]
-ERNA22[ERNA22$Replaced_YorN=="N" & ERNA22$TissueCollected=="Y",]
-length(ERNA22$TissueCollected[ERNA22$TissueCollected=="Y"])
+#length(ERNA22$Replaced_YorN[ERNA22$Replaced_YorN!=""])
+#nrow(ERNA22[ERNA22$Replaced_YorN!="" & ERNA22$TissueCollected=="Y",])
+#ERNA22[ERNA22$Replaced_YorN!="" & ERNA22$TissueCollected=="Y",]
+#ERNA22[ERNA22$Replaced_YorN=="N" & ERNA22$TissueCollected=="Y",]
+#length(ERNA22$TissueCollected[ERNA22$TissueCollected=="Y"])
 
 ERNA22$ExcludeBcReplaceYorN[ERNA22$Replaced_YorN!=""] <- "Y"
-testRm <- ERNA22[ERNA22$Replaced_YorN!="",] 
-testKeep <- ERNA22[ERNA22$Replaced_YorN=="",] 
+#testRm <- ERNA22[ERNA22$Replaced_YorN!="",] 
+#testKeep <- ERNA22[ERNA22$Replaced_YorN=="",] 
 
 ## Check that surv is only 1, 0, and maybe NA
-ERNA22[(ERNA22$Survival_20220608 < 0 | ERNA22$Survival_20220608 > 1) & !is.na(ERNA22$Survival_20220608),]
-ERNA22[(ERNA22$Survival_20220719 < 0 | ERNA22$Survival_20220719 > 1) & !is.na(ERNA22$Survival_20220719),]
-ERNA22[(ERNA22$Survival_20220909 < 0 | ERNA22$Survival_20220909 > 1) & !is.na(ERNA22$Survival_20220909),]
-ERNA22[(ERNA22$Survival_20220915 < 0 | ERNA22$Survival_20220915 > 1) & !is.na(ERNA22$Survival_20220915),]
-ERNA22[(ERNA22$Survival_20221108 < 0 | ERNA22$Survival_20221108 > 1) & !is.na(ERNA22$Survival_20221108),]
+#ERNA22[(ERNA22$Survival_20220608 < 0 | ERNA22$Survival_20220608 > 1) & !is.na(ERNA22$Survival_20220608),]
+#ERNA22[(ERNA22$Survival_20220719 < 0 | ERNA22$Survival_20220719 > 1) & !is.na(ERNA22$Survival_20220719),]
+#ERNA22[(ERNA22$Survival_20220909 < 0 | ERNA22$Survival_20220909 > 1) & !is.na(ERNA22$Survival_20220909),]
+#ERNA22[(ERNA22$Survival_20220915 < 0 | ERNA22$Survival_20220915 > 1) & !is.na(ERNA22$Survival_20220915),]
+#ERNA22[(ERNA22$Survival_20221108 < 0 | ERNA22$Survival_20221108 > 1) & !is.na(ERNA22$Survival_20221108),]
 
 ## Check that surv is only integers
-ERNA22[ERNA22$Survival_20220608 - floor(ERNA22$Survival_20220608) != 0,]
-ERNA22[ERNA22$Survival_20220719 - floor(ERNA22$Survival_20220719) != 0,] 
-ERNA22[ERNA22$Survival_20220909 - floor(ERNA22$Survival_20220909) != 0,] 
-ERNA22[ERNA22$Survival_20220915 - floor(ERNA22$Survival_20220915) != 0,] 
-ERNA22[ERNA22$Survival_20221108 - floor(ERNA22$Survival_20221108) != 0,]
+#ERNA22[ERNA22$Survival_20220608 - floor(ERNA22$Survival_20220608) != 0,]
+#ERNA22[ERNA22$Survival_20220719 - floor(ERNA22$Survival_20220719) != 0,] 
+#ERNA22[ERNA22$Survival_20220909 - floor(ERNA22$Survival_20220909) != 0,] 
+#ERNA22[ERNA22$Survival_20220915 - floor(ERNA22$Survival_20220915) != 0,] 
+#ERNA22[ERNA22$Survival_20221108 - floor(ERNA22$Survival_20221108) != 0,]
 
 ## Most indivs didn't flower in the first year, ignore phenology for 2022
 
@@ -182,15 +182,15 @@ unique(ERNA23$Notes_20231013[ERNA23$Notes_20231013!=""])     #'H','Not harvested
 ## Make subsequent (after harvesting for a given indiv) data NA only after harvest date
 ## Also add a column with Harvested Yes/No (any date in 2023) to use in filtering of data from later years
 
-ERNA23[grepl("coll", ERNA23$Notes_20230811.1),] 
+#ERNA23[grepl("coll", ERNA23$Notes_20230811.1),] 
 #ERNA23[grepl("coll", ERNA23$Notes_20230811),] #Use Notes column 20230811.1 as it contains more than 20230811
 #ERNA23$Survival_20230901[grepl("coll", ERNA23$Notes_20230811.1)] <- NA
 ERNA23 <- ERNA23 %>% mutate(across(c(Survival_20230901, Survival_20230914, Survival_20231013), ~ if_else(Notes_20230811.1=="coll AGB", NA, .x)))
 ERNA23 <- ERNA23 %>% mutate(across(c(Flowering_20230901, Flowering_20230914, Flowering_20231013), ~ if_else(Notes_20230811.1=="coll AGB", NA, .x)))
 
-ERNA23[grepl("harvest", ERNA23$Notes_20230901),]          
-ERNA23[grepl("h\\.", ERNA23$Notes_20230901),]          
-ERNA23[grepl("H", ERNA23$Notes_20230901),]      
+#ERNA23[grepl("harvest", ERNA23$Notes_20230901),]          
+#ERNA23[grepl("h\\.", ERNA23$Notes_20230901),]          
+#ERNA23[grepl("H", ERNA23$Notes_20230901),]      
 ERNA23 <- ERNA23 %>% mutate(across(c(Survival_20230914, Survival_20231013, Flowering_20230914, Flowering_20231013), 
                                    ~ if_else(str_starts(ERNA23$Notes_20230901,"harvest"), NA, .x)))
 ERNA23 <- ERNA23 %>% mutate(across(c(Survival_20230914, Survival_20231013, Flowering_20230914, Flowering_20231013), 
@@ -198,37 +198,32 @@ ERNA23 <- ERNA23 %>% mutate(across(c(Survival_20230914, Survival_20231013, Flowe
 ERNA23 <- ERNA23 %>% mutate(across(c(Survival_20230914, Survival_20231013, Flowering_20230914, Flowering_20231013), 
                                    ~ if_else(str_detect(ERNA23$Notes_20230901,"H"), NA, .x)))
 
-ERNA23[grepl("H", ERNA23$Notes_20230914),]  
+#ERNA23[grepl("H", ERNA23$Notes_20230914),]  
 ERNA23 <- ERNA23 %>% mutate(across(c(Survival_20231013, Flowering_20231013), ~ if_else(Notes_20230914=="H", NA, .x)))
 
-ERNA23[grepl("H", ERNA23$Notes_20231013),] 
+#ERNA23[grepl("H", ERNA23$Notes_20231013),] 
 ERNA23 <- ERNA23 %>% mutate(across(c(Survival_20231013, Flowering_20231013), ~ if_else(Notes_20231013=="H", NA, .x)))
 
 
 ## Add a column with Harvested Yes/No (any date in 2023) to use in filtering of data from later years **
-#ERNA23 <- ERNA23 %>% mutate(Harvested_2023=if_else(
-#                     str_starts(Notes_20230811.1,"coll AGB") | str_starts(Notes_20230901,"harvest") |
-#                     str_detect(Notes_20230901,"h\\.") | str_detect(Notes_20230901,"H") |
-#                     str_detect(Notes_20230914,"H") | str_detect(Notes_20231013,"H"), "Y", "N"))
-#ERNA23$Harvested_2023[!is.na(ERNA23test5$AboveGroundBiomass_g)] #Some harvested plants didn't have note added 
 ERNA23 <- ERNA23 %>% mutate(Harvested_2023=if_else(!is.na(AboveGroundBiomass_g), "Y", "N"))
 testKeep <- ERNA23[ERNA23$Harvested_2023=="N",] 
 
 
 ## Check that surv is only 1, 0 and maybe NA
-ERNA23[(ERNA23$Survival_20230607 < 0 | ERNA23$Survival_20230607 > 1) & !is.na(ERNA23$Survival_20230607),]
-ERNA23[(ERNA23$Survival_20230620 < 0 | ERNA23$Survival_20230620 > 1) & !is.na(ERNA23$Survival_20230620),]
-ERNA23[(ERNA23$Survival_20230627 < 0 | ERNA23$Survival_20230627 > 1) & !is.na(ERNA23$Survival_20230627),]
-ERNA23[(ERNA23$Survival_20230705 < 0 | ERNA23$Survival_20230705 > 1) & !is.na(ERNA23$Survival_20230705),]
-ERNA23[(ERNA23$Survival_20230728 < 0 | ERNA23$Survival_20230728 > 1) & !is.na(ERNA23$Survival_20230728),]
-ERNA23[(ERNA23$Survival_20230811 < 0 | ERNA23$Survival_20230811 > 1) & !is.na(ERNA23$Survival_20230811),]
-ERNA23[(ERNA23$Survival_20230901 < 0 | ERNA23$Survival_20230901 > 1) & !is.na(ERNA23$Survival_20230901),]
-ERNA23[(ERNA23$Survival_20230914 < 0 | ERNA23$Survival_20230914 > 1) & !is.na(ERNA23$Survival_20230914),]
-ERNA23[(ERNA23$Survival_20231013 < 0 | ERNA23$Survival_20231013 > 1) & !is.na(ERNA23$Survival_20231013),]
+#ERNA23[(ERNA23$Survival_20230607 < 0 | ERNA23$Survival_20230607 > 1) & !is.na(ERNA23$Survival_20230607),]
+#ERNA23[(ERNA23$Survival_20230620 < 0 | ERNA23$Survival_20230620 > 1) & !is.na(ERNA23$Survival_20230620),]
+#ERNA23[(ERNA23$Survival_20230627 < 0 | ERNA23$Survival_20230627 > 1) & !is.na(ERNA23$Survival_20230627),]
+#ERNA23[(ERNA23$Survival_20230705 < 0 | ERNA23$Survival_20230705 > 1) & !is.na(ERNA23$Survival_20230705),]
+#ERNA23[(ERNA23$Survival_20230728 < 0 | ERNA23$Survival_20230728 > 1) & !is.na(ERNA23$Survival_20230728),]
+#ERNA23[(ERNA23$Survival_20230811 < 0 | ERNA23$Survival_20230811 > 1) & !is.na(ERNA23$Survival_20230811),]
+#ERNA23[(ERNA23$Survival_20230901 < 0 | ERNA23$Survival_20230901 > 1) & !is.na(ERNA23$Survival_20230901),]
+#ERNA23[(ERNA23$Survival_20230914 < 0 | ERNA23$Survival_20230914 > 1) & !is.na(ERNA23$Survival_20230914),]
+#ERNA23[(ERNA23$Survival_20231013 < 0 | ERNA23$Survival_20231013 > 1) & !is.na(ERNA23$Survival_20231013),]
 
 #Check that surv is only integers
-ERNA23[ERNA23$Survival_20230607 - floor(ERNA23$Survival_20230607) != 0,]
-ERNA23[ERNA23$Survival_20230620 - floor(ERNA23$Survival_20230620) != 0,]
+#ERNA23[ERNA23$Survival_20230607 - floor(ERNA23$Survival_20230607) != 0,]
+#ERNA23[ERNA23$Survival_20230620 - floor(ERNA23$Survival_20230620) != 0,]
 
 ## Check that biomass is only numeric
 is.numeric(ERNA23$AboveGroundBiomass_g)
@@ -264,10 +259,10 @@ names(ERNA23) <- sub("Flowering_", "Phenology_", names(ERNA23))
 
 ## 2024 -----------------------------
 setdiff(ERNA24$plantID,ERNA24$ID) #Check difference in these two cols
-anyDuplicated(ERNA24)
-sum(duplicated(ERNA24))
+#anyDuplicated(ERNA24)
+#sum(duplicated(ERNA24))
 
-## Make an updated date column: remove time, save as date data format? 
+## Make an updated date column: remove time, save as date data format
 ERNA24 <- ERNA24 %>% mutate(Date=as.Date(sub(" .*","", date), format="%m/%d/%Y"))
 
 ## Combine date columns separated by just a day or two, as these should represent one collection point in time
@@ -291,38 +286,38 @@ names(ERNA24wide) <- sub("^lengthInCm_", "Length_", names(ERNA24wide))
 names(ERNA24wide) <- sub("^notes_", "Notes_", names(ERNA24wide))
 
 ## Check that surv is only 1, 0 and maybe NA 
-ERNA24wide[(ERNA24wide$Survival_20240626 < 0 | ERNA24wide$Survival_20240626 > 1) & !is.na(ERNA24wide$Survival_20240626),]
-ERNA24wide[(ERNA24wide$Survival_20240701 < 0 | ERNA24wide$Survival_20240701 > 1) & !is.na(ERNA24wide$Survival_20240701),]
-ERNA24wide[(ERNA24wide$Survival_20240711 < 0 | ERNA24wide$Survival_20240711 > 1) & !is.na(ERNA24wide$Survival_20240711),]
-ERNA24wide[(ERNA24wide$Survival_20240718 < 0 | ERNA24wide$Survival_20240718 > 1) & !is.na(ERNA24wide$Survival_20240718),]
-ERNA24wide[(ERNA24wide$Survival_20240725 < 0 | ERNA24wide$Survival_20240725 > 1) & !is.na(ERNA24wide$Survival_20240725),]
-ERNA24wide[(ERNA24wide$Survival_20240730 < 0 | ERNA24wide$Survival_20240730 > 1) & !is.na(ERNA24wide$Survival_20240730),]
-ERNA24wide[(ERNA24wide$Survival_20240808 < 0 | ERNA24wide$Survival_20240808 > 1) & !is.na(ERNA24wide$Survival_20240808),]
-ERNA24wide[(ERNA24wide$Survival_20240813 < 0 | ERNA24wide$Survival_20240813 > 1) & !is.na(ERNA24wide$Survival_20240813),]
-ERNA24wide[(ERNA24wide$Survival_20240820 < 0 | ERNA24wide$Survival_20240820 > 1) & !is.na(ERNA24wide$Survival_20240820),]
-ERNA24wide[(ERNA24wide$Survival_20240827 < 0 | ERNA24wide$Survival_20240827 > 1) & !is.na(ERNA24wide$Survival_20240827),]
-ERNA24wide[(ERNA24wide$Survival_20240903 < 0 | ERNA24wide$Survival_20240903 > 1) & !is.na(ERNA24wide$Survival_20240903),]
-ERNA24wide[(ERNA24wide$Survival_20240910 < 0 | ERNA24wide$Survival_20240910 > 1) & !is.na(ERNA24wide$Survival_20240910),]
-ERNA24wide[(ERNA24wide$Survival_20240925 < 0 | ERNA24wide$Survival_20240925 > 1) & !is.na(ERNA24wide$Survival_20240925),]
-ERNA24wide[(ERNA24wide$Survival_20241004 < 0 | ERNA24wide$Survival_20241004 > 1) & !is.na(ERNA24wide$Survival_20241004),]
-ERNA24wide[(ERNA24wide$Survival_20241010 < 0 | ERNA24wide$Survival_20241010 > 1) & !is.na(ERNA24wide$Survival_20241010),]
+#ERNA24wide[(ERNA24wide$Survival_20240626 < 0 | ERNA24wide$Survival_20240626 > 1) & !is.na(ERNA24wide$Survival_20240626),]
+#ERNA24wide[(ERNA24wide$Survival_20240701 < 0 | ERNA24wide$Survival_20240701 > 1) & !is.na(ERNA24wide$Survival_20240701),]
+#ERNA24wide[(ERNA24wide$Survival_20240711 < 0 | ERNA24wide$Survival_20240711 > 1) & !is.na(ERNA24wide$Survival_20240711),]
+#ERNA24wide[(ERNA24wide$Survival_20240718 < 0 | ERNA24wide$Survival_20240718 > 1) & !is.na(ERNA24wide$Survival_20240718),]
+#ERNA24wide[(ERNA24wide$Survival_20240725 < 0 | ERNA24wide$Survival_20240725 > 1) & !is.na(ERNA24wide$Survival_20240725),]
+#ERNA24wide[(ERNA24wide$Survival_20240730 < 0 | ERNA24wide$Survival_20240730 > 1) & !is.na(ERNA24wide$Survival_20240730),]
+#ERNA24wide[(ERNA24wide$Survival_20240808 < 0 | ERNA24wide$Survival_20240808 > 1) & !is.na(ERNA24wide$Survival_20240808),]
+#ERNA24wide[(ERNA24wide$Survival_20240813 < 0 | ERNA24wide$Survival_20240813 > 1) & !is.na(ERNA24wide$Survival_20240813),]
+#ERNA24wide[(ERNA24wide$Survival_20240820 < 0 | ERNA24wide$Survival_20240820 > 1) & !is.na(ERNA24wide$Survival_20240820),]
+#ERNA24wide[(ERNA24wide$Survival_20240827 < 0 | ERNA24wide$Survival_20240827 > 1) & !is.na(ERNA24wide$Survival_20240827),]
+#ERNA24wide[(ERNA24wide$Survival_20240903 < 0 | ERNA24wide$Survival_20240903 > 1) & !is.na(ERNA24wide$Survival_20240903),]
+#ERNA24wide[(ERNA24wide$Survival_20240910 < 0 | ERNA24wide$Survival_20240910 > 1) & !is.na(ERNA24wide$Survival_20240910),]
+#ERNA24wide[(ERNA24wide$Survival_20240925 < 0 | ERNA24wide$Survival_20240925 > 1) & !is.na(ERNA24wide$Survival_20240925),]
+#ERNA24wide[(ERNA24wide$Survival_20241004 < 0 | ERNA24wide$Survival_20241004 > 1) & !is.na(ERNA24wide$Survival_20241004),]
+#ERNA24wide[(ERNA24wide$Survival_20241010 < 0 | ERNA24wide$Survival_20241010 > 1) & !is.na(ERNA24wide$Survival_20241010),]
 
 ## Check that phenology is only 1, 0 and maybe NA 
-ERNA24wide[(ERNA24wide$Phenology_20240626 < 0 | ERNA24wide$Phenology_20240626 > 1) & !is.na(ERNA24wide$Phenology_20240626),]
-ERNA24wide[(ERNA24wide$Phenology_20240701 < 0 | ERNA24wide$Phenology_20240701 > 1) & !is.na(ERNA24wide$Phenology_20240701),]
-ERNA24wide[(ERNA24wide$Phenology_20240711 < 0 | ERNA24wide$Phenology_20240711 > 1) & !is.na(ERNA24wide$Phenology_20240711),]
-ERNA24wide[(ERNA24wide$Phenology_20240718 < 0 | ERNA24wide$Phenology_20240718 > 1) & !is.na(ERNA24wide$Phenology_20240718),]
-ERNA24wide[(ERNA24wide$Phenology_20240725 < 0 | ERNA24wide$Phenology_20240725 > 1) & !is.na(ERNA24wide$Phenology_20240725),]
-ERNA24wide[(ERNA24wide$Phenology_20240730 < 0 | ERNA24wide$Phenology_20240730 > 1) & !is.na(ERNA24wide$Phenology_20240730),]
-ERNA24wide[(ERNA24wide$Phenology_20240808 < 0 | ERNA24wide$Phenology_20240808 > 1) & !is.na(ERNA24wide$Phenology_20240808),]
-ERNA24wide[(ERNA24wide$Phenology_20240813 < 0 | ERNA24wide$Phenology_20240813 > 1) & !is.na(ERNA24wide$Phenology_20240813),]
-ERNA24wide[(ERNA24wide$Phenology_20240820 < 0 | ERNA24wide$Phenology_20240820 > 1) & !is.na(ERNA24wide$Phenology_20240820),]
-ERNA24wide[(ERNA24wide$Phenology_20240827 < 0 | ERNA24wide$Phenology_20240827 > 1) & !is.na(ERNA24wide$Phenology_20240827),]
-ERNA24wide[(ERNA24wide$Phenology_20240903 < 0 | ERNA24wide$Phenology_20240903 > 1) & !is.na(ERNA24wide$Phenology_20240903),]
-ERNA24wide[(ERNA24wide$Phenology_20240910 < 0 | ERNA24wide$Phenology_20240910 > 1) & !is.na(ERNA24wide$Phenology_20240910),]
-ERNA24wide[(ERNA24wide$Phenology_20240925 < 0 | ERNA24wide$Phenology_20240925 > 1) & !is.na(ERNA24wide$Phenology_20240925),]
-ERNA24wide[(ERNA24wide$Phenology_20241004 < 0 | ERNA24wide$Phenology_20241004 > 1) & !is.na(ERNA24wide$Phenology_20241004),]
-ERNA24wide[(ERNA24wide$Phenology_20241010 < 0 | ERNA24wide$Phenology_20241010 > 1) & !is.na(ERNA24wide$Phenology_20241010),]
+#ERNA24wide[(ERNA24wide$Phenology_20240626 < 0 | ERNA24wide$Phenology_20240626 > 1) & !is.na(ERNA24wide$Phenology_20240626),]
+#ERNA24wide[(ERNA24wide$Phenology_20240701 < 0 | ERNA24wide$Phenology_20240701 > 1) & !is.na(ERNA24wide$Phenology_20240701),]
+#ERNA24wide[(ERNA24wide$Phenology_20240711 < 0 | ERNA24wide$Phenology_20240711 > 1) & !is.na(ERNA24wide$Phenology_20240711),]
+#ERNA24wide[(ERNA24wide$Phenology_20240718 < 0 | ERNA24wide$Phenology_20240718 > 1) & !is.na(ERNA24wide$Phenology_20240718),]
+#ERNA24wide[(ERNA24wide$Phenology_20240725 < 0 | ERNA24wide$Phenology_20240725 > 1) & !is.na(ERNA24wide$Phenology_20240725),]
+#ERNA24wide[(ERNA24wide$Phenology_20240730 < 0 | ERNA24wide$Phenology_20240730 > 1) & !is.na(ERNA24wide$Phenology_20240730),]
+#ERNA24wide[(ERNA24wide$Phenology_20240808 < 0 | ERNA24wide$Phenology_20240808 > 1) & !is.na(ERNA24wide$Phenology_20240808),]
+#ERNA24wide[(ERNA24wide$Phenology_20240813 < 0 | ERNA24wide$Phenology_20240813 > 1) & !is.na(ERNA24wide$Phenology_20240813),]
+#ERNA24wide[(ERNA24wide$Phenology_20240820 < 0 | ERNA24wide$Phenology_20240820 > 1) & !is.na(ERNA24wide$Phenology_20240820),]
+#ERNA24wide[(ERNA24wide$Phenology_20240827 < 0 | ERNA24wide$Phenology_20240827 > 1) & !is.na(ERNA24wide$Phenology_20240827),]
+#ERNA24wide[(ERNA24wide$Phenology_20240903 < 0 | ERNA24wide$Phenology_20240903 > 1) & !is.na(ERNA24wide$Phenology_20240903),]
+#ERNA24wide[(ERNA24wide$Phenology_20240910 < 0 | ERNA24wide$Phenology_20240910 > 1) & !is.na(ERNA24wide$Phenology_20240910),]
+#ERNA24wide[(ERNA24wide$Phenology_20240925 < 0 | ERNA24wide$Phenology_20240925 > 1) & !is.na(ERNA24wide$Phenology_20240925),]
+#ERNA24wide[(ERNA24wide$Phenology_20241004 < 0 | ERNA24wide$Phenology_20241004 > 1) & !is.na(ERNA24wide$Phenology_20241004),]
+#ERNA24wide[(ERNA24wide$Phenology_20241010 < 0 | ERNA24wide$Phenology_20241010 > 1) & !is.na(ERNA24wide$Phenology_20241010),]
 
 ## Check that size is only numeric 
 ## Note: Size measured on a subset of plts on 10/10 only (end of 2024 season)
@@ -451,6 +446,7 @@ ERNAcomb.b <- ERNAcomb[ERNAcomb$Replaced_YorN=="",]
 ## ** Check for consistency in survival and flowering across the year (do this for 22-26)
 ## ** Check that phenology only increases or stays the same; once flowering=1, it shouldn't go back to 0 
 ## ** Check that once zero in surv on X/X or later, stays zero (if becomes 1 later, could be data entry error, or not depending on species)
+
 
 ## Look into which plts were removed for SER transplants (6 plts dug up)
 unique(ERNA25$notes[ERNA25$notes!=""])
