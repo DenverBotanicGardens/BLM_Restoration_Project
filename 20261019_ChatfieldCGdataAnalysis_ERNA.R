@@ -440,6 +440,17 @@ str(ERNAcomb)
 
 
 ## **********************************************************************************************
+## ** don't use individuals that have "Y" or "N" in 2022 Replaced_YorN column b/c of confusion around timing and what it means for subsequent data **
+ERNAcomb.b <- ERNAcomb[ERNAcomb$Replaced_YorN=="",] 
+#testKeep <- ERNA22[ERNA22$Replaced_YorN=="",] 
+#ERNA22$ExcludeBcReplaceYorN[ERNA22$Replaced_YorN != ""] <- "Y"
+
+## ** Confirm who was harvested 2023-2026 (after combining)
+#Look at notes in 24-26 for plts marked at Harvested_23 **
+
+## ** Check for consistency in survival and flowering across the year (do this for 22-26)
+## ** Check that phenology only increases or stays the same; once flowering=1, it shouldn't go back to 0 
+## ** Check that once zero in surv on X/X or later, stays zero (if becomes 1 later, could be data entry error, or not depending on species)
 
 ## Look into which plts were removed for SER transplants (6 plts dug up)
 unique(ERNA25$notes[ERNA25$notes!=""])
@@ -447,20 +458,12 @@ ERNA25[grepl("SER", ERNA25$notes),]
 ERNA25$plantID[grepl("H", ERNA25$notes)]
 ERNA23$ID[ERNA23$Harvested_2023=="Y" & ERNA23$Block==10] 
 ## Combine 24 and 25 data to look at recent deaths and associated notes
-ERNA25plus$notes[ERNA25plus$Survival_20251009==0 & ERNA25plus$Survival_20241010==1 & ERNA25plus$Block==7 & ERNA25plus$notes==""] 
-ERNA25plus$notes[ERNA25plus$Survival_20251009==0 & ERNA25plus$Survival_20241010==1 & ERNA25plus$Block==8] 
-ERNA25plus$notes[ERNA25plus$Survival_20251009==0 & ERNA25plus$Survival_20241010==1 & ERNA25plus$Block==9] 
-ERNA25plus$notes[ERNA25plus$Survival_20251009==0 & ERNA25plus$Survival_20241010==1 & ERNA25plus$Block==10] 
+#ERNA25plus$notes[ERNA25plus$Survival_20251009==0 & ERNA25plus$Survival_20241010==1 & ERNA25plus$Block==7 & ERNA25plus$notes==""] 
+#ERNA25plus$notes[ERNA25plus$Survival_20251009==0 & ERNA25plus$Survival_20241010==1 & ERNA25plus$Block==8] 
+#ERNA25plus$notes[ERNA25plus$Survival_20251009==0 & ERNA25plus$Survival_20241010==1 & ERNA25plus$Block==9] 
+#ERNA25plus$notes[ERNA25plus$Survival_20251009==0 & ERNA25plus$Survival_20241010==1 & ERNA25plus$Block==10] 
 ## Make new column to indicate if potentially removed for SER conference display. Change future data to NA? ** ***
 #ERNA23 <- ERNA23 %>% mutate(Harvested_2023=if_else(!is.na(AboveGroundBiomass_g), "Y", "N"))
-
-
-## ** don't use individuals that have "Y" or "N" in 2022 Replaced_YorN column b/c of confusion around timing and what it means for subsequent data **
-## ** Confirm who was harvested 2023-2026 (after combining)
-## ** Check for consistency in survival and flowering across the year (do this for 22-26)
-## ** Check that phenology only increases or stays the same; once flowering=1, it shouldn't go back to 0 
-## ** Check that once zero in surv on X/X or later, stays zero (if becomes 1 later, could be data entry error, or not depending on species)
-
 
 ## Checks 
 ## *** Need to work on this **** Look at ARFR and Katie's methods for PEVI ** 
