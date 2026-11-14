@@ -95,7 +95,8 @@ str(ERNA22)
 str(ERNA23)
 str(ERNA24)
 str(ERNA25)
-
+str(ERNA26)
+str(ERNA.sla)
 
 ERNA22$Source <- as.factor(ERNA22$Source)
 ERNA22$Block <- as.factor(ERNA22$Block)
@@ -108,12 +109,12 @@ ERNA23$Flowering_20231013 <- as.integer(as.character(ERNA23$Flowering_20231013))
 ERNA24$ID <- as.factor(ERNA24$plantID)
 ERNA25$ID <- as.factor(ERNA25$plantID)
 ERNA26$ID <- as.factor(ERNA26$plantID)
-
+ERNA.sla$ID <- as.factor(ERNA.sla$ID)
 
 
 
 ## 2022 -----------------------------
-## Note: Seedlings planted 4/20-4/28, first surv 5/18, first replacements 5/18-5/19 (replaced if dead & missing & source available)
+## Note: Seedlings planted 4/20-4/28, first field surv survey 5/18, first replacements 5/18-5/19 (replaced if dead & missing & source available)
 ## (not replaced if appeared dead-no green tissue- but not missing, since these might not yet be fully dead.)
 ## Second surv/sz 6/8-6/10, second replacements 6/13 (replaced if dead on both 5/18 and 6/8, not replaced if only dead 6/8).
 
@@ -132,16 +133,18 @@ ERNA22$ExcludeBcReplaceYorN[ERNA22$Replaced_YorN!=""] <- "Y"
 testRm <- ERNA22[ERNA22$Replaced_YorN!="",] 
 testKeep <- ERNA22[ERNA22$Replaced_YorN=="",] 
 
-## Check that surv is only 1, 0 and maybe NA
+## Check that surv is only 1, 0, and maybe NA
 ERNA22[(ERNA22$Survival_20220608 < 0 | ERNA22$Survival_20220608 > 1) & !is.na(ERNA22$Survival_20220608),]
 ERNA22[(ERNA22$Survival_20220719 < 0 | ERNA22$Survival_20220719 > 1) & !is.na(ERNA22$Survival_20220719),]
 ERNA22[(ERNA22$Survival_20220909 < 0 | ERNA22$Survival_20220909 > 1) & !is.na(ERNA22$Survival_20220909),]
+ERNA22[(ERNA22$Survival_20220915 < 0 | ERNA22$Survival_20220915 > 1) & !is.na(ERNA22$Survival_20220915),]
 ERNA22[(ERNA22$Survival_20221108 < 0 | ERNA22$Survival_20221108 > 1) & !is.na(ERNA22$Survival_20221108),]
-## **check other dates? **
 
 ## Check that surv is only integers
 ERNA22[ERNA22$Survival_20220608 - floor(ERNA22$Survival_20220608) != 0,]
 ERNA22[ERNA22$Survival_20220719 - floor(ERNA22$Survival_20220719) != 0,] 
+ERNA22[ERNA22$Survival_20220909 - floor(ERNA22$Survival_20220909) != 0,] 
+ERNA22[ERNA22$Survival_20220915 - floor(ERNA22$Survival_20220915) != 0,] 
 ERNA22[ERNA22$Survival_20221108 - floor(ERNA22$Survival_20221108) != 0,]
 
 ## Most indivs didn't flower in the first year, ignore phenology for 2022
@@ -322,7 +325,7 @@ ERNA24wide[(ERNA24wide$Phenology_20241004 < 0 | ERNA24wide$Phenology_20241004 > 
 ERNA24wide[(ERNA24wide$Phenology_20241010 < 0 | ERNA24wide$Phenology_20241010 > 1) & !is.na(ERNA24wide$Phenology_20241010),]
 
 ## Check that size is only numeric 
-## Note: Size measured on a subset of plts on 10/10 (end of 2024 season)
+## Note: Size measured on a subset of plts on 10/10 only (end of 2024 season)
 is.numeric(ERNA24wide$Length_20241010)
 
 ## Check that if surv=0 for a given date, there are no phenology values for that date
@@ -408,15 +411,35 @@ is.numeric(ERNA26$Length_20260924)
 
 
 
-## **********************************************************************************************
 
-## Combine data from different years (here probably),
-#ERNA23 <- left_join(ERNA23, ERNA.SdZn, by="Source")
-#ERNA23 <- left_join(ERNA23, ERNA.biovar, by="Source")
-#ERNA25plus <- left_join(ERNA25, ERNA24wide, by="ID")
-#ERNA25plus <- left_join(ERNA25plus, ERNA22, by="ID")
+## Combine data from different years ------------------------------------
+colnames(ERNA22)
+colnames(ERNA23)
+colnames(ERNA24wide)
+colnames(ERNA25)
+colnames(ERNA26)
+colnames(ERNA.sla)
+setdiff(ERNA23$SelectedToHarvest,ERNA23$SelectedToHarvest.1) #Check for differences
+ERNA22.sel <- ERNA22 %>% dplyr::select(-c("DateMortalityObservedPreTransplant","TissueCollected")) 
+ERNA23.sel <- ERNA23 %>% dplyr::select(-c("Treatment","Num.Assign_.InBlock","Row","PosInRow","Tag","SelectedToHarvest.1")) 
+ERNA24.sel <- ERNA24wide %>% dplyr::select(-c("Plant.Position.In.Row","Length_20240626","Length_20240701","Length_20240711",
+                                              "Length_20240718","Length_20240725","Length_20240730","Length_20240808","Length_20240813",
+                                              "Length_20240820","Length_20240827","Length_20240903","Length_20240910","Length_20240925",
+                                              "Length_20241004")) 
+ERNA25.sel <- ERNA25 %>% dplyr::select(-c("ObjectID","GlobalID","plantID_db","ParentGlobalID","CreationDate","Creator","EditDate","Editor","lengthInCm")) 
+ERNA26.sel <- ERNA26 %>% dplyr::select(-c("ObjectID","GlobalID","plantID_db","ParentGlobalID","CreationDate","Creator","EditDate","Editor")) 
+ERNAsla.sel <- ERNA.sla %>% dplyr::select(-c("Species","ConsumedLeafArea_cm2","PercentConsumed","ScaleLength_cm","OrigWeightOnOlderScale","X")) 
+## ** check if SLA was from 2023 (or a different year) and add yr to column name ** 
+
+## Combine dataframes
+ERNAdata.list <- list(ERNA22.sel, ERNA23.sel, ERNA24.sel, ERNA25.sel, ERNA26.sel, ERNAsla.sel)
+ERNAcomb <- ERNAdata.list %>% purrr::reduce(full_join, by="ID")
+str(ERNAcomb)
 ## ----------------------------------------------------------------------
 
+
+
+## **********************************************************************************************
 
 ## Look into which plts were removed for SER transplants (6 plts dug up)
 unique(ERNA25$notes[ERNA25$notes!=""])
@@ -513,6 +536,8 @@ ERNA.SdZn$SdZnOrderNum[grepl("20 - 25 Deg. F. / 12 - 30", ERNA.SdZn$seed_zone)] 
 ## ERNA - COMBINE DATA TYPES  ***  --------------------------------------------------------------
 #ERNA.biovar <- left_join(ERNA.biovar, ERNA.SdZn, by="Source")
 #ERNA22.cl <- left_join(ERNA22.cl, ERNA.biovar, by="Source")
+#ERNA23 <- left_join(ERNA23, ERNA.SdZn, by="Source")
+#ERNA23 <- left_join(ERNA23, ERNA.biovar, by="Source")
 ## *********************
 
 
@@ -591,6 +616,16 @@ str(ERNA23$ReproBiomass_g)
 
 ## ERNA - ESTIMATE SURVIVAL 
 ## 2022
+## ******
+## Note: Seedlings planted 4/20-4/28, first field surv survey 5/18, first replacements 5/18-5/19 (replaced if dead & missing & source available)
+## (not replaced if appeared dead-no green tissue- but not missing, since these might not yet be fully dead.)
+## Second surv/sz 6/8-6/10, second replacements 6/13 (replaced if dead on both 5/18 and 6/8, not replaced if only dead 6/8).
+
+## Uncertainty around replacements and not tracking which individuals were replaced on which dates,
+## led to confusion around which data could be used reliably for individuals that died early and were either replaced or not.
+## Given this, ignore plants that died (likely from transplant shock) after initial planting and were either replaced or not. 
+## ******
+
 ERNA22.cl$AliveYesNo <- 0
 ERNA22.cl$AliveYesNo[ERNA22.cl$Survival_20221108==1] <- 1
 ERNA22.cl$AliveYesNo[(ERNA22.cl$OrigPltSurvival_20220518==0) & (ERNA22.cl$Replaced_YorN=="N" | ERNA22.cl$Replaced_YorN=="")] <- NA
