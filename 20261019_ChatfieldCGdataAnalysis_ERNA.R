@@ -341,21 +341,21 @@ ERNA24wide$Phenology_20241004[ERNA24wide$Survival_20241004 == 0]
 ERNA24wide$Phenology_20241010[ERNA24wide$Survival_20241010 == 0]
 
 ## If plt alive and 1 was not entered in flowering col, enter 0 (not NA) 
-ERNA24wide$Phenology_20240626[ERNA24wide$Survival_20240626==1 & is.na(ERNA24wide$Phenology_20240626)] 
-ERNA24wide$Phenology_20240701[ERNA24wide$Survival_20240701==1 & is.na(ERNA24wide$Phenology_20240701)] 
-ERNA24wide$Phenology_20240711[ERNA24wide$Survival_20240711==1 & is.na(ERNA24wide$Phenology_20240711)] 
-ERNA24wide$Phenology_20240718[ERNA24wide$Survival_20240718==1 & is.na(ERNA24wide$Phenology_20240718)] 
-ERNA24wide$Phenology_20240725[ERNA24wide$Survival_20240725==1 & is.na(ERNA24wide$Phenology_20240725)] 
-ERNA24wide$Phenology_20240730[ERNA24wide$Survival_20240730==1 & is.na(ERNA24wide$Phenology_20240730)] 
-ERNA24wide$Phenology_20240808[ERNA24wide$Survival_20240808==1 & is.na(ERNA24wide$Phenology_20240808)] 
-ERNA24wide$Phenology_20240813[ERNA24wide$Survival_20240813==1 & is.na(ERNA24wide$Phenology_20240813)] 
-ERNA24wide$Phenology_20240820[ERNA24wide$Survival_20240820==1 & is.na(ERNA24wide$Phenology_20240820)] 
-ERNA24wide$Phenology_20240827[ERNA24wide$Survival_20240827==1 & is.na(ERNA24wide$Phenology_20240827)] 
-ERNA24wide$Phenology_20240903[ERNA24wide$Survival_20240903==1 & is.na(ERNA24wide$Phenology_20240903)] 
-ERNA24wide$Phenology_20240910[ERNA24wide$Survival_20240910==1 & is.na(ERNA24wide$Phenology_20240910)] 
-ERNA24wide$Phenology_20240925[ERNA24wide$Survival_20240925==1 & is.na(ERNA24wide$Phenology_20240925)] 
-ERNA24wide$Phenology_20241004[ERNA24wide$Survival_20241004==1 & is.na(ERNA24wide$Phenology_20241004)] 
-ERNA24wide$Phenology_20241010[ERNA24wide$Survival_20241010==1 & is.na(ERNA24wide$Phenology_20241010)] 
+#ERNA24wide$Phenology_20240626[ERNA24wide$Survival_20240626==1 & is.na(ERNA24wide$Phenology_20240626)] 
+#ERNA24wide$Phenology_20240701[ERNA24wide$Survival_20240701==1 & is.na(ERNA24wide$Phenology_20240701)] 
+#ERNA24wide$Phenology_20240711[ERNA24wide$Survival_20240711==1 & is.na(ERNA24wide$Phenology_20240711)] 
+#ERNA24wide$Phenology_20240718[ERNA24wide$Survival_20240718==1 & is.na(ERNA24wide$Phenology_20240718)] 
+#ERNA24wide$Phenology_20240725[ERNA24wide$Survival_20240725==1 & is.na(ERNA24wide$Phenology_20240725)] 
+#ERNA24wide$Phenology_20240730[ERNA24wide$Survival_20240730==1 & is.na(ERNA24wide$Phenology_20240730)] 
+#ERNA24wide$Phenology_20240808[ERNA24wide$Survival_20240808==1 & is.na(ERNA24wide$Phenology_20240808)] 
+#ERNA24wide$Phenology_20240813[ERNA24wide$Survival_20240813==1 & is.na(ERNA24wide$Phenology_20240813)] 
+#ERNA24wide$Phenology_20240820[ERNA24wide$Survival_20240820==1 & is.na(ERNA24wide$Phenology_20240820)] 
+#ERNA24wide$Phenology_20240827[ERNA24wide$Survival_20240827==1 & is.na(ERNA24wide$Phenology_20240827)] 
+#ERNA24wide$Phenology_20240903[ERNA24wide$Survival_20240903==1 & is.na(ERNA24wide$Phenology_20240903)] 
+#ERNA24wide$Phenology_20240910[ERNA24wide$Survival_20240910==1 & is.na(ERNA24wide$Phenology_20240910)] 
+#ERNA24wide$Phenology_20240925[ERNA24wide$Survival_20240925==1 & is.na(ERNA24wide$Phenology_20240925)] 
+#ERNA24wide$Phenology_20241004[ERNA24wide$Survival_20241004==1 & is.na(ERNA24wide$Phenology_20241004)] 
+#ERNA24wide$Phenology_20241010[ERNA24wide$Survival_20241010==1 & is.na(ERNA24wide$Phenology_20241010)] 
 ## ---------------------------------------------------------------
 
 
@@ -363,7 +363,7 @@ ERNA24wide$Phenology_20241010[ERNA24wide$Survival_20241010==1 & is.na(ERNA24wide
 
 
 ## 2025 -----------------------------
-ERNA25 <- ERNA25 %>% rename(Survival_20251009 = survival, Phenology_20251009 = phenology)
+ERNA25 <- ERNA25 %>% rename(Survival_20251009 = survival, Phenology_20251009 = phenology, Notes_20251009 = notes)
 
 ## No size data was collected in 2025
 
@@ -385,7 +385,7 @@ ERNA25$Phenology_20251009[ERNA25$Survival_20251009==1 & is.na(ERNA25$Phenology_2
 ## 2026 -----------------------------
 colnames(ERNA26)
 ## Rename phenology and survival columns to include year
-ERNA26 <- ERNA26 %>% rename(Survival_20260924 = survival, Phenology_20260924 = phenology, Length_20260924 = lengthInCm)
+ERNA26 <- ERNA26 %>% rename(Survival_20260924 = survival, Phenology_20260924 = phenology, Length_20260924 = lengthInCm, Notes_20260924 = notes)
 
 ## Check that surv is only 1, 0 and maybe NA
 ERNA26[(ERNA26$Survival_20260924 < 0 | ERNA26$Survival_20260924 > 1) & !is.na(ERNA26$Survival_20260924),]
@@ -416,7 +416,7 @@ colnames(ERNA26)
 colnames(ERNA.sla)
 setdiff(ERNA23$SelectedToHarvest,ERNA23$SelectedToHarvest.1) #Check for differences
 ERNA22.sel <- ERNA22 %>% dplyr::select(-c("DateMortalityObservedPreTransplant","TissueCollected")) 
-ERNA23.sel <- ERNA23 %>% dplyr::select(-c("Treatment","Num.Assign_.InBlock","Row","PosInRow","Tag","SelectedToHarvest.1")) 
+ERNA23.sel <- ERNA23 %>% dplyr::select(-c("Treatment","Num.Assign_.InBlock","Row","PosInRow","Tag","SelectedToHarvest.1","Survival_2022")) 
 ERNA24.sel <- ERNA24wide %>% dplyr::select(-c("Plant.Position.In.Row","Length_20240626","Length_20240701","Length_20240711",
                                               "Length_20240718","Length_20240725","Length_20240730","Length_20240808","Length_20240813",
                                               "Length_20240820","Length_20240827","Length_20240903","Length_20240910","Length_20240925",
@@ -427,25 +427,41 @@ ERNAsla.sel <- ERNA.sla %>% dplyr::select(-c("Species","ConsumedLeafArea_cm2","P
 ## ** check if SLA was from 2023 (or a different year) and add yr to column name ** 
 
 ## Combine dataframes
-ERNAdata.list <- list(ERNA22.sel, ERNA23.sel, ERNA24.sel, ERNA25.sel, ERNA26.sel, ERNAsla.sel)
+ERNAdata.list <- list(ERNA22.sel, ERNA23.sel, ERNA24.sel, ERNA25.sel, ERNA26.sel)#, ERNAsla.sel)
 ERNAcomb <- ERNAdata.list %>% purrr::reduce(full_join, by="ID")
 str(ERNAcomb)
+colnames(ERNAcomb)
 ## ----------------------------------------------------------------------
 
 
 
 ## **********************************************************************************************
-## ** don't use individuals that have "Y" or "N" in 2022 Replaced_YorN column b/c of confusion around timing and what it means for subsequent data **
+
+## ----------------------------------------------------------------------
+## Don't use individuals that have "Y" or "N" in 2022 Replaced_YorN column b/c of confusion around timing and what it means for subsequent data 
 ERNAcomb.b <- ERNAcomb[ERNAcomb$Replaced_YorN=="",] 
-#testKeep <- ERNA22[ERNA22$Replaced_YorN=="",] 
-#ERNA22$ExcludeBcReplaceYorN[ERNA22$Replaced_YorN != ""] <- "Y"
+#testKeep <- ERNAcomb[ERNAcomb$ExcludeBcReplaceYorN=="",] 
 
 ## ** Confirm who was harvested 2023-2026 (after combining)
 #Look at notes in 24-26 for plts marked at Harvested_23 **
+read.notes <- ERNAcomb[ERNAcomb$Harvested_2023=="Y",] %>% select(c(starts_with("Notes_2024"))) #**also look at 25 and 26 notes
+## ** add NAs in 24-26 for survival, phenology, size for harvested plants **
+
+## ** Check that once zero in surv on X/X, stays zero with in each year (if becomes 1 later, could be data entry error, or not depending on species)
+#ERNA.surv <- ERNAcomb %>% select(c("ID", starts_with("Survival_")))
+ERNA.surv2 <- grep("^Survival_", names(ERNAcomb.b), value=TRUE) #get column names for survival cols
+survLong <- ERNAcomb.b %>% select(c("ID", all_of(ERNA.surv2))) %>% 
+                         pivot_longer(cols=all_of(ERNA.surv2), names_to="Date", names_pattern="^Survival_(.*)$", values_to="Survival") #%>%
+                         # mutate(date_digits=gsub("[^0-9]", "", Date))
+
+
+#ERNA24wide <- select(ERNA24, -c("GlobalID","plantID","plantID_db","ParentGlobalID","CreationDate","Creator","EditDate","Editor")) %>% 
+#  pivot_wider(id_cols=c(ID,Plant.Position.In.Row), names_from=Date, values_from=c(survival,phenology,notes,lengthInCm),
+#             names_glue="{.value}_{format(as.Date(Date), '%Y%m%d')}")
+
 
 ## ** Check for consistency in survival and flowering across the year (do this for 22-26)
 ## ** Check that phenology only increases or stays the same; once flowering=1, it shouldn't go back to 0 
-## ** Check that once zero in surv on X/X or later, stays zero (if becomes 1 later, could be data entry error, or not depending on species)
 
 
 ## Look into which plts were removed for SER transplants (6 plts dug up)
