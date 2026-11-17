@@ -243,6 +243,143 @@ dats$ARFR.Reproductive.Percent.Cover <- ifelse(dats$ARFR.Count == 0, NA, dats$AR
 ## Proportion repro (repro cover divided by total cover) 
 ## Relative size (total cover/ number of plants)
 
+## Mikaely Evans Analysis
+
+# Survival from each annual transition: 24-25, 25-26
+plot(dats2409$ARFR.Count, dats25$ARFR.Count)
+plot(dats25$ARFR.Count, dats26$ARFR.Count)
+
+## Change zeros to NAs in 2023 counts just for surv estimates
+dats23temp <- dats23
+dats23temp$ARFR.Count[dats23temp$ARFR.Count==0] <- NA
+dats24temp <- dats2409
+dats24temp$ARFR.Count[dats24temp$ARFR.Count==0] <- NA
+dats2409$Surv <- dats2409$ARFR.Count/dats23temp$ARFR.Count
+
+
+Surv_subset <- filter(dats2409, SeedMix!="Single")
+boxplot(Surv ~ SeedMix, data=Surv_subset, ylim=c(0,1.2), col=c("grey40", "grey80"), main="Both sites", 
+        ylab="Survival Rate", xlab=NA)
+
+
+## Plot survival by site separately
+dats2409.PC <- dats2409[dats2409$Site=="PC",]
+dats2409.EP <- dats2409[dats2409$Site=="EP",]
+
+par(mar=c(7,5,3,2))
+cols <- c(rep("grey40", 5), rep("grey80",5), rep("plum4",6))
+boxplot(Surv ~ Contents, data=dats2409.PC, col=cols, ylim=c(0,1), cex.main=1.5,
+        main="Site 1", ylab="Survival rate", xlab=NA, cex.lab=1.5, las=2)
+boxplot(Surv ~ Contents, data=dats2409.EP, col=cols, ylim=c(0,2), cex.main=1.5,
+        main="Site 2", ylab="Survival rate", xlab=NA, cex.lab=1.5, las=2)
+
+
+SurvAvgs.PC <- dats2409.PC %>% group_by(Contents) %>% 
+  dplyr::summarise(Surv_MD=median(Surv,na.rm=TRUE),
+                   Surv_MN=mean(Surv,na.rm=TRUE),
+                   Surv_SE=calcSE(Surv),
+                   Surv_SUM=sum(Surv,na.rm=TRUE))
+SurvAvgs.PC$MixCol[grepl("single", SurvAvgs.PC$Contents)] = "plum4"    
+SurvAvgs.PC$MixCol[grepl("mix_c", SurvAvgs.PC$Contents)] = "grey80"     
+SurvAvgs.PC$MixCol[grepl("mix_b", SurvAvgs.PC$Contents)] = "grey30"    
+
+#SurvByMed.PC <- with(dats2406.PC, reorder(Contents, Surv, median, na.rm=TRUE))
+#SurvAvgs.PC <- SurvAvgs.PC[order(SurvAvgs.PC$Surv_MD),] #Order by median 
+#par(mar=c(7,5,3,2))
+#boxplot(Surv ~ SurvByMed.PC, data=dats2406.PC, ylim=c(0,1),
+#        xlab=NA, ylab="Survival rate", cex.lab=1.25, col=SurvAvgs.PC$MixCol,
+#        las=2)
+
+#dats2406.PCmix <- dats2406[dats2406$SeedMix!="Single",]
+boxplot(Surv ~ SeedMix, data=dats2409.PC, ylim=c(0,1), col=c("grey40", "grey80", "plum4"), main="Site 1",
+        ylab="Survival rate")
+#boxplot(Surv ~ SeedMix, data=dats2406.EP, ylim=c(0,1.7), col=c("grey40", "grey80", "plum4"), main="Site 2",
+#        ylab="Survival rate")
+
+
+## Plots means at each site
+SurvAvgs.EP <- dats2409.EP %>% group_by(Contents) %>% 
+  dplyr::summarise(Surv_MD=median(Surv,na.rm=TRUE),
+                   Surv_MN=mean(Surv,na.rm=TRUE),
+                   Surv_SE=calcSE(Surv))
+SurvAvgs.EP$MixCol[grepl("single", SurvAvgs.EP$Contents)] = "plum4"    
+SurvAvgs.EP$MixCol[grepl("mix_c", SurvAvgs.EP$Contents)] = "grey80"     
+SurvAvgs.EP$MixCol[grepl("mix_b", SurvAvgs.EP$Contents)] = "grey30"  
+
+plot(1:2, 0:1, type="n",ylim=c(0,0.6), xaxt="n", ylab="Survival rate", xlab="Site", cex.lab=1.5)
+for (ee in 1:length(unique(dats$Contents))) { 
+  points(1:2, c(SurvAvgs.PC$Surv_MN[ee],SurvAvgs.EP$Surv_MN[ee]), col=SurvAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  lines(1:2, c(SurvAvgs.PC$Surv_MN[ee],SurvAvgs.EP$Surv_MN[ee]), col=SurvAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  
+}
+
+# Growth: changes in total cover overtime, 24-25, 25-26
+plot(dats2406$ARFR.Count, dats2406$ARFR.Percent.Cover) #How correlated are counts and cover?
+
+par(mar=c(7,5,3,2))
+boxplot(ARFR.Percent.Cover ~ Contents, data=dats2406.PC, col=cols, ylim=c(0,56), cex.main=1.5,
+        main="Site 1", ylab="Percent A. frigida cover/plot", xlab=NA, cex.lab=1.5, las=2)
+boxplot(ARFR.Percent.Cover ~ Contents, data=dats2406.EP, col=cols, ylim=c(0,20), cex.main=1.5,
+        main="Site 2", ylab="Percent A. frigida cover/plot", xlab=NA, cex.lab=1.5, las=2) 
+
+boxplot(ARFR.Percent.Cover ~ SeedMix, data=Surv_subset, ylim=c(0,55), col=c("grey40", "grey80"), main="Both sites", 
+        ylab="Percent Cover", xlab=NA)
+
+
+CovrAvgs.PC <- dats2406.PC %>% group_by(Contents) %>% 
+  dplyr::summarise(Covr_MD=median(ARFR.Percent.Cover,na.rm=TRUE),
+                   Covr_MN=mean(ARFR.Percent.Cover,na.rm=TRUE),
+                   Covr_SE=calcSE(ARFR.Percent.Cover))
+CovrAvgs.PC$MixCol[grepl("single", CovrAvgs.PC$Contents)] = "plum4"    
+CovrAvgs.PC$MixCol[grepl("mix_c", CovrAvgs.PC$Contents)] = "grey80"     
+CovrAvgs.PC$MixCol[grepl("mix_b", CovrAvgs.PC$Contents)] = "grey30"    
+
+#CovrByMed.PC <- with(dats2406.PC, reorder(Contents, ARFR.Percent.Cover, median, na.rm=TRUE))
+#CovrAvgs.PC <- CovrAvgs.PC[order(CovrAvgs.PC$Covr_MD),] #Order by median 
+#boxplot(ARFR.Percent.Cover ~ CovrByMed.PC, data=dats2406.PC, ylim=c(0,59),
+#        xlab=NA, ylab="Percent A. frigida cover/plot", cex.lab=1.25, col=CovrAvgs.PC$MixCol,
+#        las=2)
+
+boxplot(ARFR.Percent.Cover ~ SeedMix + Site, data=dats2406)
+boxplot(ARFR.Percent.Cover ~ Site, data=dats2406, ylim=c(0,56), ylab="Percent A. frigida cover/plot",
+        cex.lab=1.5)
+boxplot(ARFR.Percent.Cover ~ SeedMix, data=dats2406.PC, ylim=c(0,60), col=c("grey40", "grey80", "plum4"), main="Site 1",
+        ylab="Percent A. frigida cover")
+boxplot(ARFR.Percent.Cover ~ SeedMix, data=dats2406.EP, ylim=c(0,10), col=c("grey40", "grey80", "plum4"), main="Site 2",
+        ylab="Percent A. frigida cover")
+boxplot(ARFR.Percent.Cover ~ SeedMix, data=dats2406, ylim=c(0,60), col=c("grey40", "grey80", "plum4"), main="Both sites",
+        ylab="Percent A. frigida cover")
+
+modCovr.PC <- lm(ARFR.Percent.Cover ~ SeedMix, data=dats2406.PC)
+summary(modCovr.PC)
+modCovr.EP <- lm(ARFR.Percent.Cover ~ SeedMix, data=dats2406.EP)
+summary(modCovr.EP)
+modCovr <- lm(ARFR.Percent.Cover ~ SeedMix, data=dats2406)
+summary(modCovr)
+
+
+
+## Plots means at each site
+CovrAvgs.EP <- dats2406.EP %>% group_by(Contents) %>% 
+  dplyr::summarise(Covr_MD=median(ARFR.Percent.Cover,na.rm=TRUE),
+                   Covr_MN=mean(ARFR.Percent.Cover,na.rm=TRUE),
+                   Covr_SE=calcSE(ARFR.Percent.Cover))
+CovrAvgs.EP$MixCol[grepl("single", CovrAvgs.EP$Contents)] = "plum4"    
+CovrAvgs.EP$MixCol[grepl("mix_c", CovrAvgs.EP$Contents)] = "grey80"     
+CovrAvgs.EP$MixCol[grepl("mix_b", CovrAvgs.EP$Contents)] = "grey30"  
+
+plot(1:2, 0:1, type="n",ylim=c(0,30), xaxt="n", ylab="Vegetative Cover", xlab="Site", cex.lab=1.5)
+for (ee in 1:length(unique(dats$Contents))) { 
+  points(1:2, c(CovrAvgs.PC$Covr_MN[ee],CovrAvgs.EP$Covr_MN[ee]), col=CovrAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  lines(1:2, c(CovrAvgs.PC$Covr_MN[ee],CovrAvgs.EP$Covr_MN[ee]), col=CovrAvgs.PC$MixCol[ee], pch=19, cex=1.5)
+  
+}
+
+
+# Proportion repro (repro cover divided by total cover) 
+
+# Relative size (total cover/ number of plants)
+
 
 
 
