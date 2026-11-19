@@ -440,7 +440,6 @@ colnames(ERNAcomb)
 ## ----------------------------------------------------------------------
 ## Don't use individuals that have "Y" or "N" in 2022 Replaced_YorN column b/c of confusion around timing and what it means for subsequent data 
 ERNAcomb.b <- ERNAcomb[ERNAcomb$Replaced_YorN=="",] 
-#testKeep <- ERNAcomb[ERNAcomb$ExcludeBcReplaceYorN=="",] 
 
 ## ** Confirm who was harvested 2023-2026 (after combining)
 #Look at notes in 24-26 for plts marked at Harvested_23 **
@@ -448,19 +447,24 @@ read.notes <- ERNAcomb[ERNAcomb$Harvested_2023=="Y",] %>% select(c(starts_with("
 ## ** add NAs in 24-26 for survival, phenology, size for harvested plants **
 
 ## ** Check that once zero in surv on X/X, stays zero with in each year (if becomes 1 later, could be data entry error, or not depending on species)
-#ERNA.surv <- ERNAcomb %>% select(c("ID", starts_with("Survival_")))
-ERNA.surv2 <- grep("^Survival_", names(ERNAcomb.b), value=TRUE) #get column names for survival cols
-survLong <- ERNAcomb.b %>% select(c("ID", all_of(ERNA.surv2))) %>% 
-                         pivot_longer(cols=all_of(ERNA.surv2), names_to="Date", names_pattern="^Survival_(.*)$", values_to="Survival") #%>%
-                         # mutate(date_digits=gsub("[^0-9]", "", Date))
+## Modified from ChatGPT
+ERNA.survCols <- grep("^Survival_", names(ERNAcomb.b), value=TRUE) #get column names for survival cols
+survLong <- ERNAcomb.b %>% select(c("ID", all_of(ERNA.survCols))) %>% 
+                         pivot_longer(cols=all_of(ERNA.survCols), names_to="Date", names_pattern="^Survival_(.*)$", values_to="Survival") 
 
+## Make a date variable
+dateDigits <- survLong$Date ##** is this right?
+surveyDate = as.Date(NA)
+surveyDate=replace(surveyDate, nchar(dateDigits)==8, as.Date(dateDigits[nchar(dateDigits)==8], format="%Y%m%d"))
 
-#ERNA24wide <- select(ERNA24, -c("GlobalID","plantID","plantID_db","ParentGlobalID","CreationDate","Creator","EditDate","Editor")) %>% 
-#  pivot_wider(id_cols=c(ID,Plant.Position.In.Row), names_from=Date, values_from=c(survival,phenology,notes,lengthInCm),
-#             names_glue="{.value}_{format(as.Date(Date), '%Y%m%d')}")
+## Identify survival inconsistencies in the data (eg. 0 to 1 survival transitions)
+survInconsist <- survLong %>% filter(!is.na(Survival)) %>% group_by(ID) %>% arrange(surveyDate, .by_group=TRUE) %>%
+                 mutate(prevDate=lag(Date), prevSurvey=lag(surveyDate),prevSurv=lag(Survival),
+                        prevYr=as.integer(format(prevYr, "%Y")),currYr=as.integer(format(surveyDate, "%Y"))) %>%
+                 filter(prevSurv==0, Survival==1) %>%
+                 mutate(checkID=if_else(prevYr==currYr, "Within Yr","Across Yrs"))
 
-
-## ** Check for consistency in survival and flowering across the year (do this for 22-26)
+## ** Check for consistency in flowering across the year (do this for 22-26)
 ## ** Check that phenology only increases or stays the same; once flowering=1, it shouldn't go back to 0 
 
 
