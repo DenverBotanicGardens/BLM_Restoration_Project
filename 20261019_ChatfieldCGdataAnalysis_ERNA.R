@@ -77,7 +77,7 @@ for (cc in chr.list) {
 ERNA22 <- read.csv(file="Chatfield/2022_data/20230302_ChatfieldData2022_ERNA.csv", sep=",", header=TRUE, dec=".")
 ERNA.SdZn <- read.csv(file="AGoebl/Seeds/20231215_ERNA_LatLongSdZn_hexcodes.csv", sep=",", header=TRUE, dec=".")
 ERNA.biovar <- readRDS("AGoebl/Seeds/20240131_ERNA_BiovarsAvg1980_2021")
-ERNA23 <- read.csv(file="Chatfield/2023_data/20241017_ChatfieldData2023_ERNA.csv", sep=",", header=TRUE, dec=".")
+ERNA23 <- read.csv(file="Chatfield/2023_data/20261119_ChatfieldData2023_ERNA.csv", sep=",", header=TRUE, dec=".")
 ERNA.bioVarCG <- readRDS("AGoebl/Seeds/20240207_Chatfield_Biovars2022")
 ERNA.sla <- read.csv(file="Chatfield/2023_data/20241017_ChatfieldSLAdata2023_ERNA.csv", sep=",", header=TRUE, dec=".")
 
@@ -446,23 +446,28 @@ ERNAcomb.b <- ERNAcomb[ERNAcomb$Replaced_YorN=="",]
 read.notes <- ERNAcomb[ERNAcomb$Harvested_2023=="Y",] %>% select(c(starts_with("Notes_2024"))) #**also look at 25 and 26 notes
 ## ** add NAs in 24-26 for survival, phenology, size for harvested plants **
 
-## ** Check that once zero in surv on X/X, stays zero with in each year (if becomes 1 later, could be data entry error, or not depending on species)
+## Check that once zero in surv, stays zero within each yr and the next years  (if becomes 1 later, could be data entry error; check these inconsistencies)
 ## Modified from ChatGPT
 ERNA.survCols <- grep("^Survival_", names(ERNAcomb.b), value=TRUE) #get column names for survival cols
 survLong <- ERNAcomb.b %>% select(c("ID", all_of(ERNA.survCols))) %>% 
-                         pivot_longer(cols=all_of(ERNA.survCols), names_to="Date", names_pattern="^Survival_(.*)$", values_to="Survival") 
-
-## Make a date variable
-dateDigits <- survLong$Date ##** is this right?
-surveyDate = as.Date(NA)
-surveyDate=replace(surveyDate, nchar(dateDigits)==8, as.Date(dateDigits[nchar(dateDigits)==8], format="%Y%m%d"))
+                         pivot_longer(cols=all_of(ERNA.survCols), names_to="Date", names_pattern="^Survival_(.*)$", values_to="Survival") %>%
+                         mutate(surveyDate=as.Date(NA), surveyDate=replace(surveyDate, nchar(Date)==8, as.Date(dateDigits[nchar(Date)==8], 
+                         format="%Y%m%d")))
 
 ## Identify survival inconsistencies in the data (eg. 0 to 1 survival transitions)
 survInconsist <- survLong %>% filter(!is.na(Survival)) %>% group_by(ID) %>% arrange(surveyDate, .by_group=TRUE) %>%
                  mutate(prevDate=lag(Date), prevSurvey=lag(surveyDate),prevSurv=lag(Survival),
-                        prevYr=as.integer(format(prevYr, "%Y")),currYr=as.integer(format(surveyDate, "%Y"))) %>%
+                        prevYr=as.integer(format(prevSurvey,"%Y")),currYr=as.integer(format(surveyDate,"%Y"))) %>%
                  filter(prevSurv==0, Survival==1) %>%
-                 mutate(checkID=if_else(prevYr==currYr, "Within Yr","Across Yrs"))
+                 mutate(checkType=if_else(prevYr==currYr, "Within Yr","Across Yrs"))
+
+table(survInconsist$checkType)
+table(survInconsist$currYr)
+table(survInconsist$prevYr)
+survInconsist.22 <- survInconsist[survInconsist$currYr==2022 & survInconsist$checkType=="Within Yr",]
+survInconsist.23 <- survInconsist[survInconsist$currYr==2023 & survInconsist$checkType=="Within Yr",]
+survInconsist.24 <- survInconsist[survInconsist$currYr==2024 & survInconsist$checkType=="Within Yr",]
+
 
 ## ** Check for consistency in flowering across the year (do this for 22-26)
 ## ** Check that phenology only increases or stays the same; once flowering=1, it shouldn't go back to 0 
@@ -563,6 +568,7 @@ ERNA.SdZn$SdZnOrderNum[grepl("20 - 25 Deg. F. / 12 - 30", ERNA.SdZn$seed_zone)] 
 
 ## ERNA 2023 - CREATE FLOWERING/ PHENOLOGY VARIABLE(S) ---------------------------------------------
 ## For 2023, estimate days to 1st flwr & if flowered at all based on '1' in any pheno survey (not just last as not always consistent)
+## ** only use 1s after 0 was recorded, not if only NAs precede 1s **
 
 #ERNA.Pheno <- ERNA23 %>% dplyr::select(starts_with("Flowering"))
 #min(ERNA.Pheno, na.rm=TRUE)
