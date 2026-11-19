@@ -31,7 +31,8 @@ calcSE <- function(x){sd(x, na.rm=TRUE)/sqrt(length(x))}
 ## SET WORKING DIRECTORY --------------------------------------------------------------------------
 #setwd("C:/Users/april.goebl/OneDrive - Denver Botanic Gardens/AGoebl_NonProject_WorkRelated/BLM_Restoration_Project")
 #setwd("C:/Users/april.goebl/Denver Botanic Gardens/Conservation - Restoration/BLM-Grassland/CanyonCity")
-setwd("/Users/mikaelyevans/Desktop/DBG/BLM")
+# setwd("/Users/mikaelyevans/Desktop/EvansDBG/BLM_Restoration_Project")
+setwd("C:/Users/mikaely.evans/Desktop/EvansDBG/BLM_Restoration_Project")
 ## ------------------------------------------------------------------------------------------------
 
 
@@ -40,7 +41,7 @@ setwd("/Users/mikaelyevans/Desktop/DBG/BLM")
 #dats <- read.csv(file="20231102_CanonCityData_ARFR.csv", sep=",", header=TRUE, dec=".")
 #dats <- read.csv(file="20250203_CanonCityData_ARFRforAnalysis.csv", sep=",", header=TRUE, dec=".")
 # dats <- read.csv(file="Data_CanyonCity/20261104_CanonCityData23to26_ARFRforAnalysis.csv", sep=",", header=TRUE, dec=".")
-dats <- read.csv(file="Data/20261104_CanonCityData23to26_ARFRforAnalysis(in).csv", sep=",", header=TRUE, dec=".")
+dats <- read.csv("../20261104_CanonCityData23to26_ARFRforAnalysis(in).csv", sep=",", header=TRUE, dec=".")
 ## ------------------------------------------------------------------------------------------------
 
 
@@ -78,14 +79,32 @@ dats <- dats[dats$Treatment != "pilot",]
 
 ## Data checks **
 #ARFR (seedling/ plant) count should only be numeric
+is.numeric(dats$ARFR.Count)
 #Percent cover (total and repro) should only be numeric or NA
+is.numeric(dats$ARFR.Percent.Cover)
+is.numeric(dats$ARFR.Reproductive.Percent.Cover)
 #Flowering (yes/no) should only be 1, 0, or NA
+unique(dats$Flowering)
 
 #ARFR (seedling) count on 20240918 should only be 1 or 0, should not be empty
+is.na(dats$ARFR.Count)
+dats %>%
+  filter(Date == "9/18/2024 18:00") %>%
+  distinct(ARFR.Count)
 #If seedling count>0, then percent cover (total) should be >0
+dats %>%
+  filter(ARFR.Count > 0 & ARFR.Percent.Cover <= 0)
+# What should we do about this?
 #If seedling count=0, then percent cover (total) should=0
+dats %>% 
+  filter(ARFR.Count == 0 & (ARFR.Percent.Cover != 0 | is.na(ARFR.Percent.Cover))) %>%
+  distinct(ARFR.Count)
+dats <- dats %>%
+  mutate(ARFR.Percent.Cover = if_else(ARFR.Count == 0, 0, ARFR.Percent.Cover))
 #Repro % cover should not be more than total % cover, but they can be equal 
-#other checks..?
+dats %>%
+  filter(ARFR.Percent.Cover < ARFR.Reproductive.Percent.Cover) %>%
+  distinct()
 
 
 
