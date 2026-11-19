@@ -22,6 +22,8 @@ library(car)
 library(effects)
 library(tidyverse)
 library(AICcmodavg)
+library(lubridate)
+library(ggplot2)
 
 calcSE <- function(x){sd(x, na.rm=TRUE)/sqrt(length(x))}
 ## ------------------------------------------------------------------------------------------------
@@ -77,7 +79,7 @@ dats <- dats[dats$Treatment != "pilot",]
 #droplevels function
 
 
-## Data checks **
+## Data checks 
 #ARFR (seedling/ plant) count should only be numeric
 is.numeric(dats$ARFR.Count)
 #Percent cover (total and repro) should only be numeric or NA
@@ -249,9 +251,6 @@ dats26 <- dats[grepl("2026", dats$Date),]
 ## If no plants present, change repro cover to NA, not zero 
 dats26$ARFR.Reproductive.Percent.Cover <- ifelse(dats26$ARFR.Count == 0, NA, dats26$ARFR.Reproductive.Percent.Cover)
 
-
-## Mikaely Evans - I updated the 2024, 2025, and 2025 data here following the June 2024 style. I am wondering if this is also essential to complete this step in the dats file so these checks are completed for all the years together.
-
 ## Combined
 dats$ARFR.Reproductive.Percent.Cover <- ifelse(dats$ARFR.Count == 0, NA, dats$ARFR.Reproductive.Percent.Cover)
 
@@ -265,21 +264,69 @@ dats$ARFR.Reproductive.Percent.Cover <- ifelse(dats$ARFR.Count == 0, NA, dats$AR
 ## Mikaely Evans Analysis
 
 # Survival from each annual transition: 24-25, 25-26
-plot(dats2409$ARFR.Count, dats25$ARFR.Count)
-plot(dats25$ARFR.Count, dats26$ARFR.Count)
+dats <- dats %>%
+  mutate(Date_parsed = mdy_hm(Date), year = year(Date_parsed))
 
-## Change zeros to NAs in 2023 counts just for surv estimates
+dats %>%
+  filter(year != "2023") %>%
+  group_by(year) %>%
+  ggplot(aes(x = as.factor(year), y = ARFR.Count)) +
+  geom_boxplot() +
+  labs(x = "Year", y = "ARFR Count")
+dats %>%
+  group_by(year) %>%
+  ggplot(aes(x = as.factor(year), y = ARFR.Percent.Cover)) +
+  geom_boxplot() +
+  labs(x = "Year", y = "ARFR Plot Cover Percentage")
+dats %>%
+  group_by(year) %>%
+  ggplot(aes(x = as.factor(year), y = ARFR.Reproductive.Percent.Cover)) +
+  geom_boxplot() +
+  labs(x = "Year", y = "ARFR Reproductive Plot Cover Percentage")
+dats %>%
+  group_by(Plot.Number) %>%
+  ggplot(aes(x = as.factor(year), y = ARFR.Count, col = Plot.Number)) +
+  geom_jitter() +
+  labs(x = "Year", y = "ARFR Count") +
+  theme(legend.position = "none")
+dats %>%
+  group_by(Plot.Number) %>%
+  ggplot(aes(x = as.factor(year), y = ARFR.Percent.Cover, col = Plot.Number)) +
+  geom_jitter() +
+  labs(x = "Year", y = "ARFR Plot Cover Percentage") +
+  theme(legend.position = "none")
+dats %>%
+  group_by(Plot.Number) %>%
+  ggplot(aes(x = as.factor(year), y = ARFR.Reproductive.Percent.Cover, col = Plot.Number)) +
+  geom_jitter() +
+  labs(x = "Year", y = "ARFR Reproductive Percent Cover") +
+  theme(legend.position = "none")
+
+
+
+
+
+
+
+## Change zeros to NAs in 2023, 2024, 2025, 2026 counts just for surv estimates
 dats23temp <- dats23
 dats23temp$ARFR.Count[dats23temp$ARFR.Count==0] <- NA
 dats24temp <- dats2409
 dats24temp$ARFR.Count[dats24temp$ARFR.Count==0] <- NA
 dats2409$Surv <- dats2409$ARFR.Count/dats23temp$ARFR.Count
-
+dats25temp <- dats25
+dats25temp$ARFR.Count[dats25temp$ARFR.Count == 0] <- NA
+dats25$Surv <- dats25$ARFR.Count/dats24temp$ARFR.Count
+dats26temp <- dats26
+dats26temp$ARFR.Count[dats26temp$ARFR.Count == 0] <- NA
+dats26$Surv <- dats26$ARFR.Count/dats25temp$ARFR.Count
 
 Surv_subset <- filter(dats2409, SeedMix!="Single")
 boxplot(Surv ~ SeedMix, data=Surv_subset, ylim=c(0,1.2), col=c("grey40", "grey80"), main="Both sites", 
         ylab="Survival Rate", xlab=NA)
-
+boxplot(Surv ~ SeedMix, data = dats25, col=c("grey40", "grey80", "plum4"), main = "Both Sites", ylab = "Survival Rate", xlab = NA)
+boxplot(Surv ~ SeedMix, data = dats26, col=c("grey40", "grey80", "plum4"), main = "Both Sites", ylab = "Survival Rate", xlab = NA)
+boxplot(Surv ~ year, data = dats)
 
 ## Plot survival by site separately
 dats2409.PC <- dats2409[dats2409$Site=="PC",]
